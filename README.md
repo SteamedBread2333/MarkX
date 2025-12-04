@@ -354,16 +354,6 @@ markx/
 
 <br>
 
-[![Star History](https://img.shields.io/github/stars/yourusername/markx?style=social)](https://github.com/yourusername/markx/stargazers)
-[![Fork](https://img.shields.io/github/forks/yourusername/markx?style=social)](https://github.com/yourusername/markx/fork)
-[![Watch](https://img.shields.io/github/watchers/yourusername/markx?style=social)](https://github.com/yourusername/markx/watchers)
-
-<br>
-
-Made with 💙 by [MarkX Contributors](https://github.com/yourusername/markx/graphs/contributors)
-
-<br>
-
 **[⬆ 回到顶部](#)**
 
 </div>
