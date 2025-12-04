@@ -9,6 +9,8 @@ import DOMPurify from 'dompurify';
 import mermaid from 'mermaid';
 import hljs from 'highlight.js';
 
+// Ace Editor 通过全局变量 window.ace 加载，无需 import
+
 // ==================== 应用状态管理 ====================
 const AppState = {
     currentTheme: 'light',
@@ -83,6 +85,7 @@ function initMermaid() {
 // ==================== DOM 元素引用 ====================
 const elements = {
     editor: document.getElementById('editor'),
+    editorTextarea: document.getElementById('editorTextarea'),
     preview: document.getElementById('preview'),
     editorContainer: document.getElementById('editorContainer'),
     previewContainer: document.getElementById('previewContainer'),
@@ -98,6 +101,169 @@ const elements = {
     lineCount: document.getElementById('lineCount'),
     readTime: document.getElementById('readTime'),
 };
+
+// ==================== Ace Editor 编辑器 ====================
+
+// 全局编辑器实例
+let aceEditor = null;
+
+// 默认文档内容
+const defaultContent = `# 欢迎使用 MarkX！
+
+现代化的 Markdown 编辑器，支持 **Mermaid 图表** 和 **KaTeX 数学公式**！
+
+## ✨ 特色功能
+
+- ✅ 实时预览
+- ✅ Mermaid 图表支持
+- ✅ KaTeX 数学公式
+- ✅ 代码高亮
+- ✅ 暗色/亮色主题
+- ✅ 文件导入导出
+- ✅ 自动保存草稿
+
+---
+
+## 📊 Mermaid 图表示例
+
+点击工具栏的「图表」按钮快速插入模板！
+
+\`\`\`mermaid
+graph TD
+    A[开始] --> B{是否喜欢?}
+    B -->|是| C[太棒了!]
+    B -->|否| D[试试其他功能]
+    C --> E[分享给朋友]
+    D --> E
+\`\`\`
+
+---
+
+## 🧮 数学公式示例
+
+点击工具栏的「公式」按钮快速插入模板！
+
+**行内公式**：质能方程 $E = mc^2$，勾股定理 $a^2 + b^2 = c^2$
+
+**块级公式**：
+
+$$
+x = \\frac{-b \\pm \\sqrt{b^2 - 4ac}}{2a}
+$$
+
+$$
+\\sum_{i=1}^{n} i = \\frac{n(n+1)}{2}
+$$
+
+---
+
+试试编辑内容，右侧会实时更新！🚀`;
+
+/**
+ * 初始化 Ace Editor
+ */
+function initEditor() {
+    try {
+        // 确保 Ace 已加载
+        if (typeof window.ace === 'undefined') {
+            console.error('❌ Ace Editor 未加载');
+            return;
+        }
+        
+        // 创建编辑器实例
+        aceEditor = window.ace.edit('editor', {
+            mode: 'ace/mode/markdown',
+            theme: 'ace/theme/github',
+            value: defaultContent,
+            fontSize: '15px',
+            showPrintMargin: false,
+            highlightActiveLine: true,
+            highlightGutterLine: true,
+            enableBasicAutocompletion: true,
+            enableLiveAutocompletion: false,
+            enableSnippets: true,
+            wrap: true,
+            wrapBehavioursEnabled: true,
+            tabSize: 4,
+            useSoftTabs: true,
+            showFoldWidgets: true,
+            showLineNumbers: true,
+            showGutter: true,
+            displayIndentGuides: true,
+            animatedScroll: true,
+            vScrollBarAlwaysVisible: false,
+            hScrollBarAlwaysVisible: false,
+            scrollPastEnd: 0.5,
+            behavioursEnabled: true,
+            wrapBehavioursEnabled: true
+        });
+        
+        // 获取 session
+        const session = aceEditor.getSession();
+        
+        // 设置编辑器选项
+        session.setUseWrapMode(true);
+        
+        // 监听内容变化
+        aceEditor.session.on('change', () => {
+            AppState.isDirty = true;
+            debouncedRender();
+        });
+        
+        // 自定义快捷键
+        aceEditor.commands.addCommand({
+            name: 'save',
+            bindKey: { win: 'Ctrl-S', mac: 'Cmd-S' },
+            exec: () => {
+                saveFile();
+            }
+        });
+        
+        console.log('✅ Ace Editor 初始化成功');
+        
+    } catch (error) {
+        console.error('❌ Ace Editor 初始化失败:', error);
+        throw error;
+    }
+}
+
+/**
+ * 更新编辑器主题
+ */
+function updateEditorTheme(isDark) {
+    if (!aceEditor) return;
+    
+    try {
+        aceEditor.setTheme(isDark ? 'ace/theme/one_dark' : 'ace/theme/github');
+    } catch (error) {
+        console.error('更新主题失败:', error);
+    }
+}
+
+/**
+ * 获取编辑器内容
+ */
+function getEditorContent() {
+    return aceEditor ? aceEditor.getValue() : '';
+}
+
+/**
+ * 设置编辑器内容
+ */
+function setEditorContent(content) {
+    if (!aceEditor) return;
+    
+    const cursorPosition = aceEditor.getCursorPosition();
+    aceEditor.setValue(content, -1); // -1 移动光标到开始
+    
+    // 尝试恢复光标位置
+    try {
+        aceEditor.moveCursorToPosition(cursorPosition);
+    } catch (e) {
+        // 如果恢复失败，移动到文档开始
+        aceEditor.moveCursorTo(0, 0);
+    }
+}
 
 // ==================== 工具函数 ====================
 
@@ -181,7 +347,7 @@ function updateStats(text) {
  * 渲染 Markdown 为 HTML
  */
 async function renderMarkdown() {
-    let markdown = elements.editor.value;
+    let markdown = getEditorContent();
     
     try {
         // 预处理：保护数学公式不被 Markdown 解析器破坏
@@ -549,6 +715,9 @@ function toggleTheme() {
     themeIcon.setAttribute('href', 
         AppState.currentTheme === 'dark' ? '#icon-theme-light' : '#icon-theme-dark');
     
+    // 更新 CodeMirror 主题
+    updateEditorTheme(AppState.currentTheme === 'dark');
+    
     // 切换代码高亮主题
     const lightTheme = document.getElementById('highlight-light');
     const darkTheme = document.getElementById('highlight-dark');
@@ -588,6 +757,9 @@ function initTheme() {
     const themeIcon = elements.themeBtn.querySelector('use');
     themeIcon.setAttribute('href', 
         AppState.currentTheme === 'dark' ? '#icon-theme-light' : '#icon-theme-dark');
+    
+    // 更新 CodeMirror 主题
+    updateEditorTheme(AppState.currentTheme === 'dark');
     
     // 设置代码高亮主题
     const lightTheme = document.getElementById('highlight-light');
@@ -643,7 +815,7 @@ function newDocument() {
         }
     }
     
-    elements.editor.value = '';
+    setEditorContent('');
     AppState.currentFileName = 'untitled.md';
     AppState.isDirty = false;
     renderMarkdown();
@@ -666,7 +838,7 @@ function handleFileSelect(event) {
     
     const reader = new FileReader();
     reader.onload = (e) => {
-        elements.editor.value = e.target.result;
+        setEditorContent(e.target.result);
         AppState.currentFileName = file.name;
         AppState.isDirty = false;
         renderMarkdown();
@@ -704,7 +876,7 @@ function saveFile() {
     AppState.currentFileName = fullFileName;
     
     // 保存文件
-    const content = elements.editor.value;
+    const content = getEditorContent();
     const blob = new Blob([content], { type: 'text/markdown;charset=utf-8' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -773,7 +945,7 @@ function exportHTML() {
  */
 async function copyMarkdown() {
     try {
-        await navigator.clipboard.writeText(elements.editor.value);
+        await navigator.clipboard.writeText(getEditorContent());
         setStatus('Markdown 已复制到剪贴板');
     } catch (err) {
         console.error('复制失败:', err);
@@ -801,7 +973,7 @@ function clearContent() {
     if (!confirm('确定要清空所有内容吗？此操作不可恢复。')) {
         return;
     }
-    elements.editor.value = '';
+    setEditorContent('');
     AppState.isDirty = false;
     renderMarkdown();
     setStatus('已清空内容');
@@ -813,25 +985,24 @@ function clearContent() {
  * 在编辑器中插入文本
  */
 function insertText(before, after = '', placeholder = '') {
-    const editor = elements.editor;
-    const start = editor.selectionStart;
-    const end = editor.selectionEnd;
-    const selectedText = editor.value.substring(start, end);
+    if (!aceEditor) return;
+    
+    const selectedText = aceEditor.getSelectedText();
     const textToInsert = before + (selectedText || placeholder) + after;
     
-    editor.value = editor.value.substring(0, start) + textToInsert + editor.value.substring(end);
+    // 插入文本
+    aceEditor.insert(textToInsert);
     
-    // 设置光标位置
-    if (selectedText) {
-        editor.selectionStart = start;
-        editor.selectionEnd = start + textToInsert.length;
-    } else {
-        const cursorPos = start + before.length + placeholder.length;
-        editor.selectionStart = cursorPos;
-        editor.selectionEnd = cursorPos;
+    // 如果没有选中文本且有占位符，选中占位符
+    if (!selectedText && placeholder) {
+        const cursor = aceEditor.getCursorPosition();
+        const Range = window.ace.require('ace/range').Range;
+        const startCol = cursor.column - after.length - placeholder.length;
+        const endCol = cursor.column - after.length;
+        aceEditor.selection.setRange(new Range(cursor.row, startCol, cursor.row, endCol));
     }
     
-    editor.focus();
+    aceEditor.focus();
     AppState.isDirty = true;
     debouncedRender();
 }
@@ -923,7 +1094,7 @@ const mathTemplates = {
  */
 function saveDraft() {
     try {
-        localStorage.setItem('markx-draft', elements.editor.value);
+        localStorage.setItem('markx-draft', getEditorContent());
         localStorage.setItem('markx-draft-time', new Date().toISOString());
     } catch (err) {
         console.error('保存草稿失败:', err);
@@ -949,7 +1120,7 @@ function loadDraft() {
                 // 检查是否设置了自动恢复
                 if (autoRestore === 'always') {
                     // 自动恢复，不提示
-                    elements.editor.value = draft;
+                    setEditorContent(draft);
                     renderMarkdown();
                     setStatus('已自动恢复草稿');
                 } else if (autoRestore === 'never') {
@@ -1016,7 +1187,7 @@ function showDraftRestoreDialog(draft, timeStr) {
         if (remember.checked) {
             localStorage.setItem('markx-auto-restore', 'always');
         }
-        elements.editor.value = draft;
+        setEditorContent(draft);
         renderMarkdown();
         setStatus('已恢复草稿');
         document.body.removeChild(dialog);
@@ -1078,11 +1249,7 @@ function handleKeyboard(event) {
  * 初始化所有事件监听器
  */
 function initEventListeners() {
-    // 编辑器输入事件
-    elements.editor.addEventListener('input', () => {
-        AppState.isDirty = true;
-        debouncedRender();
-    });
+    // Ace Editor 的输入和键盘事件已在编辑器初始化时设置
     
     // 工具栏按钮
     elements.newBtn.addEventListener('click', newDocument);
@@ -1184,6 +1351,9 @@ async function initApp() {
     console.log('🚀 MarkX 正在启动...');
     
     try {
+        // 初始化编辑器
+        initEditor();
+        
         // 初始化主题
         initTheme();
         

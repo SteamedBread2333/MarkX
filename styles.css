@@ -13,6 +13,8 @@
     --border-hover: #a8b1ba;
     --accent-color: #0969da;
     --accent-hover: #0550ae;
+    --accent-color-alpha: rgba(9, 105, 218, 0.2);
+    --selection-bg: rgba(9, 105, 218, 0.25);
     --success-color: #1a7f37;
     --danger-color: #cf222e;
     --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
@@ -59,6 +61,8 @@
     --border-hover: #484f58;
     --accent-color: #2f81f7;
     --accent-hover: #539bf5;
+    --accent-color-alpha: rgba(47, 129, 247, 0.3);
+    --selection-bg: rgba(47, 129, 247, 0.35);
     --success-color: #3fb950;
     --danger-color: #f85149;
     --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.4);
@@ -1262,5 +1266,59 @@ body.layout-vertical .editor-container {
 ::-moz-selection {
     background: var(--accent-color);
     color: white;
+}
+
+/* ==================== Ace Editor 编辑器样式 ==================== */
+
+/* 编辑器容器 */
+.editor {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    font-size: 15px;
+}
+
+/* Ace Editor 自定义样式 */
+.ace_editor {
+    font-family: var(--font-mono) !important;
+    line-height: 1.8 !important;
+}
+
+.ace_gutter {
+    background: var(--bg-secondary) !important;
+    color: var(--text-tertiary) !important;
+    border-right: 1px solid var(--border-color) !important;
+}
+
+.ace_gutter-active-line {
+    background: var(--bg-hover) !important;
+}
+
+.ace_cursor {
+    color: var(--accent-color) !important;
+}
+
+/* 选中文本高亮 - 确保明显可见 */
+.ace_marker-layer .ace_selection {
+    background: var(--selection-bg) !important;
+    border-radius: 2px;
+}
+
+/* 聚焦时的选中文本 */
+.ace_editor.ace_focus .ace_marker-layer .ace_selection {
+    background: var(--selection-bg) !important;
+}
+
+.ace_marker-layer .ace_active-line {
+    background: var(--bg-hover) !important;
+}
+
+/* 暗色主题覆盖 */
+[data-theme="dark"] .ace_gutter {
+    background: rgba(0, 0, 0, 0.3) !important;
+}
+
+[data-theme="dark"] .ace_gutter-active-line {
+    background: rgba(255, 255, 255, 0.05) !important;
 }
 
