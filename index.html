@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="专业的 Markdown 编辑器，完美支持 Mermaid 图表渲染。现代化、开箱即用、功能强大。">
+    <meta name="keywords" content="markdown, mermaid, editor, 编辑器, 在线编辑器, markdown editor">
+    <meta name="author" content="MarkX Team">
+    <title>MarkX - 专业 Markdown + Mermaid 编辑器</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg">
+    <link rel="alternate icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><defs><linearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'><stop offset='0%25' stop-color='%235B86E5'/><stop offset='100%25' stop-color='%2336D1DC'/></linearGradient></defs><rect width='32' height='32' rx='6' fill='url(%23g)'/><path fill='white' d='M8 10l4 6 4-6h2l-5 8h-2l-5-8h2zm12 0l4 6 4-6h2l-5 8h-2l-5-8h2z'/></svg>">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://your-demo-url.com/">
+    <meta property="og:title" content="MarkX - 专业 Markdown + Mermaid 编辑器">
+    <meta property="og:description" content="现代化、开箱即用、功能强大的 Markdown 编辑器，完美支持 Mermaid 图表渲染">
+    <meta property="og:image" content="./logo-banner.svg">
+    
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://your-demo-url.com/">
+    <meta property="twitter:title" content="MarkX - 专业 Markdown + Mermaid 编辑器">
+    <meta property="twitter:description" content="现代化、开箱即用、功能强大的 Markdown 编辑器">
+    <meta property="twitter:image" content="./logo-banner.svg">
+    
+    <!-- 样式文件 -->
+    <link rel="stylesheet" href="styles.css">
+    
+    <!-- 外部依赖库 - 使用 CDN -->
+    <!-- Highlight.js - 代码高亮 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/styles/github.min.css" id="highlight-light">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/styles/github-dark.min.css" id="highlight-dark" disabled>
+    
+    <!-- Import Maps 用于 ES 模块 -->
+    <script type="importmap">
+    {
+        "imports": {
+            "marked": "https://cdn.jsdelivr.net/npm/marked@11.1.1/+esm",
+            "dompurify": "https://cdn.jsdelivr.net/npm/dompurify@3.0.8/+esm",
+            "mermaid": "https://cdn.jsdelivr.net/npm/mermaid@10.6.1/+esm",
+            "highlight.js": "https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/+esm"
+        }
+    }
+    </script>
+</head>
+<body data-theme="light">
+    <!-- SVG 图标库 -->
+    <svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+        <symbol id="icon-logo" viewBox="0 0 32 32">
+            <defs>
+                <linearGradient id="logoGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="var(--logo-from, #5B86E5)"/>
+                    <stop offset="100%" stop-color="var(--logo-to, #36D1DC)"/>
+                </linearGradient>
+            </defs>
+            <rect width="32" height="32" rx="6" fill="url(#logoGrad)"/>
+            <path fill="white" fill-opacity="0.95" d="M8 10l4 6 4-6h2l-5 8h-2l-5-8h2zm12 0l4 6 4-6h2l-5 8h-2l-5-8h2z" stroke="white" stroke-width="0.3" stroke-linejoin="round"/>
+        </symbol>
+        <symbol id="icon-new" viewBox="0 0 24 24">
+            <rect x="4" y="3" width="13" height="18" rx="2" fill="none" stroke="currentColor" stroke-width="2"/>
+            <path d="M9 3v5h5" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+            <line x1="19" y1="19" x2="19" y2="16" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="17.5" y1="17.5" x2="20.5" y2="17.5" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+        </symbol>
+        <symbol id="icon-open" viewBox="0 0 24 24">
+            <path d="M3 7v11a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-7l-2-2H5a2 2 0 0 0-2 2z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+            <path d="M3 7h18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </symbol>
+        <symbol id="icon-save" viewBox="0 0 24 24">
+            <rect x="4" y="4" width="16" height="16" rx="2" fill="none" stroke="currentColor" stroke-width="2"/>
+            <rect x="8" y="4" width="8" height="5" fill="currentColor"/>
+            <rect x="8" y="14" width="8" height="3" rx="0.5" fill="currentColor"/>
+            <circle cx="12" cy="16" r="0.8" fill="var(--icon-bg, #fff)"/>
+        </symbol>
+        <symbol id="icon-bold" viewBox="0 0 24 24">
+            <path d="M7 5h7a4 4 0 0 1 0 8H7V5z" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round"/>
+            <path d="M7 13h8a4 4 0 0 1 0 8H7v-8z" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round"/>
+        </symbol>
+        <symbol id="icon-italic" viewBox="0 0 24 24">
+            <line x1="10" y1="6" x2="14" y2="6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="10" y1="18" x2="14" y2="18" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="13" y1="6" x2="11" y2="18" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+        </symbol>
+        <symbol id="icon-heading" viewBox="0 0 24 24">
+            <line x1="6" y1="6" x2="6" y2="18" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="18" y1="6" x2="18" y2="18" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="6" y1="12" x2="18" y2="12" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+        </symbol>
+        <symbol id="icon-link" viewBox="0 0 24 24">
+            <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </symbol>
+        <symbol id="icon-image" viewBox="0 0 24 24">
+            <rect x="3" y="3" width="18" height="18" rx="2" fill="none" stroke="currentColor" stroke-width="2"/>
+            <circle cx="8.5" cy="8.5" r="1.5" fill="currentColor"/>
+            <path d="M21 15l-5-5L5 21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </symbol>
+        <symbol id="icon-code" viewBox="0 0 24 24">
+            <polyline points="16 18 22 12 16 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <polyline points="8 6 2 12 8 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </symbol>
+        <symbol id="icon-table" viewBox="0 0 24 24">
+            <rect x="3" y="3" width="18" height="18" rx="2" fill="none" stroke="currentColor" stroke-width="2"/>
+            <line x1="3" y1="9" x2="21" y2="9" stroke="currentColor" stroke-width="2"/>
+            <line x1="3" y1="15" x2="21" y2="15" stroke="currentColor" stroke-width="2"/>
+            <line x1="9" y1="3" x2="9" y2="21" stroke="currentColor" stroke-width="2"/>
+            <line x1="15" y1="9" x2="15" y2="21" stroke="currentColor" stroke-width="2"/>
+        </symbol>
+        <symbol id="icon-chart" viewBox="0 0 24 24">
+            <polyline points="3 20 9 14 13 18 21 10" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle cx="9" cy="14" r="2" fill="currentColor"/>
+            <circle cx="13" cy="18" r="2" fill="currentColor"/>
+            <circle cx="21" cy="10" r="2" fill="currentColor"/>
+        </symbol>
+        <symbol id="icon-layout" viewBox="0 0 24 24">
+            <rect x="3" y="3" width="18" height="18" rx="2" fill="none" stroke="currentColor" stroke-width="2"/>
+            <line x1="12" y1="3" x2="12" y2="21" stroke="currentColor" stroke-width="2"/>
+        </symbol>
+        <symbol id="icon-theme-dark" viewBox="0 0 24 24">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" fill="currentColor"/>
+        </symbol>
+        <symbol id="icon-theme-light" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="5" fill="currentColor"/>
+            <line x1="12" y1="1" x2="12" y2="3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            <line x1="12" y1="21" x2="12" y2="23" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            <line x1="1" y1="12" x2="3" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            <line x1="21" y1="12" x2="23" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </symbol>
+        <symbol id="icon-more" viewBox="0 0 24 24">
+            <circle cx="12" cy="6" r="2" fill="currentColor"/>
+            <circle cx="12" cy="12" r="2" fill="currentColor"/>
+            <circle cx="12" cy="18" r="2" fill="currentColor"/>
+        </symbol>
+        <symbol id="icon-download" viewBox="0 0 24 24">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <polyline points="7 10 12 15 17 10" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <line x1="12" y1="15" x2="12" y2="3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </symbol>
+        <symbol id="icon-image-download" viewBox="0 0 24 24">
+            <rect x="3" y="3" width="18" height="18" rx="2" fill="none" stroke="currentColor" stroke-width="2"/>
+            <circle cx="8.5" cy="8.5" r="1.5" fill="currentColor"/>
+            <path d="M21 15l-5-5L5 21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </symbol>
+    </svg>
+
+    <!-- 顶部工具栏 -->
+    <header class="toolbar">
+        <div class="toolbar-left">
+            <h1 class="logo">
+                <svg class="logo-icon"><use href="#icon-logo"></use></svg>
+                <span>MarkX</span>
+            </h1>
+            <div class="toolbar-divider"></div>
+            
+            <!-- 文件操作 -->
+            <button class="toolbar-btn" id="newBtn" title="新建文档 (Ctrl+N)">
+                <svg class="icon"><use href="#icon-new"></use></svg>
+                <span class="text">新建</span>
+            </button>
+            <button class="toolbar-btn" id="openBtn" title="打开文件 (Ctrl+O)">
+                <svg class="icon"><use href="#icon-open"></use></svg>
+                <span class="text">打开</span>
+            </button>
+            <button class="toolbar-btn" id="saveBtn" title="保存文件 (Ctrl+S)">
+                <svg class="icon"><use href="#icon-save"></use></svg>
+                <span class="text">保存</span>
+            </button>
+            
+            <div class="toolbar-divider"></div>
+            
+            <!-- Markdown 格式化工具 -->
+            <button class="toolbar-btn" id="boldBtn" title="加粗 (Ctrl+B)">
+                <svg class="icon"><use href="#icon-bold"></use></svg>
+            </button>
+            <button class="toolbar-btn" id="italicBtn" title="斜体 (Ctrl+I)">
+                <svg class="icon"><use href="#icon-italic"></use></svg>
+            </button>
+            <button class="toolbar-btn" id="headingBtn" title="标题">
+                <svg class="icon"><use href="#icon-heading"></use></svg>
+            </button>
+            <button class="toolbar-btn" id="linkBtn" title="链接 (Ctrl+K)">
+                <svg class="icon"><use href="#icon-link"></use></svg>
+            </button>
+            <button class="toolbar-btn" id="imageBtn" title="图片">
+                <svg class="icon"><use href="#icon-image"></use></svg>
+            </button>
+            <button class="toolbar-btn" id="codeBtn" title="代码块">
+                <svg class="icon"><use href="#icon-code"></use></svg>
+            </button>
+            <button class="toolbar-btn" id="tableBtn" title="表格">
+                <svg class="icon"><use href="#icon-table"></use></svg>
+            </button>
+            
+            <div class="toolbar-divider"></div>
+            
+            <!-- Mermaid 模板 -->
+            <div class="dropdown">
+                <button class="toolbar-btn" id="mermaidBtn" title="Mermaid 图表">
+                    <svg class="icon"><use href="#icon-chart"></use></svg>
+                    <span class="text">图表</span>
+                </button>
+                <div class="dropdown-content">
+                    <button class="dropdown-item" data-mermaid="flowchart">流程图</button>
+                    <button class="dropdown-item" data-mermaid="sequence">时序图</button>
+                    <button class="dropdown-item" data-mermaid="gantt">甘特图</button>
+                    <button class="dropdown-item" data-mermaid="class">类图</button>
+                    <button class="dropdown-item" data-mermaid="state">状态图</button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="toolbar-right">
+            <!-- 视图切换 -->
+            <button class="toolbar-btn" id="layoutBtn" title="切换布局">
+                <svg class="icon"><use href="#icon-layout"></use></svg>
+            </button>
+            
+            <!-- 主题切换 -->
+            <button class="toolbar-btn" id="themeBtn" title="切换主题">
+                <svg class="icon"><use href="#icon-theme-dark"></use></svg>
+            </button>
+            
+            <!-- 更多选项 -->
+            <div class="dropdown">
+                <button class="toolbar-btn" title="更多">
+                    <svg class="icon"><use href="#icon-more"></use></svg>
+                </button>
+                <div class="dropdown-content dropdown-right">
+                    <button class="dropdown-item" id="exportHtmlBtn">导出 HTML</button>
+                    <button class="dropdown-item" id="copyMdBtn">复制 Markdown</button>
+                    <button class="dropdown-item" id="copyHtmlBtn">复制 HTML</button>
+                    <button class="dropdown-item" id="clearBtn">清空内容</button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- 主内容区 -->
+    <main class="main-content">
+        <!-- 编辑器区域 -->
+        <div class="editor-container" id="editorContainer">
+            <textarea 
+                id="editor" 
+                class="editor" 
+                placeholder="# 欢迎使用 MarkX！
+
+在这里输入 Markdown 内容，支持完整的 GitHub Flavored Markdown 语法。
+
+## 特色功能
+
+- ✅ 实时预览
+- ✅ Mermaid 图表支持
+- ✅ 代码高亮
+- ✅ 暗色/亮色主题
+- ✅ 文件导入导出
+- ✅ 自动保存草稿
+
+## Mermaid 示例
+
+点击工具栏的「图表」按钮快速插入模板！
+
+```mermaid
+graph TD
+    A[开始] --> B{是否喜欢?}
+    B -->|是| C[太棒了!]
+    B -->|否| D[试试其他功能]
+    C --> E[分享给朋友]
+    D --> E
+```
+
+试试编辑内容，右侧会实时更新！🚀"
+                spellcheck="false"
+                autocomplete="off"
+                autocorrect="off"
+                autocapitalize="off"></textarea>
+        </div>
+
+        <!-- 预览区域 -->
+        <div class="preview-container" id="previewContainer">
+            <div id="preview" class="preview markdown-body"></div>
+        </div>
+    </main>
+
+    <!-- 底部状态栏 -->
+    <footer class="statusbar">
+        <div class="statusbar-left">
+            <span id="statusMessage">就绪</span>
+        </div>
+        <div class="statusbar-right">
+            <span id="charCount">0 字符</span>
+            <span class="statusbar-divider">|</span>
+            <span id="wordCount">0 词</span>
+            <span class="statusbar-divider">|</span>
+            <span id="lineCount">0 行</span>
+            <span class="statusbar-divider">|</span>
+            <span id="readTime">预计阅读 1 分钟</span>
+        </div>
+    </footer>
+
+    <!-- 文件上传隐藏输入 -->
+    <input type="file" id="fileInput" accept=".md,.markdown,.txt" style="display: none;">
+
+    <!-- 主应用脚本 -->
+    <script type="module" src="app.js"></script>
+</body>
+</html>
+

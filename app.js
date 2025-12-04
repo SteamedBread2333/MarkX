@@ -1,0 +1,1150 @@
+/**
+ * MarkX - 专业 Markdown + Mermaid 编辑器
+ * 完整的前端应用逻辑
+ */
+
+// ==================== 导入依赖库 ====================
+import { marked } from 'marked';
+import DOMPurify from 'dompurify';
+import mermaid from 'mermaid';
+import hljs from 'highlight.js';
+
+// ==================== 应用状态管理 ====================
+const AppState = {
+    currentTheme: 'light',
+    currentLayout: 'split', // split, editor-only, preview-only, vertical
+    autoSaveTimer: null,
+    currentFileName: 'untitled.md',
+    isDirty: false,
+};
+
+// ==================== 配置 Marked.js ====================
+const renderer = new marked.Renderer();
+
+// 自定义代码块渲染 - 处理 Mermaid
+renderer.code = function(code, language) {
+    const lang = language || '';
+    
+    // 检测 Mermaid 代码块
+    if (lang === 'mermaid' || lang === 'mmd') {
+        return `<div class="mermaid">${code}</div>`;
+    }
+    
+    // 其他代码使用 highlight.js 高亮
+    if (lang && hljs.getLanguage(lang)) {
+        try {
+            const highlighted = hljs.highlight(code, { language: lang }).value;
+            return `<pre><code class="hljs language-${lang}">${highlighted}</code></pre>`;
+        } catch (err) {
+            console.error('代码高亮失败:', err);
+        }
+    }
+    
+    // 默认代码块
+    return `<pre><code>${escapeHtml(code)}</code></pre>`;
+};
+
+// 自定义标题渲染 - 添加 ID 用于目录跳转
+renderer.heading = function(text, level) {
+    const id = generateHeadingId(text);
+    return `<h${level} id="${id}">${text}</h${level}>`;
+};
+
+// 配置 Marked 选项
+marked.setOptions({
+    renderer: renderer,
+    gfm: true, // GitHub Flavored Markdown
+    breaks: true, // 支持换行
+    pedantic: false,
+    smartLists: true,
+    smartypants: true,
+});
+
+// ==================== 配置 Mermaid ====================
+function initMermaid() {
+    const theme = AppState.currentTheme === 'dark' ? 'dark' : 'default';
+    
+    mermaid.initialize({
+        startOnLoad: false,
+        theme: theme,
+        securityLevel: 'loose',
+        fontFamily: 'var(--font-family)',
+        themeVariables: {
+            primaryColor: AppState.currentTheme === 'dark' ? '#2f81f7' : '#0969da',
+            primaryTextColor: AppState.currentTheme === 'dark' ? '#e6edf3' : '#24292f',
+            primaryBorderColor: AppState.currentTheme === 'dark' ? '#30363d' : '#d0d7de',
+            lineColor: AppState.currentTheme === 'dark' ? '#484f58' : '#d0d7de',
+            secondaryColor: AppState.currentTheme === 'dark' ? '#161b22' : '#f6f8fa',
+            tertiaryColor: AppState.currentTheme === 'dark' ? '#0d1117' : '#ffffff',
+        },
+    });
+}
+
+// ==================== DOM 元素引用 ====================
+const elements = {
+    editor: document.getElementById('editor'),
+    preview: document.getElementById('preview'),
+    editorContainer: document.getElementById('editorContainer'),
+    previewContainer: document.getElementById('previewContainer'),
+    themeBtn: document.getElementById('themeBtn'),
+    layoutBtn: document.getElementById('layoutBtn'),
+    newBtn: document.getElementById('newBtn'),
+    openBtn: document.getElementById('openBtn'),
+    saveBtn: document.getElementById('saveBtn'),
+    fileInput: document.getElementById('fileInput'),
+    statusMessage: document.getElementById('statusMessage'),
+    charCount: document.getElementById('charCount'),
+    wordCount: document.getElementById('wordCount'),
+    lineCount: document.getElementById('lineCount'),
+    readTime: document.getElementById('readTime'),
+};
+
+// ==================== 工具函数 ====================
+
+/**
+ * 防抖函数
+ */
+function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+        const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+    };
+}
+
+/**
+ * 转义 HTML 特殊字符
+ */
+function escapeHtml(text) {
+    const map = {
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#039;'
+    };
+    return text.replace(/[&<>"']/g, m => map[m]);
+}
+
+/**
+ * 从标题文本生成 ID
+ */
+function generateHeadingId(text) {
+    return text
+        .toLowerCase()
+        .replace(/[^\w\u4e00-\u9fa5]+/g, '-')
+        .replace(/^-+|-+$/g, '');
+}
+
+/**
+ * 设置状态消息
+ */
+function setStatus(message, duration = 3000) {
+    elements.statusMessage.textContent = message;
+    if (duration > 0) {
+        setTimeout(() => {
+            elements.statusMessage.textContent = '就绪';
+        }, duration);
+    }
+}
+
+/**
+ * 更新统计信息
+ */
+function updateStats(text) {
+    // 字符数
+    const charCount = text.length;
+    elements.charCount.textContent = `${charCount.toLocaleString()} 字符`;
+    
+    // 词数（中英文混合）
+    const chineseWords = (text.match(/[\u4e00-\u9fa5]/g) || []).length;
+    const englishWords = (text.match(/[a-zA-Z]+/g) || []).length;
+    const totalWords = chineseWords + englishWords;
+    elements.wordCount.textContent = `${totalWords.toLocaleString()} 词`;
+    
+    // 行数
+    const lineCount = text.split('\n').length;
+    elements.lineCount.textContent = `${lineCount.toLocaleString()} 行`;
+    
+    // 预计阅读时间（假设每分钟 200 中文字或 300 英文词）
+    const readMinutes = Math.max(1, Math.ceil((chineseWords / 200) + (englishWords / 300)));
+    elements.readTime.textContent = `预计阅读 ${readMinutes} 分钟`;
+}
+
+// ==================== Markdown 渲染 ====================
+
+/**
+ * 渲染 Markdown 为 HTML
+ */
+async function renderMarkdown() {
+    const markdown = elements.editor.value;
+    
+    try {
+        // 使用 Marked 解析 Markdown
+        let html = marked.parse(markdown);
+        
+        // 使用 DOMPurify 清理 HTML（防止 XSS）
+        html = DOMPurify.sanitize(html, {
+            ADD_TAGS: ['iframe'], // 允许嵌入 iframe（可选）
+            ADD_ATTR: ['allow', 'allowfullscreen', 'frameborder', 'scrolling'],
+        });
+        
+        // 更新预览区
+        elements.preview.innerHTML = html;
+        
+        // 渲染 Mermaid 图表
+        await renderMermaidCharts();
+        
+        // 更新统计信息
+        updateStats(markdown);
+        
+        setStatus('预览已更新');
+        
+    } catch (error) {
+        console.error('渲染错误:', error);
+        elements.preview.innerHTML = `
+            <div class="mermaid-error">
+                <div class="mermaid-error-title">渲染失败</div>
+                <div>${escapeHtml(error.message)}</div>
+            </div>
+        `;
+        setStatus('渲染失败', 5000);
+    }
+}
+
+/**
+ * 渲染所有 Mermaid 图表
+ */
+async function renderMermaidCharts() {
+    const mermaidElements = elements.preview.querySelectorAll('.mermaid');
+    
+    if (mermaidElements.length === 0) return;
+    
+    // 重新初始化 Mermaid（以应用主题）
+    initMermaid();
+    
+    // 渲染每个图表
+    for (let i = 0; i < mermaidElements.length; i++) {
+        const element = mermaidElements[i];
+        const code = element.textContent;
+        
+        try {
+            // 生成唯一 ID
+            const id = `mermaid-${Date.now()}-${i}`;
+            
+            // 渲染图表
+            const { svg } = await mermaid.render(id, code);
+            
+            // 创建容器包装 SVG 和导出按钮
+            const wrapper = document.createElement('div');
+            wrapper.className = 'mermaid-wrapper';
+            wrapper.innerHTML = `
+                <div class="mermaid-content">${svg}</div>
+                <div class="mermaid-export-toolbar">
+                    <button class="mermaid-export-btn" data-format="svg" title="导出为 SVG 矢量图（推荐）">
+                        <svg class="icon"><use href="#icon-download"></use></svg>
+                        <span class="text">SVG</span>
+                    </button>
+                    <button class="mermaid-export-btn" data-format="png" title="导出为 PNG 图片（高清 2x）&#10;如无反应请重试或使用 SVG">
+                        <svg class="icon"><use href="#icon-image-download"></use></svg>
+                        <span class="text">PNG</span>
+                    </button>
+                </div>
+            `;
+            
+            // 替换元素内容
+            element.innerHTML = '';
+            element.appendChild(wrapper);
+            
+            // 绑定导出事件
+            bindMermaidExportEvents(wrapper, id);
+            
+        } catch (error) {
+            console.error('Mermaid 渲染错误:', error);
+            element.innerHTML = `
+                <div class="mermaid-error">
+                    <div class="mermaid-error-title">Mermaid 图表渲染失败</div>
+                    <div>${escapeHtml(error.message)}</div>
+                    <pre><code>${escapeHtml(code)}</code></pre>
+                </div>
+            `;
+        }
+    }
+}
+
+/**
+ * 绑定 Mermaid 图表导出事件
+ */
+function bindMermaidExportEvents(wrapper, diagramId) {
+    const exportButtons = wrapper.querySelectorAll('.mermaid-export-btn');
+    
+    exportButtons.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            // 防止重复点击
+            if (btn.disabled) {
+                console.log('按钮已禁用，忽略点击');
+                return;
+            }
+            
+            const format = btn.getAttribute('data-format');
+            const svgElement = wrapper.querySelector('svg');
+            
+            if (!svgElement) {
+                console.error('找不到 SVG 元素');
+                setStatus('导出失败：找不到图表 ❌', 3000);
+                return;
+            }
+            
+            // 禁用按钮，防止重复点击
+            btn.disabled = true;
+            btn.style.opacity = '0.5';
+            btn.style.cursor = 'not-allowed';
+            
+            // 延迟后恢复按钮状态
+            const enableButton = () => {
+                setTimeout(() => {
+                    btn.disabled = false;
+                    btn.style.opacity = '';
+                    btn.style.cursor = '';
+                }, 1000);
+            };
+            
+            if (format === 'svg') {
+                exportMermaidAsSVG(svgElement, diagramId);
+                enableButton();
+            } else if (format === 'png') {
+                exportMermaidAsPNG(svgElement, diagramId);
+                enableButton();
+            }
+        });
+    });
+}
+
+/**
+ * 导出 Mermaid 图表为 SVG
+ */
+function exportMermaidAsSVG(svgElement, diagramId) {
+    try {
+        setStatus('正在导出 SVG...');
+        
+        // 克隆 SVG 元素
+        const svgClone = svgElement.cloneNode(true);
+        
+        // 获取 SVG 字符串
+        const serializer = new XMLSerializer();
+        const svgString = serializer.serializeToString(svgClone);
+        
+        // 添加 XML 声明和样式
+        const fullSvg = `<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+${svgString}`;
+        
+        // 创建 Blob 并下载
+        const blob = new Blob([fullSvg], { type: 'image/svg+xml' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${diagramId}.svg`;
+        a.click();
+        URL.revokeObjectURL(url);
+        
+        setStatus('SVG 导出成功 ✅');
+    } catch (error) {
+        console.error('SVG 导出失败:', error);
+        setStatus('SVG 导出失败 ❌', 3000);
+    }
+}
+
+/**
+ * 导出 Mermaid 图表为 PNG
+ */
+function exportMermaidAsPNG(svgElement, diagramId) {
+    try {
+        setStatus('正在导出 PNG...');
+        console.log('开始导出 PNG:', diagramId);
+        
+        // 获取 SVG 尺寸
+        const bbox = svgElement.getBoundingClientRect();
+        const width = Math.floor(bbox.width);
+        const height = Math.floor(bbox.height);
+        
+        console.log('SVG 尺寸:', width, 'x', height);
+        
+        // 检查尺寸是否有效
+        if (width <= 0 || height <= 0) {
+            throw new Error('SVG 尺寸无效');
+        }
+        
+        // 创建 canvas
+        const canvas = document.createElement('canvas');
+        const scale = 2; // 提高清晰度
+        canvas.width = width * scale;
+        canvas.height = height * scale;
+        const ctx = canvas.getContext('2d');
+        ctx.scale(scale, scale);
+        
+        // 根据当前主题设置背景色
+        const bgColor = AppState.currentTheme === 'dark' ? '#0d1117' : '#ffffff';
+        ctx.fillStyle = bgColor;
+        ctx.fillRect(0, 0, width, height);
+        
+        // 将 SVG 转换为图片
+        const svgClone = svgElement.cloneNode(true);
+        
+        // 确保 SVG 有正确的命名空间
+        if (!svgClone.getAttribute('xmlns')) {
+            svgClone.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+        }
+        
+        const serializer = new XMLSerializer();
+        let svgString = serializer.serializeToString(svgClone);
+        
+        // 编码 SVG 为 data URL（更可靠）
+        const svgBase64 = btoa(unescape(encodeURIComponent(svgString)));
+        const dataUrl = `data:image/svg+xml;base64,${svgBase64}`;
+        
+        const img = new Image();
+        
+        // 设置超时（10秒）
+        const timeout = setTimeout(() => {
+            console.error('PNG 导出超时');
+            setStatus('PNG 导出超时 ⏱️ 请重试或使用 SVG 格式', 5000);
+            alert('PNG 导出超时\n\n可能原因：\n1. 图表太大或太复杂\n2. 浏览器性能限制\n\n建议：\n• 再次点击重试\n• 或使用 SVG 格式导出');
+        }, 10000);
+        
+        img.onload = () => {
+            clearTimeout(timeout);
+            console.log('图片加载成功');
+            
+            try {
+                ctx.drawImage(img, 0, 0, width, height);
+                
+                // 导出为 PNG
+                canvas.toBlob((blob) => {
+                    if (!blob) {
+                        console.error('Canvas toBlob 失败');
+                        setStatus('PNG 转换失败 ❌', 3000);
+                        return;
+                    }
+                    
+                    console.log('PNG Blob 创建成功，大小:', blob.size);
+                    
+                    const pngUrl = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = pngUrl;
+                    a.download = `${diagramId}.png`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    
+                    // 延迟释放 URL
+                    setTimeout(() => {
+                        URL.revokeObjectURL(pngUrl);
+                    }, 100);
+                    
+                    setStatus('PNG 导出成功 ✅');
+                    console.log('PNG 导出完成');
+                }, 'image/png');
+            } catch (err) {
+                clearTimeout(timeout);
+                console.error('绘制或导出失败:', err);
+                setStatus('PNG 导出失败 ❌', 3000);
+            }
+        };
+        
+        img.onerror = (err) => {
+            clearTimeout(timeout);
+            console.error('图片加载失败:', err);
+            setStatus('PNG 导出失败 ❌ 建议使用 SVG 格式', 5000);
+            
+            // 提示用户
+            if (confirm('PNG 导出失败\n\n建议改用 SVG 格式导出（矢量图，质量更好）\n\n是否立即导出为 SVG？')) {
+                exportMermaidAsSVG(svgElement, diagramId);
+            }
+        };
+        
+        // 设置图片源
+        img.src = dataUrl;
+        
+    } catch (error) {
+        console.error('PNG 导出异常:', error);
+        setStatus(`PNG 导出失败 ❌`, 5000);
+        
+        // 显示详细错误信息
+        alert(`PNG 导出失败\n\n错误信息：${error.message}\n\n可能的解决方案：\n1. 刷新页面后重试\n2. 使用 SVG 格式导出\n3. 尝试缩小图表大小\n4. 使用其他浏览器\n\n如果问题持续，请打开浏览器控制台（F12）查看详细日志。`);
+    }
+}
+
+/**
+ * 防抖渲染（避免输入时频繁渲染）
+ */
+const debouncedRender = debounce(renderMarkdown, 300);
+
+// ==================== 主题切换 ====================
+
+/**
+ * 切换主题
+ */
+function toggleTheme() {
+    AppState.currentTheme = AppState.currentTheme === 'light' ? 'dark' : 'light';
+    document.body.setAttribute('data-theme', AppState.currentTheme);
+    
+    // 更新主题图标
+    const themeIcon = elements.themeBtn.querySelector('use');
+    themeIcon.setAttribute('href', 
+        AppState.currentTheme === 'dark' ? '#icon-theme-light' : '#icon-theme-dark');
+    
+    // 切换代码高亮主题
+    const lightTheme = document.getElementById('highlight-light');
+    const darkTheme = document.getElementById('highlight-dark');
+    if (AppState.currentTheme === 'dark') {
+        lightTheme.disabled = true;
+        darkTheme.disabled = false;
+    } else {
+        lightTheme.disabled = false;
+        darkTheme.disabled = true;
+    }
+    
+    // 保存到 localStorage
+    localStorage.setItem('markx-theme', AppState.currentTheme);
+    
+    // 重新渲染 Mermaid 图表（应用新主题）
+    renderMarkdown();
+    
+    setStatus(`已切换到${AppState.currentTheme === 'dark' ? '暗色' : '亮色'}模式`);
+}
+
+/**
+ * 初始化主题
+ */
+function initTheme() {
+    // 从 localStorage 读取主题设置
+    const savedTheme = localStorage.getItem('markx-theme');
+    if (savedTheme) {
+        AppState.currentTheme = savedTheme;
+    } else {
+        // 检测系统主题偏好
+        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            AppState.currentTheme = 'dark';
+        }
+    }
+    
+    document.body.setAttribute('data-theme', AppState.currentTheme);
+    const themeIcon = elements.themeBtn.querySelector('use');
+    themeIcon.setAttribute('href', 
+        AppState.currentTheme === 'dark' ? '#icon-theme-light' : '#icon-theme-dark');
+    
+    // 设置代码高亮主题
+    const lightTheme = document.getElementById('highlight-light');
+    const darkTheme = document.getElementById('highlight-dark');
+    if (AppState.currentTheme === 'dark') {
+        lightTheme.disabled = true;
+        darkTheme.disabled = false;
+    }
+}
+
+// ==================== 布局切换 ====================
+
+/**
+ * 切换布局模式
+ */
+function toggleLayout() {
+    const layouts = ['split', 'editor-only', 'preview-only', 'vertical'];
+    const currentIndex = layouts.indexOf(AppState.currentLayout);
+    const nextIndex = (currentIndex + 1) % layouts.length;
+    AppState.currentLayout = layouts[nextIndex];
+    
+    // 移除所有布局类
+    document.body.classList.remove(
+        'layout-editor-only',
+        'layout-preview-only',
+        'layout-vertical'
+    );
+    
+    // 添加新布局类
+    if (AppState.currentLayout !== 'split') {
+        document.body.classList.add(`layout-${AppState.currentLayout}`);
+    }
+    
+    const layoutNames = {
+        'split': '分屏',
+        'editor-only': '仅编辑器',
+        'preview-only': '仅预览',
+        'vertical': '上下分屏'
+    };
+    
+    setStatus(`布局: ${layoutNames[AppState.currentLayout]}`);
+}
+
+// ==================== 文件操作 ====================
+
+/**
+ * 新建文档
+ */
+function newDocument() {
+    if (AppState.isDirty) {
+        if (!confirm('当前文档未保存，确定要新建吗？')) {
+            return;
+        }
+    }
+    
+    elements.editor.value = '';
+    AppState.currentFileName = 'untitled.md';
+    AppState.isDirty = false;
+    renderMarkdown();
+    setStatus('已新建文档');
+}
+
+/**
+ * 打开文件
+ */
+function openFile() {
+    elements.fileInput.click();
+}
+
+/**
+ * 处理文件选择
+ */
+function handleFileSelect(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        elements.editor.value = e.target.result;
+        AppState.currentFileName = file.name;
+        AppState.isDirty = false;
+        renderMarkdown();
+        setStatus(`已打开 ${file.name}`);
+    };
+    reader.onerror = () => {
+        setStatus('文件读取失败', 5000);
+    };
+    reader.readAsText(file);
+    
+    // 重置 input 以允许重复选择同一文件
+    event.target.value = '';
+}
+
+/**
+ * 保存文件
+ */
+function saveFile() {
+    // 提取当前文件名（不含扩展名）
+    const currentName = AppState.currentFileName.replace('.md', '');
+    
+    // 弹出对话框让用户输入文件名
+    const fileName = prompt('请输入文件名（无需输入 .md 扩展名）:', currentName);
+    
+    // 如果用户取消或输入为空，则不保存
+    if (!fileName || fileName.trim() === '') {
+        return;
+    }
+    
+    // 清理文件名，添加 .md 扩展名
+    const cleanFileName = fileName.trim();
+    const fullFileName = cleanFileName.endsWith('.md') ? cleanFileName : `${cleanFileName}.md`;
+    
+    // 更新当前文件名
+    AppState.currentFileName = fullFileName;
+    
+    // 保存文件
+    const content = elements.editor.value;
+    const blob = new Blob([content], { type: 'text/markdown;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = fullFileName;
+    a.click();
+    URL.revokeObjectURL(url);
+    
+    AppState.isDirty = false;
+    setStatus(`已保存 ${fullFileName}`);
+}
+
+/**
+ * 导出 HTML
+ */
+function exportHTML() {
+    const html = `<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>${AppState.currentFileName.replace('.md', '')}</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/styles/github.min.css">
+    <style>
+        body {
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 0 20px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            line-height: 1.6;
+            color: #24292f;
+        }
+        .markdown-body { color: #24292f; }
+        .markdown-body h1, .markdown-body h2 { border-bottom: 1px solid #d0d7de; padding-bottom: 0.3em; }
+        .markdown-body code { background: #f6f8fa; padding: 0.2em 0.4em; border-radius: 6px; }
+        .markdown-body pre { background: #f6f8fa; padding: 16px; border-radius: 6px; overflow-x: auto; }
+        .markdown-body table { border-collapse: collapse; width: 100%; }
+        .markdown-body table th, .markdown-body table td { border: 1px solid #d0d7de; padding: 6px 13px; }
+        .mermaid { text-align: center; margin: 24px 0; }
+    </style>
+</head>
+<body>
+    <div class="markdown-body">
+        ${elements.preview.innerHTML}
+    </div>
+    <script type="module">
+        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10.6.1/+esm';
+        mermaid.initialize({ startOnLoad: true, theme: 'default' });
+    </script>
+</body>
+</html>`;
+    
+    const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = AppState.currentFileName.replace('.md', '.html');
+    a.click();
+    URL.revokeObjectURL(url);
+    
+    setStatus('已导出 HTML');
+}
+
+/**
+ * 复制 Markdown
+ */
+async function copyMarkdown() {
+    try {
+        await navigator.clipboard.writeText(elements.editor.value);
+        setStatus('Markdown 已复制到剪贴板');
+    } catch (err) {
+        console.error('复制失败:', err);
+        setStatus('复制失败', 3000);
+    }
+}
+
+/**
+ * 复制 HTML
+ */
+async function copyHTML() {
+    try {
+        await navigator.clipboard.writeText(elements.preview.innerHTML);
+        setStatus('HTML 已复制到剪贴板');
+    } catch (err) {
+        console.error('复制失败:', err);
+        setStatus('复制失败', 3000);
+    }
+}
+
+/**
+ * 清空内容
+ */
+function clearContent() {
+    if (!confirm('确定要清空所有内容吗？此操作不可恢复。')) {
+        return;
+    }
+    elements.editor.value = '';
+    AppState.isDirty = false;
+    renderMarkdown();
+    setStatus('已清空内容');
+}
+
+// ==================== Markdown 编辑工具 ====================
+
+/**
+ * 在编辑器中插入文本
+ */
+function insertText(before, after = '', placeholder = '') {
+    const editor = elements.editor;
+    const start = editor.selectionStart;
+    const end = editor.selectionEnd;
+    const selectedText = editor.value.substring(start, end);
+    const textToInsert = before + (selectedText || placeholder) + after;
+    
+    editor.value = editor.value.substring(0, start) + textToInsert + editor.value.substring(end);
+    
+    // 设置光标位置
+    if (selectedText) {
+        editor.selectionStart = start;
+        editor.selectionEnd = start + textToInsert.length;
+    } else {
+        const cursorPos = start + before.length + placeholder.length;
+        editor.selectionStart = cursorPos;
+        editor.selectionEnd = cursorPos;
+    }
+    
+    editor.focus();
+    AppState.isDirty = true;
+    debouncedRender();
+}
+
+/**
+ * Mermaid 模板
+ */
+const mermaidTemplates = {
+    flowchart: `\`\`\`mermaid
+graph TD
+    A[开始] --> B{判断条件}
+    B -->|是| C[执行操作1]
+    B -->|否| D[执行操作2]
+    C --> E[结束]
+    D --> E
+\`\`\`\n\n`,
+    
+    sequence: `\`\`\`mermaid
+sequenceDiagram
+    participant A as 用户
+    participant B as 系统
+    participant C as 数据库
+    
+    A->>B: 发送请求
+    B->>C: 查询数据
+    C-->>B: 返回结果
+    B-->>A: 响应数据
+\`\`\`\n\n`,
+    
+    gantt: `\`\`\`mermaid
+gantt
+    title 项目时间线
+    dateFormat  YYYY-MM-DD
+    section 阶段一
+    需求分析           :a1, 2024-01-01, 7d
+    设计方案           :after a1, 5d
+    section 阶段二
+    开发实现           :2024-01-15, 14d
+    测试优化           :7d
+\`\`\`\n\n`,
+    
+    class: `\`\`\`mermaid
+classDiagram
+    class Animal {
+        +String name
+        +int age
+        +eat()
+        +sleep()
+    }
+    class Dog {
+        +bark()
+    }
+    class Cat {
+        +meow()
+    }
+    Animal <|-- Dog
+    Animal <|-- Cat
+\`\`\`\n\n`,
+    
+    state: `\`\`\`mermaid
+stateDiagram-v2
+    [*] --> 待处理
+    待处理 --> 处理中: 开始处理
+    处理中 --> 已完成: 处理成功
+    处理中 --> 失败: 处理失败
+    失败 --> 待处理: 重试
+    已完成 --> [*]
+\`\`\`\n\n`,
+};
+
+// ==================== 本地存储（自动保存） ====================
+
+/**
+ * 保存草稿到 localStorage
+ */
+function saveDraft() {
+    try {
+        localStorage.setItem('markx-draft', elements.editor.value);
+        localStorage.setItem('markx-draft-time', new Date().toISOString());
+    } catch (err) {
+        console.error('保存草稿失败:', err);
+    }
+}
+
+/**
+ * 加载草稿
+ */
+function loadDraft() {
+    try {
+        const draft = localStorage.getItem('markx-draft');
+        const draftTime = localStorage.getItem('markx-draft-time');
+        const autoRestore = localStorage.getItem('markx-auto-restore');
+        
+        if (draft && draftTime) {
+            const time = new Date(draftTime);
+            const now = new Date();
+            const diffMinutes = (now - time) / 1000 / 60;
+            
+            // 如果草稿是最近 7 天内的
+            if (diffMinutes < 7 * 24 * 60) {
+                // 检查是否设置了自动恢复
+                if (autoRestore === 'always') {
+                    // 自动恢复，不提示
+                    elements.editor.value = draft;
+                    renderMarkdown();
+                    setStatus('已自动恢复草稿');
+                } else if (autoRestore === 'never') {
+                    // 永不恢复，不提示
+                    return;
+                } else {
+                    // 首次或每次询问
+                    const timeStr = time.toLocaleString('zh-CN');
+                    const message = `发现 ${timeStr} 的草稿，是否恢复？\n\n提示：可以在下方选择记住此操作`;
+                    
+                    // 创建自定义对话框
+                    showDraftRestoreDialog(draft, timeStr);
+                }
+            }
+        }
+    } catch (err) {
+        console.error('加载草稿失败:', err);
+    }
+}
+
+/**
+ * 显示草稿恢复对话框
+ */
+function showDraftRestoreDialog(draft, timeStr) {
+    // 创建对话框容器
+    const dialog = document.createElement('div');
+    dialog.className = 'draft-dialog';
+    dialog.innerHTML = `
+        <div class="draft-dialog-overlay"></div>
+        <div class="draft-dialog-content">
+            <h3>
+                <svg style="width: 20px; height: 20px; vertical-align: middle; margin-right: 8px;"><use href="#icon-save"></use></svg>
+                发现未保存的草稿
+            </h3>
+            <p>上次编辑时间：${timeStr}</p>
+            <div class="draft-dialog-actions">
+                <label class="draft-dialog-checkbox">
+                    <input type="checkbox" id="draftRemember">
+                    <span>记住我的选择</span>
+                </label>
+                <div class="draft-dialog-buttons">
+                    <button class="draft-btn draft-btn-secondary" id="draftIgnore">忽略</button>
+                    <button class="draft-btn draft-btn-primary" id="draftRestore">恢复草稿</button>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(dialog);
+    
+    // 绑定事件
+    const remember = dialog.querySelector('#draftRemember');
+    const ignoreBtn = dialog.querySelector('#draftIgnore');
+    const restoreBtn = dialog.querySelector('#draftRestore');
+    
+    ignoreBtn.addEventListener('click', () => {
+        if (remember.checked) {
+            localStorage.setItem('markx-auto-restore', 'never');
+        }
+        document.body.removeChild(dialog);
+    });
+    
+    restoreBtn.addEventListener('click', () => {
+        if (remember.checked) {
+            localStorage.setItem('markx-auto-restore', 'always');
+        }
+        elements.editor.value = draft;
+        renderMarkdown();
+        setStatus('已恢复草稿');
+        document.body.removeChild(dialog);
+    });
+    
+    // ESC 键关闭
+    const handleEsc = (e) => {
+        if (e.key === 'Escape' && document.body.contains(dialog)) {
+            document.body.removeChild(dialog);
+            document.removeEventListener('keydown', handleEsc);
+        }
+    };
+    document.addEventListener('keydown', handleEsc);
+}
+
+/**
+ * 定期自动保存
+ */
+function startAutoSave() {
+    AppState.autoSaveTimer = setInterval(() => {
+        if (AppState.isDirty || elements.editor.value) {
+            saveDraft();
+        }
+    }, 30000); // 每 30 秒保存一次
+}
+
+// ==================== 键盘快捷键 ====================
+
+/**
+ * 处理键盘快捷键
+ */
+function handleKeyboard(event) {
+    const ctrl = event.ctrlKey || event.metaKey;
+    
+    if (ctrl && event.key === 's') {
+        event.preventDefault();
+        saveFile();
+    } else if (ctrl && event.key === 'o') {
+        event.preventDefault();
+        openFile();
+    } else if (ctrl && event.key === 'n') {
+        event.preventDefault();
+        newDocument();
+    } else if (ctrl && event.key === 'b') {
+        event.preventDefault();
+        insertText('**', '**', '加粗文本');
+    } else if (ctrl && event.key === 'i') {
+        event.preventDefault();
+        insertText('*', '*', '斜体文本');
+    } else if (ctrl && event.key === 'k') {
+        event.preventDefault();
+        insertText('[', '](https://example.com)', '链接文本');
+    }
+}
+
+// ==================== 事件绑定 ====================
+
+/**
+ * 初始化所有事件监听器
+ */
+function initEventListeners() {
+    // 编辑器输入事件
+    elements.editor.addEventListener('input', () => {
+        AppState.isDirty = true;
+        debouncedRender();
+    });
+    
+    // 工具栏按钮
+    elements.newBtn.addEventListener('click', newDocument);
+    elements.openBtn.addEventListener('click', openFile);
+    elements.saveBtn.addEventListener('click', saveFile);
+    elements.themeBtn.addEventListener('click', toggleTheme);
+    elements.layoutBtn.addEventListener('click', toggleLayout);
+    
+    // Markdown 格式化按钮
+    document.getElementById('boldBtn').addEventListener('click', () => {
+        insertText('**', '**', '加粗文本');
+    });
+    
+    document.getElementById('italicBtn').addEventListener('click', () => {
+        insertText('*', '*', '斜体文本');
+    });
+    
+    document.getElementById('headingBtn').addEventListener('click', () => {
+        insertText('## ', '', '标题');
+    });
+    
+    document.getElementById('linkBtn').addEventListener('click', () => {
+        insertText('[', '](https://example.com)', '链接文本');
+    });
+    
+    document.getElementById('imageBtn').addEventListener('click', () => {
+        insertText('![', '](https://example.com/image.jpg)', '图片描述');
+    });
+    
+    document.getElementById('codeBtn').addEventListener('click', () => {
+        insertText('```javascript\n', '\n```\n', '代码');
+    });
+    
+    document.getElementById('tableBtn').addEventListener('click', () => {
+        const table = '| 列1 | 列2 | 列3 |\n| --- | --- | --- |\n| 单元格1 | 单元格2 | 单元格3 |\n\n';
+        insertText(table);
+    });
+    
+    // Mermaid 模板按钮
+    document.querySelectorAll('[data-mermaid]').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const type = btn.getAttribute('data-mermaid');
+            insertText(mermaidTemplates[type]);
+        });
+    });
+    
+    // 更多选项按钮
+    document.getElementById('exportHtmlBtn').addEventListener('click', exportHTML);
+    document.getElementById('copyMdBtn').addEventListener('click', copyMarkdown);
+    document.getElementById('copyHtmlBtn').addEventListener('click', copyHTML);
+    document.getElementById('clearBtn').addEventListener('click', clearContent);
+    
+    // 文件输入
+    elements.fileInput.addEventListener('change', handleFileSelect);
+    
+    // 键盘快捷键
+    document.addEventListener('keydown', handleKeyboard);
+    
+    // 页面离开警告（有未保存内容时）
+    window.addEventListener('beforeunload', (e) => {
+        if (AppState.isDirty) {
+            e.preventDefault();
+            e.returnValue = '';
+        }
+    });
+    
+    // 系统主题变化监听
+    if (window.matchMedia) {
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+            if (!localStorage.getItem('markx-theme')) {
+                AppState.currentTheme = e.matches ? 'dark' : 'light';
+                document.body.setAttribute('data-theme', AppState.currentTheme);
+                renderMarkdown();
+            }
+        });
+    }
+}
+
+// ==================== 应用初始化 ====================
+
+/**
+ * 初始化应用
+ */
+async function initApp() {
+    console.log('🚀 MarkX 正在启动...');
+    
+    try {
+        // 初始化主题
+        initTheme();
+        
+        // 初始化 Mermaid
+        initMermaid();
+        
+        // 加载草稿
+        loadDraft();
+        
+        // 初始渲染
+        await renderMarkdown();
+        
+        // 绑定事件
+        initEventListeners();
+        
+        // 启动自动保存
+        startAutoSave();
+        
+        console.log('✅ MarkX 启动成功！');
+        setStatus('就绪');
+        
+    } catch (error) {
+        console.error('❌ 启动失败:', error);
+        setStatus('启动失败', 0);
+    }
+}
+
+// ==================== 启动应用 ====================
+
+// 等待 DOM 完全加载后启动
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initApp);
+} else {
+    initApp();
+}
+
+// 导出供调试使用
+window.MarkX = {
+    state: AppState,
+    render: renderMarkdown,
+    version: '1.0.0',
+};
+

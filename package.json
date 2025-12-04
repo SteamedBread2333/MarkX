@@ -1,0 +1,29 @@
+{
+  "name": "markx",
+  "version": "1.0.0",
+  "description": "专业的 Markdown + Mermaid 编辑器",
+  "keywords": [
+    "markdown",
+    "mermaid",
+    "editor",
+    "wysiwyg",
+    "gfm"
+  ],
+  "author": "MarkX Contributors",
+  "license": "MIT",
+  "homepage": "https://github.com/yourusername/markx#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yourusername/markx.git"
+  },
+  "bugs": {
+    "url": "https://github.com/yourusername/markx/issues"
+  },
+  "scripts": {
+    "start": "python3 -m http.server 8000 || python -m http.server 8000 || php -S localhost:8000 || npx http-server -p 8000",
+    "dev": "npm start"
+  },
+  "devDependencies": {},
+  "dependencies": {}
+}
+

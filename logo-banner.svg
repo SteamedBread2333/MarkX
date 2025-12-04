@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630">
+  <defs>
+    <linearGradient id="bannerBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#667eea;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#764ba2;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="iconGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#36D1DC;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#5B86E5;stop-opacity:1" />
+    </linearGradient>
+    <filter id="bannerGlow">
+      <feGaussianBlur stdDeviation="8" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="1200" height="630" fill="url(#bannerBg)"/>
+  
+  <!-- Decorative Elements -->
+  <circle cx="100" cy="100" r="150" fill="white" opacity="0.05"/>
+  <circle cx="1100" cy="530" r="200" fill="white" opacity="0.05"/>
+  
+  <!-- Logo Icon -->
+  <g filter="url(#bannerGlow)" transform="translate(400, 200)">
+    <rect width="120" height="120" rx="20" fill="url(#iconGradient)"/>
+    <path d="M35 40l18 30 18-30h8l-24 40h-4l-24-40h8zm50 0l18 30 18-30h8l-24 40h-4l-24-40h8z" 
+          fill="white" fill-opacity="0.95" stroke="white" stroke-width="1" stroke-linejoin="round"/>
+  </g>
+  
+  <!-- Text -->
+  <g>
+    <text x="550" y="290" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" 
+          font-size="100" font-weight="800" fill="white" letter-spacing="-3">
+      MarkX
+    </text>
+    <text x="550" y="350" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" 
+          font-size="32" fill="white" opacity="0.9" letter-spacing="2">
+      MARKDOWN + MERMAID EDITOR
+    </text>
+    <text x="550" y="410" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" 
+          font-size="24" fill="white" opacity="0.7" letter-spacing="1">
+      现代化 · 开箱即用 · 功能强大
+    </text>
+  </g>
+</svg>
+
