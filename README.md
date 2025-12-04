@@ -1,19 +1,13 @@
 <div align="center">
-
-<h3>专业的 Markdown + Mermaid 编辑器</h3>
-<p>现代化 · 开箱即用 · 功能强大</p>
-
-**[🚀 在线演示]([https://your-demo-url.com](https://steamedbread2333.github.io/MarkX/))**
-
+    <h3>专业的 Markdown + Mermaid 编辑器</h3>
+    <p>现代化 · 开箱即用 · 功能强大</p>
 </div>
-
----
-
 <div align="center">
 <img src="./logo-banner.svg" alt="MarkX Banner" width="100%">
 </div>
 
----
+[在线演示](https://steamedbread2333.github.io/MarkX)
+
 ## 🚀 快速开始
 
 ### 方法一：直接使用（推荐）
