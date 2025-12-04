@@ -3,7 +3,7 @@
 <h3>专业的 Markdown + Mermaid 编辑器</h3>
 <p>现代化 · 开箱即用 · 功能强大</p>
 
-**[🚀 在线演示](https://your-demo-url.com)**
+**[🚀 在线演示]([https://your-demo-url.com](https://steamedbread2333.github.io/MarkX/))**
 
 </div>
 
