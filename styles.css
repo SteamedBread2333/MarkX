@@ -345,6 +345,82 @@ svg.icon {
     box-shadow: 0 4px 12px rgba(33, 150, 243, 0.2);
 }
 
+/* ==================== KaTeX 数学公式样式 ==================== */
+
+/* 行内公式 */
+.katex {
+    font-size: 1.05em;
+    color: var(--text-primary);
+}
+
+/* 块级公式容器 */
+.katex-block {
+    margin: 1.5em 0;
+    padding: 0;
+    text-align: center;
+}
+
+/* 块级公式 */
+.katex-display {
+    margin: 0 !important;
+    padding: 1.2em;
+    background: var(--bg-secondary);
+    border-radius: 8px;
+    border-left: 4px solid var(--accent-color);
+    overflow-x: auto;
+    text-align: center;
+}
+
+/* 暗色主题优化 */
+[data-theme="dark"] .katex {
+    color: var(--text-primary);
+}
+
+[data-theme="dark"] .katex-display {
+    background: var(--bg-tertiary);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* 错误显示 */
+.katex-error {
+    color: #ef5350 !important;
+    background: rgba(239, 83, 80, 0.1);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: var(--font-mono);
+}
+
+/* 公式滚动条美化 */
+.katex-display::-webkit-scrollbar {
+    height: 8px;
+}
+
+.katex-display::-webkit-scrollbar-track {
+    background: var(--bg-tertiary);
+    border-radius: 4px;
+}
+
+.katex-display::-webkit-scrollbar-thumb {
+    background: var(--text-tertiary);
+    border-radius: 4px;
+}
+
+.katex-display::-webkit-scrollbar-thumb:hover {
+    background: var(--text-secondary);
+}
+
+/* 数学公式按钮特殊效果 */
+#mathBtn:hover svg.icon {
+    color: #FF6B6B;
+    animation: formulaShake 0.5s ease;
+}
+
+@keyframes formulaShake {
+    0%, 100% { transform: rotate(0deg); }
+    25% { transform: rotate(-5deg); }
+    75% { transform: rotate(5deg); }
+}
+
 html, body {
     height: 100%;
     overflow: hidden;
@@ -505,6 +581,16 @@ body {
     animation: dropdownFadeIn var(--transition-fast);
 }
 
+/* 增加下拉菜单的悬停区域，防止鼠标移动时意外关闭 */
+.dropdown-content::before {
+    content: '';
+    position: absolute;
+    top: -8px;
+    left: 0;
+    right: 0;
+    height: 8px;
+}
+
 .dropdown-right {
     left: auto;
     right: 0;
@@ -527,6 +613,8 @@ body {
     font-size: 14px;
     font-family: var(--font-family);
     transition: background var(--transition-fast);
+    user-select: none;
+    -webkit-user-select: none;
 }
 
 .dropdown-item:hover {

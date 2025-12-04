@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="专业的 Markdown 编辑器，完美支持 Mermaid 图表渲染。现代化、开箱即用、功能强大。">
-    <meta name="keywords" content="markdown, mermaid, editor, 编辑器, 在线编辑器, markdown editor">
+    <meta name="description" content="专业的 Markdown 编辑器，完美支持 Mermaid 图表和 KaTeX 数学公式渲染。现代化、开箱即用、功能强大。">
+    <meta name="keywords" content="markdown, mermaid, katex, 数学公式, editor, 编辑器, 在线编辑器, markdown editor, math formula">
     <meta name="author" content="MarkX Team">
-    <title>MarkX - 专业 Markdown + Mermaid 编辑器</title>
+    <title>MarkX - 专业 Markdown + Mermaid + KaTeX 编辑器</title>
     
     <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="./favicon.svg">
@@ -15,15 +15,15 @@
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://your-demo-url.com/">
-    <meta property="og:title" content="MarkX - 专业 Markdown + Mermaid 编辑器">
-    <meta property="og:description" content="现代化、开箱即用、功能强大的 Markdown 编辑器，完美支持 Mermaid 图表渲染">
+    <meta property="og:title" content="MarkX - 专业 Markdown + Mermaid + KaTeX 编辑器">
+    <meta property="og:description" content="现代化、开箱即用、功能强大的 Markdown 编辑器，完美支持 Mermaid 图表和 KaTeX 数学公式渲染">
     <meta property="og:image" content="./logo-banner.svg">
     
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image">
     <meta property="twitter:url" content="https://your-demo-url.com/">
-    <meta property="twitter:title" content="MarkX - 专业 Markdown + Mermaid 编辑器">
-    <meta property="twitter:description" content="现代化、开箱即用、功能强大的 Markdown 编辑器">
+    <meta property="twitter:title" content="MarkX - 专业 Markdown + Mermaid + KaTeX 编辑器">
+    <meta property="twitter:description" content="现代化、开箱即用、功能强大的 Markdown 编辑器，支持 Mermaid 图表和 KaTeX 数学公式">
     <meta property="twitter:image" content="./logo-banner.svg">
     
     <!-- 样式文件 -->
@@ -33,6 +33,11 @@
     <!-- Highlight.js - 代码高亮 -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/styles/github.min.css" id="highlight-light">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/styles/github-dark.min.css" id="highlight-dark" disabled>
+    
+    <!-- KaTeX - 数学公式渲染 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" integrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG+vnGctmUb0ZY0l8" crossorigin="anonymous"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" integrity="sha384-+VBxd3r6XgURycqtZ117nYw44OOcIax56Z4dCRWbxyPt0Koah1uHoK0o4+/RRE05" crossorigin="anonymous"></script>
     
     <!-- Import Maps 用于 ES 模块 -->
     <script type="importmap">
@@ -114,6 +119,15 @@
             <circle cx="9" cy="14" r="2" fill="currentColor"/>
             <circle cx="13" cy="18" r="2" fill="currentColor"/>
             <circle cx="21" cy="10" r="2" fill="currentColor"/>
+        </symbol>
+        <symbol id="icon-formula" viewBox="0 0 24 24">
+            <text x="3" y="18" font-family="serif" font-size="16" font-style="italic" fill="currentColor" font-weight="bold">f</text>
+            <text x="10" y="10" font-family="serif" font-size="10" fill="currentColor">x</text>
+            <path d="M9 14 L14 14" stroke="currentColor" stroke-width="1.5"/>
+            <text x="9" y="21" font-family="serif" font-size="10" fill="currentColor">y</text>
+            <path d="M16 8 Q18 10 20 8 Q18 6 16 8" fill="none" stroke="currentColor" stroke-width="1.5"/>
+            <path d="M18 15 L22 11" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            <path d="M18 11 L22 15" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
         </symbol>
         <symbol id="icon-layout" viewBox="0 0 24 24">
             <rect x="3" y="3" width="18" height="18" rx="2" fill="none" stroke="currentColor" stroke-width="2"/>
@@ -214,6 +228,24 @@
                     <button class="dropdown-item" data-mermaid="state">状态图</button>
                 </div>
             </div>
+            
+            <!-- 数学公式 -->
+            <div class="dropdown">
+                <button class="toolbar-btn" id="mathBtn" title="数学公式 (KaTeX)">
+                    <svg class="icon"><use href="#icon-formula"></use></svg>
+                    <span class="text">公式</span>
+                </button>
+                <div class="dropdown-content">
+                    <button class="dropdown-item" data-math="inline">行内公式 $x$</button>
+                    <button class="dropdown-item" data-math="block">块级公式 $$x$$</button>
+                    <button class="dropdown-item" data-math="fraction">分数 $\frac{a}{b}$</button>
+                    <button class="dropdown-item" data-math="sqrt">根号 $\sqrt{x}$</button>
+                    <button class="dropdown-item" data-math="sum">求和 $\sum$</button>
+                    <button class="dropdown-item" data-math="integral">积分 $\int$</button>
+                    <button class="dropdown-item" data-math="limit">极限 $\lim$</button>
+                    <button class="dropdown-item" data-math="matrix">矩阵</button>
+                </div>
+            </div>
         </div>
         
         <div class="toolbar-right">
@@ -251,18 +283,21 @@
                 class="editor" 
                 placeholder="# 欢迎使用 MarkX！
 
-在这里输入 Markdown 内容，支持完整的 GitHub Flavored Markdown 语法。
+现代化的 Markdown 编辑器，支持 **Mermaid 图表** 和 **KaTeX 数学公式**！
 
-## 特色功能
+## ✨ 特色功能
 
 - ✅ 实时预览
 - ✅ Mermaid 图表支持
+- ✅ KaTeX 数学公式
 - ✅ 代码高亮
 - ✅ 暗色/亮色主题
 - ✅ 文件导入导出
 - ✅ 自动保存草稿
 
-## Mermaid 示例
+---
+
+## 📊 Mermaid 图表示例
 
 点击工具栏的「图表」按钮快速插入模板！
 
@@ -274,6 +309,26 @@ graph TD
     C --> E[分享给朋友]
     D --> E
 ```
+
+---
+
+## 🧮 数学公式示例
+
+点击工具栏的「公式」按钮快速插入模板！
+
+**行内公式**：质能方程 $E = mc^2$，勾股定理 $a^2 + b^2 = c^2$
+
+**块级公式**：
+
+$$
+x = \frac{-b \pm \sqrt{b^2 - 4ac}}{2a}
+$$
+
+$$
+\sum_{i=1}^{n} i = \frac{n(n+1)}{2}
+$$
+
+---
 
 试试编辑内容，右侧会实时更新！🚀"
                 spellcheck="false"
