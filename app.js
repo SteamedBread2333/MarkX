@@ -1367,6 +1367,19 @@ function saveFile() {
  * 导出 HTML
  */
 function exportHTML() {
+    // 克隆预览区内容，避免修改原始 DOM
+    const previewClone = elements.preview.cloneNode(true);
+    
+    // 移除所有 .mermaid 元素的 mermaid 类，避免 Mermaid 脚本再次渲染
+    const mermaidElements = previewClone.querySelectorAll('.mermaid');
+    mermaidElements.forEach(el => {
+        el.classList.remove('mermaid');
+    });
+    
+    // 移除导出工具栏（导出的 HTML 不需要这些按钮）
+    const toolbars = previewClone.querySelectorAll('.mermaid-export-toolbar');
+    toolbars.forEach(toolbar => toolbar.remove());
+    
     const html = `<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -1389,17 +1402,16 @@ function exportHTML() {
         .markdown-body pre { background: #f6f8fa; padding: 16px; border-radius: 6px; overflow-x: auto; }
         .markdown-body table { border-collapse: collapse; width: 100%; }
         .markdown-body table th, .markdown-body table td { border: 1px solid #d0d7de; padding: 6px 13px; }
-        .mermaid { text-align: center; margin: 24px 0; }
+        .mermaid-wrapper { margin: 24px 0; }
+        .mermaid-content { padding: 16px; }
+        .mermaid-content svg { display: block; }
     </style>
 </head>
 <body>
     <div class="markdown-body">
-        ${elements.preview.innerHTML}
+        ${previewClone.innerHTML}
     </div>
-    <script type="module">
-        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10.6.1/+esm';
-        mermaid.initialize({ startOnLoad: true, theme: 'default' });
-    </script>
+    <!-- 不需要 Mermaid 脚本，因为 SVG 已经渲染好了 -->
 </body>
 </html>`;
     
