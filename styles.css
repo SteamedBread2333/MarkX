@@ -655,6 +655,34 @@ body {
     display: flex;
     flex-direction: column;
     transition: flex var(--transition-normal);
+    position: relative;
+}
+
+/* 编辑器容器右侧拖拽区域 */
+.editor-container::after {
+    content: '';
+    position: absolute;
+    right: -4px;
+    top: 0;
+    bottom: 0;
+    width: 8px;
+    cursor: col-resize;
+    z-index: 10;
+    background: transparent;
+    transition: background var(--transition-fast);
+}
+
+.editor-container:hover::after {
+    background: rgba(9, 105, 218, 0.1);
+}
+
+[data-theme="dark"] .editor-container:hover::after {
+    background: rgba(47, 129, 247, 0.2);
+}
+
+.editor-container.dragging::after {
+    background: var(--accent-color);
+    cursor: col-resize;
 }
 
 .editor {
