@@ -1,183 +1,185 @@
 <div align="center">
-    <h3>专业的 Markdown + Mermaid + KaTeX 编辑器</h3>
-    <p>现代化 · 开箱即用 · 功能强大</p>
+    <h3>Professional Markdown + Mermaid + KaTeX Editor</h3>
+    <p>Modern · Ready-to-use · Powerful</p>
 </div>
 <div align="center">
-<img src="./logo-banner.svg" alt="MarkX Banner" width="100%">
+<img src="./logo-banner-en.svg" alt="MarkX Banner" width="100%">
 </div>
 
-[在线演示](https://steamedbread2333.github.io/MarkX)
+**English** | [中文](README.zh-CN.md)
+
+[Live Demo](https://steamedbread2333.github.io/MarkX)
 
 ---
 
-## ✨ 核心特性
+## ✨ Core Features
 
 <table>
 <tr>
 <td width="50%">
 
-### 📊 Mermaid 图表支持
+### 📊 Mermaid Diagram Support
 
-完美集成 Mermaid.js，支持多种专业图表：
+Perfect integration with Mermaid.js, supporting various professional diagrams:
 
-- ✅ **流程图** - 可视化业务流程
-- ✅ **时序图** - 展示交互时序
-- ✅ **甘特图** - 项目进度管理
-- ✅ **类图** - UML 类关系图
-- ✅ **状态图** - 状态机可视化
-- ✅ **一键导出** - 支持 SVG/PNG 格式
+- ✅ **Flowcharts** - Visualize business processes
+- ✅ **Sequence Diagrams** - Show interaction sequences
+- ✅ **Gantt Charts** - Project progress management
+- ✅ **Class Diagrams** - UML class relationship diagrams
+- ✅ **State Diagrams** - State machine visualization
+- ✅ **One-click Export** - Support SVG/PNG formats
 
 </td>
 <td width="50%">
 
-### 🧮 KaTeX 数学公式
+### 🧮 KaTeX Math Formulas
 
-强大的数学公式渲染引擎：
+Powerful math formula rendering engine:
 
-- ✅ **行内公式** - `$E=mc^2$` 
-- ✅ **块级公式** - `$$\int_0^\infty$$`
-- ✅ **丰富符号** - 积分、求和、矩阵等
-- ✅ **实时渲染** - 输入即显示
-- ✅ **LaTeX 语法** - 标准数学排版
-- ✅ **快速插入** - 内置常用模板
+- ✅ **Inline Formulas** - `$E=mc^2$` 
+- ✅ **Block Formulas** - `$$\int_0^\infty$$`
+- ✅ **Rich Symbols** - Integrals, summations, matrices, etc.
+- ✅ **Real-time Rendering** - Display as you type
+- ✅ **LaTeX Syntax** - Standard mathematical typesetting
+- ✅ **Quick Insert** - Built-in common templates
 
 </td>
 </tr>
 </table>
 
-### 🎯 更多功能
+### 🎯 More Features
 
-- 📝 **GFM 支持** - 完整的 GitHub Flavored Markdown
-- 🎨 **主题切换** - 亮色/暗色护眼模式
-- 💾 **自动保存** - 每 30 秒自动保存草稿
-- 📊 **实时统计** - 字数、行数、阅读时间
-- 🔒 **安全防护** - DOMPurify XSS 防护
-- 📱 **响应式** - 完美适配桌面和移动端
+- 📝 **GFM Support** - Complete GitHub Flavored Markdown
+- 🎨 **Theme Toggle** - Light/Dark eye-friendly modes
+- 💾 **Auto Save** - Auto-save drafts every 30 seconds
+- 📊 **Real-time Stats** - Word count, line count, reading time
+- 🔒 **Security** - DOMPurify XSS protection
+- 📱 **Responsive** - Perfect adaptation for desktop and mobile
 
-## 🚀 快速开始
+## 🚀 Quick Start
 
-### 方法一：直接使用（推荐）
+### Method 1: Direct Use (Recommended)
 
-1. **克隆仓库**
+1. **Clone the repository**
 ```bash
 git clone https://github.com/yourusername/markx.git
 cd markx
 ```
 
-2. **启动本地服务器**
+2. **Start a local server**
 
-由于使用了 ES 模块和 Import Maps，需要通过 HTTP 服务器访问：
+Since ES modules and Import Maps are used, access via HTTP server is required:
 
 ```bash
-# 使用 Python (推荐)
+# Using Python (Recommended)
 python3 -m http.server 8000
 
-# 或使用 Node.js http-server
+# Or using Node.js http-server
 npx http-server -p 8000
 
-# 或使用 PHP
+# Or using PHP
 php -S localhost:8000
 ```
 
-3. **打开浏览器**
+3. **Open your browser**
 
-访问 `http://localhost:8000` 即可使用！
+Visit `http://localhost:8000` to start using!
 
-### 方法二：在线部署
+### Method 2: Online Deployment
 
-#### 部署到 GitHub Pages
+#### Deploy to GitHub Pages
 
-1. Fork 本仓库
-2. 进入仓库设置 → Pages
-3. Source 选择 `main` 分支
-4. 保存后等待几分钟即可访问
+1. Fork this repository
+2. Go to repository settings → Pages
+3. Select `main` branch as source
+4. Wait a few minutes and access
 
-#### 部署到 Vercel
+#### Deploy to Vercel
 
 [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/yourusername/markx)
 
-1. 点击上方按钮
-2. 登录 Vercel 账号
-3. 一键部署完成
+1. Click the button above
+2. Log in to your Vercel account
+3. One-click deployment complete
 
-#### 部署到 Netlify
+#### Deploy to Netlify
 
 [![Deploy to Netlify](https://www.netlify.com/img/deploy/button.svg)](https://app.netlify.com/start/deploy?repository=https://github.com/yourusername/markx)
 
-1. 点击上方按钮
-2. 登录 Netlify 账号
-3. 自动部署完成
+1. Click the button above
+2. Log in to your Netlify account
+3. Automatic deployment complete
 
 ---
 
-## 📖 使用指南
+## 📖 User Guide
 
-### 基础操作
+### Basic Operations
 
-#### 编辑 Markdown
-在左侧编辑器输入 Markdown 内容，右侧实时预览：
+#### Edit Markdown
+Type Markdown content in the left editor, real-time preview on the right:
 
 ```markdown
-# 一级标题
-## 二级标题
+# Heading 1
+## Heading 2
 
-**加粗文本** *斜体文本* ~~删除线~~
+**Bold text** *Italic text* ~~Strikethrough~~
 
-- 无序列表项 1
-- 无序列表项 2
+- Unordered list item 1
+- Unordered list item 2
 
-1. 有序列表项 1
-2. 有序列表项 2
+1. Ordered list item 1
+2. Ordered list item 2
 
-[链接文本](https://example.com)
-![图片描述](image.jpg)
+[Link text](https://example.com)
+![Image description](image.jpg)
 ```
 
-#### 📊 插入 Mermaid 图表
+#### 📊 Insert Mermaid Diagrams
 
-**方法一：使用工具栏**
-1. 点击工具栏的「图表」按钮
-2. 选择需要的图表类型（流程图/时序图/甘特图/类图/状态图）
-3. 自动插入模板，修改内容即可
+**Method 1: Using Toolbar**
+1. Click the "Diagram" button in the toolbar
+2. Select the diagram type needed (Flowchart/Sequence/Gantt/Class/State)
+3. Template is automatically inserted, modify content as needed
 
-**方法二：手动输入**
+**Method 2: Manual Input**
 
 ````markdown
 ```mermaid
 graph TD
-    A[开始] --> B{判断}
-    B -->|是| C[结果1]
-    B -->|否| D[结果2]
+    A[Start] --> B{Decision}
+    B -->|Yes| C[Result 1]
+    B -->|No| D[Result 2]
 ```
 ````
 
-**💡 提示：** 每个 Mermaid 图表都支持导出为 SVG 或 PNG 格式！
+**💡 Tip:** Each Mermaid diagram supports export as SVG or PNG format!
 
 ---
 
-#### 🧮 插入数学公式
+#### 🧮 Insert Math Formulas
 
-**方法一：使用工具栏**
-1. 点击工具栏的「公式」按钮
-2. 选择公式类型（行内/块级/分数/根号/求和/积分/极限/矩阵）
-3. 自动插入模板，修改内容即可
+**Method 1: Using Toolbar**
+1. Click the "Formula" button in the toolbar
+2. Select formula type (Inline/Block/Fraction/Root/Sum/Integral/Limit/Matrix)
+3. Template is automatically inserted, modify content as needed
 
-**方法二：手动输入**
+**Method 2: Manual Input**
 
-**行内公式**（使用单个 `$` 包裹）：
+**Inline Formula** (wrap with single `$`):
 ```markdown
-质能方程：$E = mc^2$，勾股定理：$a^2 + b^2 = c^2$
+Mass-energy equation: $E = mc^2$, Pythagorean theorem: $a^2 + b^2 = c^2$
 ```
 
-**块级公式**（使用双 `$$` 包裹，独立成行）：
+**Block Formula** (wrap with double `$$`, standalone line):
 ```markdown
-二次方程求根公式：
+Quadratic formula:
 
 $$
 x = \frac{-b \pm \sqrt{b^2 - 4ac}}{2a}
 $$
 
-矩阵示例：
+Matrix example:
 
 $$
 \begin{bmatrix}
@@ -187,51 +189,51 @@ c & d
 $$
 ```
 
-**💡 重要提示**：
-- 块级公式的 `$$` 符号必须单独占一行
-- 公式内容可以跨越多行
-- 前后要有空行以确保正确渲染
+**💡 Important Notes**:
+- Block formula `$$` symbols must be on separate lines
+- Formula content can span multiple lines
+- Ensure blank lines before and after for correct rendering
 
-**常用示例**：
+**Common Examples**:
 ```markdown
-- 分数：$\frac{a}{b}$
-- 根号：$\sqrt{x}$ 或 $\sqrt[3]{x}$
-- 求和：$\sum_{i=1}^{n} i$
-- 积分：$\int_{0}^{\infty} e^{-x}dx$
-- 极限：$\lim_{x \to \infty} \frac{1}{x} = 0$
+- Fraction: $\frac{a}{b}$
+- Root: $\sqrt{x}$ or $\sqrt[3]{x}$
+- Sum: $\sum_{i=1}^{n} i$
+- Integral: $\int_{0}^{\infty} e^{-x}dx$
+- Limit: $\lim_{x \to \infty} \frac{1}{x} = 0$
 ```
 
 ---
 
-#### 快捷键
+#### Keyboard Shortcuts
 
-| 快捷键 | 功能 |
-|--------|------|
-| `Ctrl + S` | 保存文件 |
-| `Ctrl + O` | 打开文件 |
-| `Ctrl + N` | 新建文档 |
-| `Ctrl + B` | 加粗 |
-| `Ctrl + I` | 斜体 |
-| `Ctrl + K` | 插入链接 |
+| Shortcut | Function |
+|----------|----------|
+| `Ctrl + S` | Save file |
+| `Ctrl + O` | Open file |
+| `Ctrl + N` | New document |
+| `Ctrl + B` | Bold |
+| `Ctrl + I` | Italic |
+| `Ctrl + K` | Insert link |
 
-### 高级功能
+### Advanced Features
 
-#### 表格
+#### Tables
 ```markdown
-| 列1 | 列2 | 列3 |
+| Column 1 | Column 2 | Column 3 |
 | --- | --- | --- |
-| 单元格1 | 单元格2 | 单元格3 |
-| 内容A | 内容B | 内容C |
+| Cell 1 | Cell 2 | Cell 3 |
+| Content A | Content B | Content C |
 ```
 
-#### 任务列表
+#### Task Lists
 ```markdown
-- [x] 已完成任务
-- [ ] 待完成任务
-- [ ] 另一个任务
+- [x] Completed task
+- [ ] Pending task
+- [ ] Another task
 ```
 
-#### 代码块
+#### Code Blocks
 ````markdown
 ```javascript
 function hello() {
@@ -242,45 +244,45 @@ function hello() {
 
 ---
 
-## 🎨 Mermaid 图表示例
+## 🎨 Mermaid Diagram Examples
 
-### 流程图
+### Flowchart
 ````markdown
 ```mermaid
 graph LR
-    A[方形] --> B(圆角)
-    B --> C{菱形}
-    C -->|选项1| D[结果1]
-    C -->|选项2| E[结果2]
+    A[Square] --> B(Rounded)
+    B --> C{Diamond}
+    C -->|Option 1| D[Result 1]
+    C -->|Option 2| E[Result 2]
 ```
 ````
 
-### 时序图
+### Sequence Diagram
 ````markdown
 ```mermaid
 sequenceDiagram
-    Alice->>John: 你好，John！
-    John-->>Alice: 你好，Alice！
-    Alice-)John: 再见！
+    Alice->>John: Hello John!
+    John-->>Alice: Hello Alice!
+    Alice-)John: Goodbye!
 ```
 ````
 
-### 甘特图
+### Gantt Chart
 ````markdown
 ```mermaid
 gantt
-    title 项目进度
+    title Project Progress
     dateFormat  YYYY-MM-DD
-    section 设计
-    需求分析      :a1, 2024-01-01, 7d
-    原型设计      :after a1, 5d
-    section 开发
-    前端开发      :2024-01-15, 10d
-    后端开发      :2024-01-15, 12d
+    section Design
+    Requirements Analysis      :a1, 2024-01-01, 7d
+    Prototype Design      :after a1, 5d
+    section Development
+    Frontend Development      :2024-01-15, 10d
+    Backend Development      :2024-01-15, 12d
 ```
 ````
 
-### 类图
+### Class Diagram
 ````markdown
 ```mermaid
 classDiagram
@@ -303,40 +305,41 @@ classDiagram
 
 ---
 
-## 🛠️ 技术栈
+## 🛠️ Tech Stack
 
-### 核心库
-- **[Marked.js](https://marked.js.org/)** `v11.1.1` - Markdown 解析
-- **[Mermaid.js](https://mermaid.js.org/)** `v10.6.1` - 图表渲染
-- **[DOMPurify](https://github.com/cure53/DOMPurify)** `v3.0.8` - XSS 防护
-- **[Highlight.js](https://highlightjs.org/)** `v11.9.0` - 代码高亮
+### Core Libraries
+- **[Marked.js](https://marked.js.org/)** `v11.1.1` - Markdown parsing
+- **[Mermaid.js](https://mermaid.js.org/)** `v10.6.1` - Diagram rendering
+- **[DOMPurify](https://github.com/cure53/DOMPurify)** `v3.0.8` - XSS protection
+- **[Highlight.js](https://highlightjs.org/)** `v11.9.0` - Code highlighting
 
-### 架构特点
-- ✅ **零构建** - 无需 Webpack/Vite，直接运行
-- ✅ **ES Modules** - 原生 JavaScript 模块
-- ✅ **Import Maps** - CDN 依赖管理
-- ✅ **纯静态** - 可部署到任何静态托管平台
+### Architecture Features
+- ✅ **Zero Build** - No Webpack/Vite needed, runs directly
+- ✅ **ES Modules** - Native JavaScript modules
+- ✅ **Import Maps** - CDN dependency management
+- ✅ **Pure Static** - Deployable to any static hosting platform
 
-### 浏览器兼容性
+### Browser Compatibility
 - ✅ Chrome 90+
 - ✅ Firefox 88+
 - ✅ Safari 14+
 - ✅ Edge 90+
-- ✅ 移动端浏览器（iOS Safari 14+, Chrome Mobile）
+- ✅ Mobile browsers (iOS Safari 14+, Chrome Mobile)
 
 ---
 
-## 📂 项目结构
+## 📂 Project Structure
 
 ```
 markx/
-├── index.html          # 主页面（HTML 结构）
-├── styles.css          # 样式文件（CSS + 主题）
-├── app.js              # 应用逻辑（JavaScript）
-├── README.md           # 项目文档（本文件）
-├── LICENSE             # MIT 许可证
-├── .gitignore          # Git 忽略文件
-└── screenshots/        # 截图目录
+├── index.html          # Main page (HTML structure)
+├── styles.css          # Stylesheet (CSS + themes)
+├── app.js              # Application logic (JavaScript)
+├── README.md           # Project documentation (this file)
+├── README.zh-CN.md     # Chinese documentation
+├── LICENSE             # MIT License
+├── .gitignore          # Git ignore file
+└── screenshots/        # Screenshots directory
     ├── light-mode.png
     ├── dark-mode.png
     └── mobile.png
@@ -346,11 +349,10 @@ markx/
 
 <div align="center">
 
-<img src="./logo.svg" width="150">
+<img src="./logo-en.svg" width="150">
 
 <br><br>
 
-**如果觉得 MarkX 有帮助，请给个 ⭐️ Star 支持一下！**
+**If MarkX is helpful, please give it a ⭐️ Star!**
 
 </div>
-

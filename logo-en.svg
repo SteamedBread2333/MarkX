@@ -1,10 +1,10 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 60" width="200" height="60">
   <defs>
-    <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+    <linearGradient id="logoGradientEn" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" style="stop-color:#5B86E5;stop-opacity:1" />
       <stop offset="100%" style="stop-color:#36D1DC;stop-opacity:1" />
     </linearGradient>
-    <filter id="glow">
+    <filter id="glowEn">
       <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
       <feMerge>
         <feMergeNode in="coloredBlur"/>
@@ -14,8 +14,8 @@
   </defs>
   
   <!-- Logo Icon -->
-  <g filter="url(#glow)">
-    <rect x="5" y="8" width="44" height="44" rx="8" fill="url(#logoGradient)"/>
+  <g filter="url(#glowEn)">
+    <rect x="5" y="8" width="44" height="44" rx="8" fill="url(#logoGradientEn)"/>
     <path d="M15 20l6 10 6-10h3l-8 13h-2l-8-13h3zm18 0l6 10 6-10h3l-8 13h-2l-8-13h3z" 
           fill="white" fill-opacity="0.95" stroke="white" stroke-width="0.5" stroke-linejoin="round"/>
   </g>
@@ -23,10 +23,10 @@
   <!-- Text "MarkX" -->
   <text x="60" y="38" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" 
         font-size="28" font-weight="700" letter-spacing="-1">
-    <tspan fill="url(#logoGradient)">MarkX</tspan>
+    <tspan fill="url(#logoGradientEn)">MarkX</tspan>
   </text>
   
-  <!-- Subtitle -->
+  <!-- Subtitle in English -->
   <text x="62" y="52" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" 
         font-size="9" fill="#666" letter-spacing="0.3">
     PROFESSIONAL MARKDOWN EDITOR
