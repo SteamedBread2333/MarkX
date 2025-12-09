@@ -469,6 +469,11 @@ body {
     min-width: 0;
 }
 
+/* 确保工具栏右侧有足够空间，不被GitHub角标遮挡 */
+.toolbar-right {
+    padding-right: 50px; /* 为GitHub角标留出空间 */
+}
+
 .logo {
     display: flex;
     align-items: center;
@@ -1473,5 +1478,102 @@ body.mermaid-viewer-active > *:not(.mermaid-fullscreen-viewer) {
 
 body.mermaid-viewer-active .mermaid-fullscreen-viewer {
     visibility: visible;
+}
+
+/* ==================== GitHub 角标 ==================== */
+
+.github-corner {
+    position: fixed;
+    top: 0;
+    right: 0;
+    z-index: 201;
+    width: 80px;
+    height: 80px;
+    overflow: hidden;
+    pointer-events: auto;
+    transition: all var(--transition-normal);
+    text-decoration: none;
+}
+
+.github-corner:hover {
+    transform: scale(1.05);
+}
+
+.github-corner svg {
+    display: block;
+    pointer-events: none;
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    border: 0;
+    filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.2));
+}
+
+/* 亮色主题：使用渐变蓝色 */
+.github-corner-bg {
+    fill: url(#githubGradient);
+}
+
+/* 暗色主题：使用更亮的颜色 */
+[data-theme="dark"] .github-corner-bg {
+    fill: url(#githubGradient);
+    opacity: 0.95;
+}
+
+[data-theme="dark"] .github-corner svg {
+    filter: drop-shadow(0 2px 12px rgba(91, 134, 229, 0.4));
+}
+
+.github-corner:hover svg {
+    filter: drop-shadow(0 4px 16px rgba(91, 134, 229, 0.5));
+}
+
+[data-theme="dark"] .github-corner:hover svg {
+    filter: drop-shadow(0 4px 20px rgba(91, 134, 229, 0.6));
+}
+
+.github-corner .octo-arm {
+    transform-origin: 130px 106px;
+}
+
+.github-corner:hover .octo-arm {
+    animation: octocat-wave 560ms ease-in-out;
+}
+
+@keyframes octocat-wave {
+    0%, 100% {
+        transform: rotate(0);
+    }
+    20%, 60% {
+        transform: rotate(-25deg);
+    }
+    40%, 80% {
+        transform: rotate(10deg);
+    }
+}
+
+/* 响应式：移动端缩小角标 */
+@media (max-width: 768px) {
+    .github-corner {
+        width: 60px;
+        height: 60px;
+    }
+    
+    .github-corner svg {
+        width: 60px;
+        height: 60px;
+    }
+    
+    /* 移动端工具栏右侧padding调整 */
+    .toolbar-right {
+        padding-right: 30px;
+    }
+}
+
+/* 打印时隐藏 */
+@media print {
+    .github-corner {
+        display: none !important;
+    }
 }
 
