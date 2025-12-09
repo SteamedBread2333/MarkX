@@ -5,76 +5,378 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MarkX - 专业 Markdown 编辑器</title>
     <style>
+        /* 全局样式 */
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Roboto+Mono:wght@400;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Orbitron', sans-serif;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             height: 100vh;
             margin: 0;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
+            background: #000000;
+            color: #00ff41;
             text-align: center;
+            overflow: hidden;
+            position: relative;
         }
+        
+        /* 背景网格和赛博朋克效果 */
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(0, 255, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 0, 255, 0.1) 0%, transparent 50%),
+                linear-gradient(rgba(0, 255, 65, 0.1) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 255, 65, 0.1) 1px, transparent 1px);
+            background-size: 100% 100%, 100% 100%, 50px 50px, 50px 50px;
+            z-index: -3;
+            animation: gridMove 20s linear infinite;
+        }
+        
+        /* 扫描线效果 */
+        body::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(
+                0deg,
+                rgba(0, 0, 0, 0.15),
+                rgba(0, 0, 0, 0.15) 1px,
+                transparent 1px,
+                transparent 2px
+            );
+            z-index: 1000;
+            pointer-events: none;
+            animation: scanlineMove 6s linear infinite;
+        }
+        
+        /* 故障效果的背景干扰 */
+        .noise::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMDAiIGhlaWdodD0iMzAwIj48ZmlsdGVyIGlkPSJhIiB4PSIwIiB5PSIwIj48ZmVUdXJidWxlbmNlIHR5cGU9ImZyYWN0YWxOb2lzZSIgYmFzZUZyZXF1ZW5jeT0iLjc1IiBzdGl0Y2hUaWxlcz0ic3RpdGNoIi8+PGZlQ29sb3JNYXRyaXggdHlwZT0ic2F0dXJhdGUiIHZhbHVlcz0iMCIvPjwvZmlsdGVyPjxwYXRoIGZpbHRlcj0idXJsKCNhKSIgb3BhY2l0eT0iLjA1IiBkPSJNMCAwaDMwMHYzMDBIMHoiLz48L3N2Zz4=');
+            opacity: 0.3;
+            z-index: -1;
+            pointer-events: none;
+        }
+        
+        /* 动画效果 */
+        @keyframes gridMove {
+            0% { background-position: 0 0, 0 0, 0 0, 0 0; }
+            100% { background-position: 0 100px, 0 -100px, 0 50px, 50px 0; }
+        }
+        
+        @keyframes scanlineMove {
+            0% { transform: translateY(-100%); }
+            100% { transform: translateY(100vh); }
+        }
+        
+        @keyframes glitch {
+            0%, 100% { transform: translate(0); }
+            20% { transform: translate(-2px, 2px); }
+            40% { transform: translate(-2px, -2px); }
+            60% { transform: translate(2px, 2px); }
+            80% { transform: translate(2px, -2px); }
+        }
+        
+        @keyframes glitch-text {
+            0%, 100% {
+                clip-path: inset(0 0 0 0);
+                transform: translate(0);
+            }
+            20% {
+                clip-path: inset(20% 0 80% 0);
+                transform: translate(-2px, 2px);
+            }
+            40% {
+                clip-path: inset(60% 0 40% 0);
+                transform: translate(-2px, -2px);
+            }
+            60% {
+                clip-path: inset(30% 0 70% 0);
+                transform: translate(2px, 2px);
+            }
+            80% {
+                clip-path: inset(80% 0 20% 0);
+                transform: translate(2px, -2px);
+            }
+        }
+        
+        @keyframes flicker {
+            0%, 19.999%, 22%, 62.999%, 64%, 64.999%, 70%, 100% {
+                opacity: 1;
+            }
+            20%, 21.999%, 63%, 63.999%, 65%, 69.999% {
+                opacity: 0.4;
+            }
+        }
+        
+        @keyframes signalStatic {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 0.7; }
+        }
+        
+        /* 故障文本容器 */
+        .glitch-wrapper {
+            position: relative;
+            display: inline-block;
+        }
+        
+        /* 霓虹发光文本 */
         h1 {
-            font-size: 2.5rem;
+            font-size: 3.5rem;
             margin-bottom: 1rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            color: #00ff41;
+            text-shadow: 
+                0 0 5px #00ff41,
+                0 0 10px #00ff41,
+                0 0 20px #00ff41,
+                0 0 40px #00ff41,
+                0 0 80px #00ff41;
+            position: relative;
+            animation: flicker 2s infinite;
         }
+        
+        /* 多层故障文本效果 */
+        h1::before,
+        h1::after {
+            content: 'Welcome to MarkX';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0.8;
+            animation: glitch-text 3s infinite;
+        }
+        
+        h1::before {
+            color: #00ffff;
+            z-index: -1;
+            animation-delay: -0.1s;
+            text-shadow: 
+                0 0 5px #00ffff,
+                0 0 10px #00ffff,
+                0 0 20px #00ffff;
+        }
+        
+        h1::after {
+            color: #ff00ff;
+            z-index: -2;
+            animation-delay: 0.1s;
+            text-shadow: 
+                0 0 5px #ff00ff,
+                0 0 10px #ff00ff,
+                0 0 20px #ff00ff;
+        }
+        
+        /* 副标题样式 */
         p {
             font-size: 1.2rem;
             margin-bottom: 2rem;
+            font-family: 'Roboto Mono', monospace;
+            color: #00ffff;
+            text-shadow: 0 0 10px #00ffff;
+            letter-spacing: 2px;
+            position: relative;
+            z-index: 2;
+            animation: flicker 3s infinite;
         }
+        
+        /* 按钮样式 - 简洁赛博朋克风格 */
         .btn {
             display: inline-block;
-            padding: 12px 24px;
-            background-color: rgba(255, 255, 255, 0.2);
-            color: white;
+            padding: 15px 30px;
+            background-color: rgba(0, 255, 65, 0.05);
+            color: #00ff41;
             text-decoration: none;
-            border-radius: 5px;
-            font-size: 1.1rem;
-            transition: background-color 0.3s ease;
-            border: 1px solid rgba(255, 255, 255, 0.3);
+            border: 2px solid #00ff41;
+            font-size: 1.2rem;
+            font-weight: 900;
+            font-family: 'Orbitron', sans-serif;
+            text-transform: uppercase;
+            letter-spacing: 3px;
             cursor: pointer;
             margin: 0.5rem;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            box-shadow: 
+                0 0 15px #00ff41,
+                inset 0 0 15px rgba(0, 255, 65, 0.1);
+            text-shadow: 0 0 10px #00ff41;
         }
+        
         .btn:hover {
-            background-color: rgba(255, 255, 255, 0.3);
+            color: #000000;
+            background-color: #00ff41;
+            box-shadow: 
+                0 0 30px #00ff41,
+                0 0 60px #00ff41,
+                inset 0 0 20px rgba(0, 255, 65, 0.3);
+            transform: translateY(-3px) scale(1.05);
+            text-shadow: 0 0 20px #000000;
         }
+        
+        .btn:active {
+            transform: translateY(-1px) scale(0.98);
+            box-shadow: 
+                0 0 20px #00ff41,
+                0 0 40px #00ff41;
+        }
+
+        
+        /* URL 显示样式 - 终端窗口风格 */
         .url-display {
-            background-color: rgba(255, 255, 255, 0.1);
-            padding: 10px 20px;
-            border-radius: 5px;
-            margin: 1rem 0;
-            font-family: 'Courier New', monospace;
-            font-size: 1rem;
+            background-color: rgba(0, 0, 0, 0.8);
+            padding: 20px 30px;
+            margin: 2rem 0;
+            font-family: 'Roboto Mono', monospace;
+            font-size: 1.2rem;
+            font-weight: 700;
             word-break: break-all;
             max-width: 80%;
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            border: 2px solid #00ff41;
+            color: #00ff41;
+            text-shadow: 0 0 10px #00ff41;
+            box-shadow: 0 0 20px rgba(0, 255, 65, 0.3);
+            position: relative;
+            z-index: 2;
+            animation: signalStatic 4s infinite;
         }
+        
+        /* 终端窗口标题栏 */
+        .url-display::before {
+            content: 'URL://MARKX.TERMINAL';
+            position: absolute;
+            top: -25px;
+            left: 0;
+            right: 0;
+            background-color: rgba(0, 255, 65, 0.2);
+            padding: 3px;
+            font-size: 0.8rem;
+            font-weight: 400;
+            border: 2px solid #00ff41;
+            border-bottom: none;
+            box-shadow: 0 -2px 10px rgba(0, 255, 65, 0.3);
+        }
+        
+        /* 成功消息样式 - 故障提示 */
         .success-message {
-            background-color: rgba(76, 175, 80, 0.8);
-            color: white;
-            padding: 10px 20px;
-            border-radius: 5px;
-            margin-top: 1rem;
+            background-color: rgba(0, 255, 65, 0.1);
+            color: #00ff41;
+            padding: 12px 25px;
+            border: 2px solid #00ff41;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-top: 1.5rem;
             opacity: 0;
-            transition: opacity 0.3s ease;
+            transition: all 0.3s ease;
+            text-shadow: 0 0 15px #00ff41;
+            box-shadow: 0 0 20px #00ff41;
+            position: relative;
+            z-index: 2;
+            animation: glitch 0.3s infinite;
         }
+        
         .success-message.show {
             opacity: 1;
         }
+        
+        /* GitHub 图标样式 - 赛博朋克风格 */
+        .github-corner {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            transition: all 0.3s ease;
+            z-index: 100;
+        }
+        
+        .github-corner:hover {
+            transform: scale(1.2) rotate(10deg);
+            filter: drop-shadow(0 0 15px #00ff41);
+        }
+        
+        .github-corner svg {
+            fill: #00ff41;
+            stroke: #00ff41;
+            stroke-width: 2;
+            transition: all 0.3s ease;
+            animation: signalStatic 3s infinite;
+        }
+        
+        .github-corner:hover svg {
+            fill: #00ffff;
+            stroke: #00ffff;
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2.5rem;
+                letter-spacing: 2px;
+            }
+            
+            p {
+                font-size: 1rem;
+                padding: 0 20px;
+            }
+            
+            .url-display {
+                font-size: 0.9rem;
+                padding: 15px 20px;
+                margin: 1.5rem 0;
+            }
+            
+            .url-display::before {
+                font-size: 0.7rem;
+                top: -20px;
+            }
+            
+            .btn {
+                padding: 10px 20px;
+                font-size: 1rem;
+            }
+        }
     </style>
 </head>
-<body>
+<body class="noise">
     <!-- GitHub 徽标 -->
     <a href="https://github.com/steamedbread2333/MarkX" target="_blank" rel="noopener noreferrer" class="github-corner" aria-label="View source on GitHub">
-        <svg height="32" aria-hidden="true" viewBox="0 0 24 24" version="1.1" width="32" data-view-component="true" class="octicon octicon-mark-github v-align-middle">
+        <svg height="40" aria-hidden="true" viewBox="0 0 24 24" version="1.1" width="40" data-view-component="true" class="octicon octicon-mark-github v-align-middle">
             <path d="M12 1C5.923 1 1 5.923 1 12c0 4.867 3.149 8.979 7.521 10.436.55.096.756-.233.756-.522 0-.262-.013-1.128-.013-2.049-2.764.509-3.479-.674-3.699-1.292-.124-.317-.66-1.293-1.127-1.554-.385-.207-.936-.715-.014-.729.866-.014 1.485.797 1.691 1.128.99 1.663 2.571 1.196 3.204.907.096-.715.385-1.196.701-1.471-2.448-.275-5.005-1.224-5.005-5.432 0-1.196.426-2.186 1.128-2.956-.111-.275-.496-1.402.11-2.915 0 0 .921-.288 3.024 1.128a10.193 10.193 0 0 1 2.75-.371c.936 0 1.871.123 2.75.371 2.104-1.43 3.025-1.128 3.025-1.128.605 1.513.221 2.64.111 2.915.701.77 1.127 1.747 1.127 2.956 0 4.222-2.571 5.157-5.019 5.432.399.344.743 1.004.743 2.035 0 1.471-.014 2.654-.014 3.025 0 .289.206.632.756.522C19.851 20.979 23 16.854 23 12c0-6.077-4.922-11-11-11Z"></path>
         </svg>
     </a>
     
-    <h1>Welcome to MarkX</h1>
+    <div class="glitch-wrapper">
+        <h1>Welcome to MarkX</h1>
+    </div>
     <p>专业的 Markdown 编辑器，支持 Mermaid 图表和 KaTeX 数学公式</p>
     
     <div class="url-display" id="urlDisplay">https://steamedbread2333.github.io/MarkX/</div>
@@ -100,6 +402,12 @@
                 // 显示成功消息
                 successMessage.classList.add('show');
                 
+                // 添加随机故障效果
+                successMessage.style.animation = 'glitch 0.2s infinite';
+                setTimeout(() => {
+                    successMessage.style.animation = 'signalStatic 5s infinite';
+                }, 1000);
+                
                 // 3秒后隐藏成功消息
                 setTimeout(() => {
                     successMessage.classList.remove('show');
@@ -107,6 +415,19 @@
             } catch (err) {
                 console.error('复制失败:', err);
             }
+        });
+        
+        // 页面加载时的动画效果
+        window.addEventListener('load', () => {
+            const elements = document.querySelectorAll('h1, p, .url-display');
+            elements.forEach((el, index) => {
+                setTimeout(() => {
+                    el.style.animation = 'glitch 0.3s ease-in-out';
+                    setTimeout(() => {
+                        el.style.animation = 'flicker 3s infinite';
+                    }, 300);
+                }, index * 100);
+            });
         });
     </script>
 </body>
