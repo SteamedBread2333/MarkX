@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MarkX - 专业 Markdown 编辑器</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-align: center;
+        }
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+        p {
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+        }
+        .btn {
+            display: inline-block;
+            padding: 12px 24px;
+            background-color: rgba(255, 255, 255, 0.2);
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            font-size: 1.1rem;
+            transition: background-color 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            cursor: pointer;
+            margin: 0.5rem;
+        }
+        .btn:hover {
+            background-color: rgba(255, 255, 255, 0.3);
+        }
+        .url-display {
+            background-color: rgba(255, 255, 255, 0.1);
+            padding: 10px 20px;
+            border-radius: 5px;
+            margin: 1rem 0;
+            font-family: 'Courier New', monospace;
+            font-size: 1rem;
+            word-break: break-all;
+            max-width: 80%;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .success-message {
+            background-color: rgba(76, 175, 80, 0.8);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            margin-top: 1rem;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .success-message.show {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+    <!-- GitHub 徽标 -->
+    <a href="https://github.com/steamedbread2333/MarkX" target="_blank" rel="noopener noreferrer" class="github-corner" aria-label="View source on GitHub">
+        <svg height="32" aria-hidden="true" viewBox="0 0 24 24" version="1.1" width="32" data-view-component="true" class="octicon octicon-mark-github v-align-middle">
+            <path d="M12 1C5.923 1 1 5.923 1 12c0 4.867 3.149 8.979 7.521 10.436.55.096.756-.233.756-.522 0-.262-.013-1.128-.013-2.049-2.764.509-3.479-.674-3.699-1.292-.124-.317-.66-1.293-1.127-1.554-.385-.207-.936-.715-.014-.729.866-.014 1.485.797 1.691 1.128.99 1.663 2.571 1.196 3.204.907.096-.715.385-1.196.701-1.471-2.448-.275-5.005-1.224-5.005-5.432 0-1.196.426-2.186 1.128-2.956-.111-.275-.496-1.402.11-2.915 0 0 .921-.288 3.024 1.128a10.193 10.193 0 0 1 2.75-.371c.936 0 1.871.123 2.75.371 2.104-1.43 3.025-1.128 3.025-1.128.605 1.513.221 2.64.111 2.915.701.77 1.127 1.747 1.127 2.956 0 4.222-2.571 5.157-5.019 5.432.399.344.743 1.004.743 2.035 0 1.471-.014 2.654-.014 3.025 0 .289.206.632.756.522C19.851 20.979 23 16.854 23 12c0-6.077-4.922-11-11-11Z"></path>
+        </svg>
+    </a>
+    
+    <h1>Welcome to MarkX</h1>
+    <p>专业的 Markdown 编辑器，支持 Mermaid 图表和 KaTeX 数学公式</p>
+    
+    <div class="url-display" id="urlDisplay">https://steamedbread2333.github.io/MarkX/</div>
+    
+    <div>
+        <button class="btn" id="copyBtn">一键复制链接</button>
+        <a href="https://steamedbread2333.github.io/MarkX/" class="btn" target="_blank">立即访问 MarkX</a>
+    </div>
+    
+    <div class="success-message" id="successMessage">链接已复制成功！</div>
+
+    <script>
+        // 一键复制功能
+        const copyBtn = document.getElementById('copyBtn');
+        const urlDisplay = document.getElementById('urlDisplay');
+        const successMessage = document.getElementById('successMessage');
+        const url = 'https://steamedbread2333.github.io/MarkX/';
+        
+        copyBtn.addEventListener('click', async () => {
+            try {
+                await navigator.clipboard.writeText(url);
+                
+                // 显示成功消息
+                successMessage.classList.add('show');
+                
+                // 3秒后隐藏成功消息
+                setTimeout(() => {
+                    successMessage.classList.remove('show');
+                }, 3000);
+            } catch (err) {
+                console.error('复制失败:', err);
+            }
+        });
+    </script>
+</body>
+</html>
