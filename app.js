@@ -1687,8 +1687,8 @@ function saveFile() {
 /**
  * 智能分页：找到最佳分页点
  * - 文字元素（p, li, span, strong, em 等）不能在中间截断
- * - SVG 如果超过一页高度，允许截断
- * - 其他元素（代码块、表格等）避免在中间分页
+ * - Mermaid 图表、代码块、数学公式块如果超过一页高度，不做分页优化，直接完整显示
+ * - 其他元素（表格、标题等）避免在中间分页
  */
 function findPageBreaks(elements, containerRect, pageHeightPx, scale = 2) {
     const breaks = [0]; // 第一页从0开始（canvas坐标，已缩放）
@@ -1714,14 +1714,18 @@ function findPageBreaks(elements, containerRect, pageHeightPx, scale = 2) {
              !element.matches('pre, table, svg, .mermaid-wrapper, .mermaid-content, .katex-display, h1, h2, h3, h4, h5, h6, blockquote'));
         const isSvg = element.matches('svg') || (element.querySelector && element.querySelector('svg'));
         const isSvgWrapper = element.matches('.mermaid-wrapper, .mermaid-content');
-        const shouldAvoidBreak = element.matches('pre, table, .katex-display, h1, h2, h3, h4, h5, h6, blockquote');
+        // 代码块和数学公式块
+        const isCodeBlock = element.matches('pre');
+        const isMathBlock = element.matches('.katex-display');
+        // 其他不应该被分割的元素
+        const shouldAvoidBreak = element.matches('table, h1, h2, h3, h4, h5, h6, blockquote');
         
         // 计算当前页剩余空间
         const currentPageBottom = currentPageTop + pageHeightPx;
         
         // 如果元素底部超过当前页底部
         if (elementBottom > currentPageBottom) {
-            if (isTextElement && !isSvg && !isSvgWrapper) {
+            if (isTextElement && !isSvg && !isSvgWrapper && !isCodeBlock && !isMathBlock) {
                 // 文字元素：不能在中间截断，必须在元素之前分页
                 if (elementBottom > currentPageBottom) {
                     // 元素底部超过当前页底部，需要在元素之前分页
@@ -1744,18 +1748,28 @@ function findPageBreaks(elements, containerRect, pageHeightPx, scale = 2) {
                         }
                     }
                 }
-            } else if (isSvg || isSvgWrapper) {
-                // SVG：如果超过一页高度，允许截断
-                if (elementTop > currentPageTop) {
-                    // 如果 SVG 顶部不在当前页，先分页到 SVG 顶部
-                    breaks.push(elementTop * scale);
-                    currentPageTop = elementTop;
-                }
-                
-                // SVG 超过一页，允许截断
-                while (elementBottom > currentPageTop + pageHeightPx) {
-                    breaks.push((currentPageTop + pageHeightPx) * scale);
-                    currentPageTop += pageHeightPx;
+            } else if (isSvg || isSvgWrapper || isCodeBlock || isMathBlock) {
+                // Mermaid 图表、代码块、数学公式块的处理逻辑
+                if (elementHeight > pageHeightPx) {
+                    // 元素超过一页高度：不提前分页（不在元素之前分页），但允许截断跨页
+                    // 不添加 elementTop 的分页点，让它从当前位置开始显示
+                    // 但是要添加分页点，让内容可以跨页显示（允许截断）
+                    let pageStart = Math.max(currentPageTop, elementTop);
+                    
+                    // 添加分页点，让内容可以跨页显示
+                    while (elementBottom > pageStart + pageHeightPx) {
+                        breaks.push((pageStart + pageHeightPx) * scale);
+                        pageStart += pageHeightPx;
+                    }
+                    
+                    // 更新 currentPageTop 到元素结束位置
+                    currentPageTop = elementBottom;
+                } else {
+                    // 元素不超过一页高度，但会跨页：在元素之前分页，避免跨页
+                    if (elementTop > currentPageTop) {
+                        breaks.push(elementTop * scale);
+                        currentPageTop = elementTop;
+                    }
                 }
             } else if (shouldAvoidBreak) {
                 // 不应该被分割的元素：在它之前分页
@@ -2017,8 +2031,7 @@ async function exportPDF() {
                 background: #f6f8fa;
                 border-radius: 6px;
                 margin-bottom: 16px;
-                page-break-inside: avoid;
-                break-inside: avoid;
+                /* 允许截断，和 Mermaid 一样的分页逻辑 */
             }
             #pdf-export-wrapper .markdown-body pre code {
                 background: transparent;
@@ -2127,8 +2140,7 @@ async function exportPDF() {
                 border-left: 4px solid #0969da;
                 overflow: visible;
                 text-align: center;
-                page-break-inside: avoid;
-                break-inside: avoid;
+                /* 允许截断，和 Mermaid 一样的分页逻辑 */
             }
             #pdf-export-wrapper .hljs {
                 background: #f6f8fa;
@@ -2370,10 +2382,21 @@ async function exportPDF() {
         // 智能分页：找到最佳分页点
         // 获取所有需要检查的元素（按DOM顺序）
         const allElements = Array.from(contentWrapper.querySelectorAll('*'));
-        // 过滤出有实际内容的元素
+        // 过滤出有实际内容的元素，并排除特殊元素的子元素
         const contentElements = allElements.filter(el => {
             const rect = el.getBoundingClientRect();
-            return rect.height > 0 && rect.width > 0;
+            if (rect.height <= 0 || rect.width <= 0) {
+                return false;
+            }
+            
+            // 排除 pre、.katex-display、.mermaid-wrapper 等元素的子元素
+            // 这些元素应该作为整体处理，不需要单独处理其子元素
+            const isChildOfSpecialElement = el.closest('pre, .katex-display, .mermaid-wrapper, .mermaid-content, .mermaid');
+            if (isChildOfSpecialElement && isChildOfSpecialElement !== el) {
+                return false;
+            }
+            
+            return true;
         });
         
         const canvasScale = 2;
