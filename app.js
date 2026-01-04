@@ -46,10 +46,13 @@ renderer.code = function(code, language) {
     return `<pre><code>${escapeHtml(code)}</code></pre>`;
 };
 
-// 自定义标题渲染 - 添加 ID 用于目录跳转
+// 自定义标题渲染 - 添加 ID 用于目录跳转，并保留空格
 renderer.heading = function(text, level) {
     const id = generateHeadingId(text);
-    return `<h${level} id="${id}">${text}</h${level}>`;
+    // 将标题中的空格转换为 &nbsp; HTML 实体，确保空格被保留
+    // 这样在 PDF 导出时也能正确显示空格
+    const textWithSpaces = text.replace(/ /g, '&nbsp;');
+    return `<h${level} id="${id}">${textWithSpaces}</h${level}>`;
 };
 
 // 配置 Marked 选项
@@ -1682,11 +1685,113 @@ function saveFile() {
 }
 
 /**
- * 导出 PDF
+ * 智能分页：找到最佳分页点
+ * - 文字元素（p, li, span, strong, em 等）不能在中间截断
+ * - SVG 如果超过一页高度，允许截断
+ * - 其他元素（代码块、表格等）避免在中间分页
+ */
+function findPageBreaks(elements, containerRect, pageHeightPx, scale = 2) {
+    const breaks = [0]; // 第一页从0开始（canvas坐标，已缩放）
+    let currentPageTop = 0; // 当前页顶部位置（容器坐标）
+    
+    for (let i = 0; i < elements.length; i++) {
+        const element = elements[i];
+        const rect = element.getBoundingClientRect();
+        const elementTop = rect.top - containerRect.top;
+        const elementHeight = rect.height;
+        const elementBottom = elementTop + elementHeight;
+        const elementWidth = rect.width;
+        
+        // 跳过不可见或高度为0的元素
+        if (elementHeight <= 0 || elementWidth <= 0) {
+            continue;
+        }
+        
+        // 判断元素类型
+        // 文字元素：包含文本内容的块级或行内元素
+        const isTextElement = element.matches('p, li, span, strong, em, a, code:not(pre code), b, i, u, mark, del, ins') ||
+            (element.textContent && element.textContent.trim().length > 0 && 
+             !element.matches('pre, table, svg, .mermaid-wrapper, .mermaid-content, .katex-display, h1, h2, h3, h4, h5, h6, blockquote'));
+        const isSvg = element.matches('svg') || (element.querySelector && element.querySelector('svg'));
+        const isSvgWrapper = element.matches('.mermaid-wrapper, .mermaid-content');
+        const shouldAvoidBreak = element.matches('pre, table, .katex-display, h1, h2, h3, h4, h5, h6, blockquote');
+        
+        // 计算当前页剩余空间
+        const currentPageBottom = currentPageTop + pageHeightPx;
+        
+        // 如果元素底部超过当前页底部
+        if (elementBottom > currentPageBottom) {
+            if (isTextElement && !isSvg && !isSvgWrapper) {
+                // 文字元素：不能在中间截断，必须在元素之前分页
+                if (elementBottom > currentPageBottom) {
+                    // 元素底部超过当前页底部，需要在元素之前分页
+                    if (elementTop > currentPageTop) {
+                        // 元素顶部不在当前页顶部，在元素之前分页
+                        breaks.push(elementTop * scale);
+                        currentPageTop = elementTop;
+                    }
+                    
+                    // 如果文字元素本身超过一页高度，这是极端情况
+                    // 我们仍然不允许截断，让它完整显示在新页
+                    // 如果下一页还是放不下，继续分页（但保持元素完整，不截断）
+                    if (elementHeight > pageHeightPx) {
+                        // 文字元素超过一页，让它完整显示在新页
+                        // 如果下一页还是放不下，继续分页（但保持元素完整）
+                        while (elementBottom > currentPageTop + pageHeightPx) {
+                            // 移动到下一页，但保持元素完整（不截断）
+                            breaks.push((currentPageTop + pageHeightPx) * scale);
+                            currentPageTop += pageHeightPx;
+                        }
+                    }
+                }
+            } else if (isSvg || isSvgWrapper) {
+                // SVG：如果超过一页高度，允许截断
+                if (elementTop > currentPageTop) {
+                    // 如果 SVG 顶部不在当前页，先分页到 SVG 顶部
+                    breaks.push(elementTop * scale);
+                    currentPageTop = elementTop;
+                }
+                
+                // SVG 超过一页，允许截断
+                while (elementBottom > currentPageTop + pageHeightPx) {
+                    breaks.push((currentPageTop + pageHeightPx) * scale);
+                    currentPageTop += pageHeightPx;
+                }
+            } else if (shouldAvoidBreak) {
+                // 不应该被分割的元素：在它之前分页
+                if (elementTop > currentPageTop) {
+                    breaks.push(elementTop * scale);
+                    currentPageTop = elementTop;
+                }
+                
+                // 如果元素仍然超过新页底部，继续分页（但这种情况应该很少）
+                while (elementBottom > currentPageTop + pageHeightPx) {
+                    breaks.push((currentPageTop + pageHeightPx) * scale);
+                    currentPageTop += pageHeightPx;
+                }
+            } else {
+                // 其他元素：在当前页底部分页
+                breaks.push(currentPageBottom * scale);
+                currentPageTop = currentPageBottom;
+                
+                // 如果元素仍然超过新页底部，继续分页
+                while (elementBottom > currentPageTop + pageHeightPx) {
+                    breaks.push((currentPageTop + pageHeightPx) * scale);
+                    currentPageTop += pageHeightPx;
+                }
+            }
+        }
+    }
+    
+    return breaks;
+}
+
+/**
+ * 导出 PDF - 使用 jsPDF + html2canvas 实现智能分页
  */
 async function exportPDF() {
-    // 检查 html2pdf 库是否已加载
-    if (typeof html2pdf === 'undefined') {
+    // 检查库是否已加载
+    if (typeof window.jspdf === 'undefined' || typeof html2canvas === 'undefined') {
         setStatus('PDF 导出库未加载，请刷新页面重试', 5000);
         return;
     }
@@ -1707,33 +1812,38 @@ async function exportPDF() {
         const toolbars = previewClone.querySelectorAll('.mermaid-export-toolbar');
         toolbars.forEach(toolbar => toolbar.remove());
         
-        // 修复标题中的空格：保留多个连续空格，但不影响换行
+        // 确保标题中的空格被保留（标题在渲染时已经转换为 &nbsp;，这里确保 HTML 中确实有 &nbsp;）
         const headings = previewClone.querySelectorAll('h1, h2, h3, h4, h5, h6');
         headings.forEach(heading => {
-            // 遍历所有文本节点，处理空格
-            const walker = document.createTreeWalker(
-                heading,
-                NodeFilter.SHOW_TEXT,
-                null,
-                false
-            );
+            // 设置 white-space 样式，确保空格被保留
+            heading.style.whiteSpace = 'pre-wrap';
             
-            const textNodes = [];
-            let node;
-            while (node = walker.nextNode()) {
-                textNodes.push(node);
-            }
-            
-            textNodes.forEach(textNode => {
-                const originalText = textNode.textContent;
-                // 将多个连续空格中的第一个保留为普通空格（可换行），其余转换为不换行空格
-                const fixedText = originalText.replace(/ {2,}/g, (match) => {
-                    return ' ' + '\u00A0'.repeat(match.length - 1);
-                });
-                if (fixedText !== originalText) {
-                    textNode.textContent = fixedText;
+            // 直接检查 innerHTML，如果还有普通空格，转换为 &nbsp;
+            const originalHTML = heading.innerHTML;
+            // 检查是否包含普通空格（不包括已经是 &nbsp; 的情况）
+            // 使用正则表达式匹配不在 HTML 标签内的普通空格
+            if (originalHTML.includes(' ') && !originalHTML.match(/&nbsp;/)) {
+                // 如果 innerHTML 中有普通空格且没有 &nbsp;，进行转换
+                // 安全地替换文本内容中的空格（不破坏 HTML 标签）
+                let newHTML = '';
+                let inTag = false;
+                for (let i = 0; i < originalHTML.length; i++) {
+                    const char = originalHTML[i];
+                    if (char === '<') {
+                        inTag = true;
+                        newHTML += char;
+                    } else if (char === '>') {
+                        inTag = false;
+                        newHTML += char;
+                    } else if (char === ' ' && !inTag) {
+                        // 不在标签内，替换空格为 &nbsp;
+                        newHTML += '&nbsp;';
+                    } else {
+                        newHTML += char;
+                    }
                 }
-            });
+                heading.innerHTML = newHTML;
+            }
         });
         
         // 确保Mermaid SVG被正确包含并保持原始尺寸
@@ -1853,7 +1963,7 @@ async function exportPDF() {
                 font-weight: 600;
                 line-height: 1.25;
                 color: #24292f;
-                white-space: normal;
+                white-space: pre-wrap !important;
                 word-wrap: break-word;
                 overflow-wrap: break-word;
             }
@@ -2093,67 +2203,225 @@ async function exportPDF() {
             contentWrapper.scrollHeight
         );
         
-        // 配置 PDF 选项
-        const opt = {
-            margin: [10, 10, 10, 10],
-            filename: AppState.currentFileName.replace('.md', '.pdf'),
-            image: { type: 'jpeg', quality: 0.98 },
-            html2canvas: { 
-                scale: 2,
-                useCORS: true,
-                logging: false,
-                backgroundColor: '#ffffff',
-                width: 794,
-                height: finalScrollHeight + 200, // 额外200px确保完整捕获
-                allowTaint: false,
-                scrollX: 0,
-                scrollY: 0,
-                onclone: (clonedDoc) => {
-                    // 确保克隆文档中的SVG可见并保持正确尺寸
-                    const clonedSvgs = clonedDoc.querySelectorAll('svg');
-                    clonedSvgs.forEach(svg => {
-                        svg.style.display = 'block';
-                        svg.style.visibility = 'visible';
-                        svg.style.opacity = '1';
-                        svg.style.maxWidth = '100%';
-                        svg.style.width = 'auto';
-                        svg.style.height = 'auto';
-                        svg.style.margin = '0 auto';
-                        
-                        // 确保SVG内的元素也可见
-                        const elements = svg.querySelectorAll('*');
-                        elements.forEach(el => {
-                            if (el.style) {
-                                el.style.visibility = 'visible';
-                                el.style.opacity = '1';
-                            }
-                        });
-                    });
-                    
-                    // 确保克隆文档的容器高度正确
-                    const clonedContainer = clonedDoc.getElementById('pdf-export-wrapper');
-                    if (clonedContainer) {
-                        clonedContainer.style.height = finalScrollHeight + 200 + 'px';
-                        clonedContainer.style.minHeight = finalScrollHeight + 200 + 'px';
+        // A4 纸张尺寸（毫米）
+        const A4_WIDTH_MM = 210;
+        const A4_HEIGHT_MM = 297;
+        const MARGIN_MM = 10;
+        const CONTENT_WIDTH_MM = A4_WIDTH_MM - MARGIN_MM * 2;
+        const CONTENT_HEIGHT_MM = A4_HEIGHT_MM - MARGIN_MM * 2;
+        
+        // 计算像素到毫米的转换比例
+        const mmToPx = (mm) => mm / 0.264583; // 1mm = 3.779527559px (在96dpi下)
+        const pageHeightPx = mmToPx(CONTENT_HEIGHT_MM);
+        const pageWidthPx = mmToPx(CONTENT_WIDTH_MM);
+        
+        // 创建 PDF 文档
+        const { jsPDF } = window.jspdf;
+        const pdf = new jsPDF({
+            unit: 'mm',
+            format: 'a4',
+            orientation: 'portrait',
+            compress: true
+        });
+        
+        // 在渲染前，再次检查标题的空格是否被正确保留
+        const headingsBeforeRender = pdfContainer.querySelectorAll('h1, h2, h3, h4, h5, h6');
+        headingsBeforeRender.forEach(heading => {
+            const html = heading.innerHTML;
+            // 如果 HTML 中还有普通空格，强制转换为 &nbsp;
+            if (html.includes(' ') && !html.match(/&nbsp;/)) {
+                let newHTML = '';
+                let inTag = false;
+                for (let i = 0; i < html.length; i++) {
+                    const char = html[i];
+                    if (char === '<') {
+                        inTag = true;
+                        newHTML += char;
+                    } else if (char === '>') {
+                        inTag = false;
+                        newHTML += char;
+                    } else if (char === ' ' && !inTag) {
+                        newHTML += '&nbsp;';
+                    } else {
+                        newHTML += char;
                     }
                 }
-            },
-            jsPDF: { 
-                unit: 'mm', 
-                format: 'a4', 
-                orientation: 'portrait',
-                compress: true
-            },
-            pagebreak: { 
-                mode: ['css', 'avoid-all'],
-                before: '.page-break-before',
-                after: '.page-break-after',
-                avoid: ['.mermaid-wrapper', '.mermaid', 'pre', 'table', '.katex-display', 'h1', 'h2', 'h3']
+                heading.innerHTML = newHTML;
             }
-        };
+        });
         
-        // 生成 PDF
-        await html2pdf().set(opt).from(pdfContainer).save();
+        // 使用 html2canvas 一次性渲染整个内容
+        const canvas = await html2canvas(pdfContainer, {
+            scale: 2,
+            useCORS: true,
+            logging: false,
+            backgroundColor: '#ffffff',
+            width: pdfContainer.scrollWidth,
+            height: finalScrollHeight,
+            allowTaint: false,
+            scrollX: 0,
+            scrollY: 0,
+            windowWidth: pdfContainer.scrollWidth,
+            windowHeight: finalScrollHeight,
+            onclone: (clonedDoc) => {
+                // 确保克隆文档中的SVG可见并保持正确尺寸
+                const clonedSvgs = clonedDoc.querySelectorAll('svg');
+                clonedSvgs.forEach(svg => {
+                    svg.style.display = 'block';
+                    svg.style.visibility = 'visible';
+                    svg.style.opacity = '1';
+                    svg.style.maxWidth = '100%';
+                    svg.style.width = 'auto';
+                    svg.style.height = 'auto';
+                    svg.style.margin = '0 auto';
+                    
+                    const elements = svg.querySelectorAll('*');
+                    elements.forEach(el => {
+                        if (el.style) {
+                            el.style.visibility = 'visible';
+                            el.style.opacity = '1';
+                        }
+                    });
+                });
+                
+                // 确保克隆文档中的标题空格被保留
+                // 使用更强制的方法：将标题转换为 SVG 文本，确保空格被保留
+                const clonedHeadings = clonedDoc.querySelectorAll('h1, h2, h3, h4, h5, h6');
+                clonedHeadings.forEach(heading => {
+                    // 设置 white-space 样式，确保空格被保留
+                    heading.style.whiteSpace = 'pre-wrap';
+                    
+                    // 方法1: 确保 innerHTML 中的空格都是 &nbsp;
+                    const originalHTML = heading.innerHTML;
+                    if (originalHTML.includes(' ')) {
+                        // 安全地替换文本内容中的空格（不破坏 HTML 标签）
+                        let newHTML = '';
+                        let inTag = false;
+                        for (let i = 0; i < originalHTML.length; i++) {
+                            const char = originalHTML[i];
+                            if (char === '<') {
+                                inTag = true;
+                                newHTML += char;
+                            } else if (char === '>') {
+                                inTag = false;
+                                newHTML += char;
+                            } else if (char === ' ' && !inTag) {
+                                // 不在标签内，替换空格为 &nbsp;
+                                newHTML += '&nbsp;';
+                            } else {
+                                newHTML += char;
+                            }
+                        }
+                        heading.innerHTML = newHTML;
+                    }
+                    
+                    // 方法2: 使用 CSS letter-spacing 作为备用方案
+                    // 如果 html2canvas 仍然忽略空格，letter-spacing 可以增加字符间距
+                    const computedStyle = clonedDoc.defaultView.getComputedStyle(heading);
+                    const fontSize = parseFloat(computedStyle.fontSize) || 16;
+                    // 设置 letter-spacing 为字体大小的 10%，这样可以增加字符间距
+                    heading.style.letterSpacing = (fontSize * 0.1) + 'px';
+                    
+                    // 方法3: 遍历所有文本节点，确保空格都被转换为 &nbsp;
+                    const walker = clonedDoc.createTreeWalker(
+                        heading,
+                        NodeFilter.SHOW_TEXT,
+                        null,
+                        false
+                    );
+                    
+                    const textNodes = [];
+                    let node;
+                    while (node = walker.nextNode()) {
+                        textNodes.push(node);
+                    }
+                    
+                    textNodes.forEach(textNode => {
+                        const originalText = textNode.textContent;
+                        // 检查文本节点中是否还有普通空格
+                        if (originalText.includes(' ') && originalText.trim().length > 0) {
+                            // 将文本节点替换为包含 &nbsp; 的 HTML
+                            const tempSpan = clonedDoc.createElement('span');
+                            tempSpan.textContent = originalText;
+                            const escapedHTML = tempSpan.innerHTML;
+                            const fixedHTML = escapedHTML.replace(/ /g, '&nbsp;');
+                            
+                            // 创建新的元素来替换文本节点
+                            const wrapper = clonedDoc.createElement('span');
+                            wrapper.innerHTML = fixedHTML;
+                            
+                            // 替换文本节点
+                            if (textNode.parentNode) {
+                                textNode.parentNode.replaceChild(wrapper, textNode);
+                            }
+                        }
+                    });
+                });
+                
+                // 确保克隆文档的容器高度正确
+                const clonedContainer = clonedDoc.getElementById('pdf-export-wrapper');
+                if (clonedContainer) {
+                    clonedContainer.style.height = finalScrollHeight + 'px';
+                    clonedContainer.style.minHeight = finalScrollHeight + 'px';
+                }
+            }
+        });
+        
+        // 智能分页：找到最佳分页点
+        // 获取所有需要检查的元素（按DOM顺序）
+        const allElements = Array.from(contentWrapper.querySelectorAll('*'));
+        // 过滤出有实际内容的元素
+        const contentElements = allElements.filter(el => {
+            const rect = el.getBoundingClientRect();
+            return rect.height > 0 && rect.width > 0;
+        });
+        
+        const canvasScale = 2;
+        const pageBreaks = findPageBreaks(contentElements, containerRect, pageHeightPx, canvasScale);
+        
+        // 计算总高度和宽度
+        const totalHeightPx = canvas.height;
+        const totalWidthPx = canvas.width;
+        
+        // 逐页添加内容
+        for (let pageIndex = 0; pageIndex < pageBreaks.length; pageIndex++) {
+            if (pageIndex > 0) {
+                pdf.addPage();
+            }
+            
+            const pageStartY = pageBreaks[pageIndex];
+            const pageEndY = pageIndex < pageBreaks.length - 1 
+                ? pageBreaks[pageIndex + 1] 
+                : totalHeightPx;
+            const pageHeight = pageEndY - pageStartY;
+            
+            // 创建临时canvas来裁剪当前页的内容
+            const pageCanvas = document.createElement('canvas');
+            pageCanvas.width = totalWidthPx;
+            pageCanvas.height = pageHeight;
+            const pageCtx = pageCanvas.getContext('2d');
+            
+            // 从原始canvas中提取当前页的内容
+            pageCtx.drawImage(
+                canvas,
+                0, pageStartY,              // 源位置
+                totalWidthPx, pageHeight,   // 源尺寸
+                0, 0,                        // 目标位置
+                totalWidthPx, pageHeight     // 目标尺寸
+            );
+            
+            // 将canvas转换为图片并添加到PDF
+            const imgData = pageCanvas.toDataURL('image/jpeg', 0.95);
+            
+            // 计算在PDF中的尺寸（保持宽高比）
+            const imgWidthMM = CONTENT_WIDTH_MM;
+            const imgHeightMM = (pageHeight / totalWidthPx) * CONTENT_WIDTH_MM;
+            
+            pdf.addImage(imgData, 'JPEG', MARGIN_MM, MARGIN_MM, imgWidthMM, imgHeightMM);
+        }
+        
+        // 保存PDF
+        pdf.save(AppState.currentFileName.replace('.md', '.pdf'));
         
         // 清理临时容器
         if (document.body.contains(pdfContainer)) {
