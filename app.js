@@ -1682,6 +1682,498 @@ function saveFile() {
 }
 
 /**
+ * 导出 PDF
+ */
+async function exportPDF() {
+    // 检查 html2pdf 库是否已加载
+    if (typeof html2pdf === 'undefined') {
+        setStatus('PDF 导出库未加载，请刷新页面重试', 5000);
+        return;
+    }
+    
+    // 检查预览区是否有内容
+    if (!elements.preview || !elements.preview.innerHTML.trim()) {
+        setStatus('预览区为空，请先编辑内容', 3000);
+        return;
+    }
+    
+    setStatus('正在生成 PDF，请稍候...');
+    
+    try {
+        // 克隆预览区内容（深度克隆，包括SVG）
+        const previewClone = elements.preview.cloneNode(true);
+        
+        // 移除导出工具栏
+        const toolbars = previewClone.querySelectorAll('.mermaid-export-toolbar');
+        toolbars.forEach(toolbar => toolbar.remove());
+        
+        // 修复标题中的空格：保留多个连续空格，但不影响换行
+        const headings = previewClone.querySelectorAll('h1, h2, h3, h4, h5, h6');
+        headings.forEach(heading => {
+            // 遍历所有文本节点，处理空格
+            const walker = document.createTreeWalker(
+                heading,
+                NodeFilter.SHOW_TEXT,
+                null,
+                false
+            );
+            
+            const textNodes = [];
+            let node;
+            while (node = walker.nextNode()) {
+                textNodes.push(node);
+            }
+            
+            textNodes.forEach(textNode => {
+                const originalText = textNode.textContent;
+                // 将多个连续空格中的第一个保留为普通空格（可换行），其余转换为不换行空格
+                const fixedText = originalText.replace(/ {2,}/g, (match) => {
+                    return ' ' + '\u00A0'.repeat(match.length - 1);
+                });
+                if (fixedText !== originalText) {
+                    textNode.textContent = fixedText;
+                }
+            });
+        });
+        
+        // 确保Mermaid SVG被正确包含并保持原始尺寸
+        // 检查并修复Mermaid SVG的显示
+        const mermaidWrappers = previewClone.querySelectorAll('.mermaid-wrapper');
+        const originalWrappers = elements.preview.querySelectorAll('.mermaid-wrapper');
+        
+        mermaidWrappers.forEach((wrapper, index) => {
+            const svg = wrapper.querySelector('svg');
+            if (svg && originalWrappers[index]) {
+                const originalSvg = originalWrappers[index].querySelector('svg');
+                if (originalSvg) {
+                    // 获取原始SVG的实际渲染尺寸
+                    const originalRect = originalSvg.getBoundingClientRect();
+                    const originalWidth = originalSvg.getAttribute('width');
+                    const originalHeight = originalSvg.getAttribute('height');
+                    const originalViewBox = originalSvg.getAttribute('viewBox');
+                    
+                    // 如果原始SVG有明确的宽度和高度，使用它们
+                    if (originalWidth && originalHeight) {
+                        svg.setAttribute('width', originalWidth);
+                        svg.setAttribute('height', originalHeight);
+                    } else if (originalViewBox) {
+                        // 如果有viewBox，使用viewBox计算尺寸
+                        const viewBoxValues = originalViewBox.split(/\s+|,/).filter(v => v);
+                        if (viewBoxValues.length >= 4) {
+                            const vbWidth = parseFloat(viewBoxValues[2]);
+                            const vbHeight = parseFloat(viewBoxValues[3]);
+                            if (vbWidth > 0 && vbHeight > 0) {
+                                // 保持原始渲染尺寸比例
+                                const scale = Math.min(originalRect.width / vbWidth, originalRect.height / vbHeight);
+                                svg.setAttribute('width', (vbWidth * scale) + 'px');
+                                svg.setAttribute('height', (vbHeight * scale) + 'px');
+                            }
+                        }
+                    } else if (originalRect.width > 0 && originalRect.height > 0) {
+                        // 使用实际渲染尺寸
+                        svg.setAttribute('width', originalRect.width + 'px');
+                        svg.setAttribute('height', originalRect.height + 'px');
+                    }
+                    
+                    // 确保viewBox被保留
+                    if (originalViewBox) {
+                        svg.setAttribute('viewBox', originalViewBox);
+                    }
+                }
+                
+                // 确保SVG有正确的样式，但保持原始尺寸比例
+                svg.style.display = 'block';
+                svg.style.maxWidth = '100%';
+                svg.style.width = svg.getAttribute('width') || 'auto';
+                svg.style.height = svg.getAttribute('height') || 'auto';
+                svg.style.margin = '0 auto';
+                
+                // 确保SVG内容可见
+                const paths = svg.querySelectorAll('path, circle, rect, line, polygon, polyline, text');
+                paths.forEach(el => {
+                    if (!el.getAttribute('fill') && !el.getAttribute('stroke')) {
+                        el.setAttribute('fill', '#24292f');
+                    }
+                });
+            }
+        });
+        
+        // 创建独立的PDF导出容器
+        const pdfContainer = document.createElement('div');
+        pdfContainer.id = 'pdf-export-wrapper';
+        pdfContainer.style.cssText = `
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 794px;
+            padding: 40px;
+            background-color: #ffffff;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif;
+            font-size: 14px;
+            line-height: 1.6;
+            color: #24292f;
+            z-index: 99999;
+            overflow: visible;
+            box-sizing: border-box;
+        `;
+        
+        // 创建内容包装器
+        const contentWrapper = document.createElement('div');
+        contentWrapper.className = 'markdown-body';
+        contentWrapper.style.cssText = `
+            width: 100%;
+            margin: 0;
+            padding: 0;
+            color: #24292f;
+            line-height: 1.6;
+            font-size: 14px;
+        `;
+        contentWrapper.innerHTML = previewClone.innerHTML;
+        
+        // 添加完整的样式表
+        const styleSheet = document.createElement('style');
+        styleSheet.textContent = `
+            #pdf-export-wrapper {
+                font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif;
+            }
+            #pdf-export-wrapper .markdown-body {
+                color: #24292f;
+                line-height: 1.6;
+                font-size: 14px;
+                white-space: normal;
+            }
+            #pdf-export-wrapper .markdown-body h1,
+            #pdf-export-wrapper .markdown-body h2,
+            #pdf-export-wrapper .markdown-body h3,
+            #pdf-export-wrapper .markdown-body h4,
+            #pdf-export-wrapper .markdown-body h5,
+            #pdf-export-wrapper .markdown-body h6 {
+                margin-top: 24px;
+                margin-bottom: 16px;
+                font-weight: 600;
+                line-height: 1.25;
+                color: #24292f;
+                white-space: normal;
+                word-wrap: break-word;
+                overflow-wrap: break-word;
+            }
+            #pdf-export-wrapper .markdown-body h1 {
+                font-size: 2em;
+                border-bottom: 1px solid #d0d7de;
+                padding-bottom: 0.3em;
+            }
+            #pdf-export-wrapper .markdown-body h2 {
+                font-size: 1.5em;
+                border-bottom: 1px solid #d0d7de;
+                padding-bottom: 0.3em;
+            }
+            #pdf-export-wrapper .markdown-body h3 { font-size: 1.25em; }
+            #pdf-export-wrapper .markdown-body h4 { font-size: 1em; }
+            #pdf-export-wrapper .markdown-body h5 { font-size: 0.875em; }
+            #pdf-export-wrapper .markdown-body h6 { font-size: 0.85em; color: #57606a; }
+            #pdf-export-wrapper .markdown-body p {
+                margin-top: 0;
+                margin-bottom: 16px;
+                color: #24292f;
+                white-space: pre-wrap;
+            }
+            #pdf-export-wrapper .markdown-body a {
+                color: #0969da;
+                text-decoration: none;
+            }
+            #pdf-export-wrapper .markdown-body strong {
+                font-weight: 600;
+            }
+            #pdf-export-wrapper .markdown-body em {
+                font-style: italic;
+            }
+            #pdf-export-wrapper .markdown-body code {
+                padding: 0.2em 0.4em;
+                margin: 0;
+                font-size: 85%;
+                background: #f6f8fa;
+                border-radius: 6px;
+                font-family: "SF Mono", Monaco, "Cascadia Code", "Roboto Mono", Consolas, "Courier New", monospace;
+                color: #24292f;
+            }
+            #pdf-export-wrapper .markdown-body pre {
+                padding: 16px;
+                overflow: visible;
+                overflow-wrap: break-word;
+                word-wrap: break-word;
+                white-space: pre-wrap;
+                font-size: 85%;
+                line-height: 1.45;
+                background: #f6f8fa;
+                border-radius: 6px;
+                margin-bottom: 16px;
+                page-break-inside: avoid;
+                break-inside: avoid;
+            }
+            #pdf-export-wrapper .markdown-body pre code {
+                background: transparent;
+                padding: 0;
+                margin: 0;
+                font-size: 100%;
+                border-radius: 0;
+                white-space: pre-wrap;
+                word-wrap: break-word;
+                color: #24292f;
+            }
+            #pdf-export-wrapper .markdown-body blockquote {
+                margin: 0 0 16px 0;
+                padding: 0 1em;
+                color: #57606a;
+                border-left: 4px solid #d0d7de;
+                white-space: pre-wrap;
+            }
+            #pdf-export-wrapper .markdown-body ul,
+            #pdf-export-wrapper .markdown-body ol {
+                padding-left: 2em;
+                margin-bottom: 16px;
+            }
+            #pdf-export-wrapper .markdown-body li {
+                margin-bottom: 0.25em;
+                color: #24292f;
+                white-space: pre-wrap;
+            }
+            #pdf-export-wrapper .markdown-body table {
+                border-spacing: 0;
+                border-collapse: collapse;
+                margin-bottom: 16px;
+                width: 100%;
+                page-break-inside: avoid;
+                break-inside: avoid;
+            }
+            #pdf-export-wrapper .markdown-body table th,
+            #pdf-export-wrapper .markdown-body table td {
+                padding: 6px 13px;
+                border: 1px solid #d0d7de;
+            }
+            #pdf-export-wrapper .markdown-body table th {
+                font-weight: 600;
+                background: #f6f8fa;
+            }
+            #pdf-export-wrapper .markdown-body table tr {
+                background: #ffffff;
+            }
+            #pdf-export-wrapper .markdown-body table tr:nth-child(2n) {
+                background: #f6f8fa;
+            }
+            #pdf-export-wrapper .markdown-body img {
+                max-width: 100%;
+                height: auto;
+                border-radius: 6px;
+            }
+            #pdf-export-wrapper .markdown-body hr {
+                height: 0.25em;
+                padding: 0;
+                margin: 24px 0;
+                background-color: #d0d7de;
+                border: 0;
+            }
+            #pdf-export-wrapper .mermaid-wrapper {
+                margin: 24px 0;
+                page-break-inside: avoid;
+                break-inside: avoid;
+                overflow: visible;
+            }
+            #pdf-export-wrapper .mermaid {
+                page-break-inside: avoid;
+                break-inside: avoid;
+                overflow: visible;
+                text-align: center;
+                margin: 24px 0;
+                padding: 0;
+                background: #f6f8fa;
+                border-radius: 8px;
+            }
+            #pdf-export-wrapper .mermaid-content {
+                padding: 16px;
+                overflow: visible;
+            }
+            #pdf-export-wrapper .mermaid-content svg {
+                display: block !important;
+                max-width: 100% !important;
+                width: auto !important;
+                height: auto !important;
+                visibility: visible !important;
+                opacity: 1 !important;
+                margin: 0 auto;
+            }
+            #pdf-export-wrapper .mermaid-content svg * {
+                visibility: visible !important;
+                opacity: 1 !important;
+            }
+            #pdf-export-wrapper .katex {
+                font-size: 1.05em;
+                color: #24292f;
+            }
+            #pdf-export-wrapper .katex-display {
+                margin: 1.5em 0 !important;
+                padding: 1.2em;
+                background: #f6f8fa;
+                border-radius: 8px;
+                border-left: 4px solid #0969da;
+                overflow: visible;
+                text-align: center;
+                page-break-inside: avoid;
+                break-inside: avoid;
+            }
+            #pdf-export-wrapper .hljs {
+                background: #f6f8fa;
+                color: #24292f;
+            }
+        `;
+        
+        pdfContainer.appendChild(styleSheet);
+        pdfContainer.appendChild(contentWrapper);
+        document.body.appendChild(pdfContainer);
+        
+        // 强制重排，确保内容渲染
+        pdfContainer.offsetHeight;
+        
+        // 等待内容渲染和图片加载
+        await new Promise(resolve => {
+            const images = pdfContainer.querySelectorAll('img');
+            const svgs = pdfContainer.querySelectorAll('svg');
+            let loadedCount = 0;
+            const totalCount = images.length + svgs.length;
+            
+            if (totalCount === 0) {
+                setTimeout(resolve, 500);
+                return;
+            }
+            
+            const checkComplete = () => {
+                loadedCount++;
+                if (loadedCount >= totalCount) {
+                    setTimeout(resolve, 500);
+                }
+            };
+            
+            images.forEach(img => {
+                if (img.complete) {
+                    checkComplete();
+                } else {
+                    img.onload = checkComplete;
+                    img.onerror = checkComplete;
+                }
+            });
+            
+            svgs.forEach(svg => {
+                checkComplete();
+            });
+        });
+        
+        // 等待布局稳定
+        await new Promise(resolve => setTimeout(resolve, 200));
+        
+        // 获取实际内容高度，确保包含所有内容
+        const containerRect = pdfContainer.getBoundingClientRect();
+        const wrapperRect = contentWrapper.getBoundingClientRect();
+        const scrollHeight = Math.max(
+            pdfContainer.scrollHeight,
+            contentWrapper.scrollHeight,
+            wrapperRect.height,
+            containerRect.height
+        );
+        
+        // 设置容器高度，添加一些额外的边距确保内容不被截断
+        const finalHeight = scrollHeight + 100; // 额外100px边距
+        pdfContainer.style.height = finalHeight + 'px';
+        pdfContainer.style.minHeight = finalHeight + 'px';
+        
+        // 再次等待确保高度设置生效
+        await new Promise(resolve => setTimeout(resolve, 100));
+        
+        // 重新获取最终高度
+        const finalScrollHeight = Math.max(
+            pdfContainer.scrollHeight,
+            contentWrapper.scrollHeight
+        );
+        
+        // 配置 PDF 选项
+        const opt = {
+            margin: [10, 10, 10, 10],
+            filename: AppState.currentFileName.replace('.md', '.pdf'),
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: { 
+                scale: 2,
+                useCORS: true,
+                logging: false,
+                backgroundColor: '#ffffff',
+                width: 794,
+                height: finalScrollHeight + 200, // 额外200px确保完整捕获
+                allowTaint: false,
+                scrollX: 0,
+                scrollY: 0,
+                onclone: (clonedDoc) => {
+                    // 确保克隆文档中的SVG可见并保持正确尺寸
+                    const clonedSvgs = clonedDoc.querySelectorAll('svg');
+                    clonedSvgs.forEach(svg => {
+                        svg.style.display = 'block';
+                        svg.style.visibility = 'visible';
+                        svg.style.opacity = '1';
+                        svg.style.maxWidth = '100%';
+                        svg.style.width = 'auto';
+                        svg.style.height = 'auto';
+                        svg.style.margin = '0 auto';
+                        
+                        // 确保SVG内的元素也可见
+                        const elements = svg.querySelectorAll('*');
+                        elements.forEach(el => {
+                            if (el.style) {
+                                el.style.visibility = 'visible';
+                                el.style.opacity = '1';
+                            }
+                        });
+                    });
+                    
+                    // 确保克隆文档的容器高度正确
+                    const clonedContainer = clonedDoc.getElementById('pdf-export-wrapper');
+                    if (clonedContainer) {
+                        clonedContainer.style.height = finalScrollHeight + 200 + 'px';
+                        clonedContainer.style.minHeight = finalScrollHeight + 200 + 'px';
+                    }
+                }
+            },
+            jsPDF: { 
+                unit: 'mm', 
+                format: 'a4', 
+                orientation: 'portrait',
+                compress: true
+            },
+            pagebreak: { 
+                mode: ['css', 'avoid-all'],
+                before: '.page-break-before',
+                after: '.page-break-after',
+                avoid: ['.mermaid-wrapper', '.mermaid', 'pre', 'table', '.katex-display', 'h1', 'h2', 'h3']
+            }
+        };
+        
+        // 生成 PDF
+        await html2pdf().set(opt).from(pdfContainer).save();
+        
+        // 清理临时容器
+        if (document.body.contains(pdfContainer)) {
+            document.body.removeChild(pdfContainer);
+        }
+        
+        setStatus('PDF 导出成功');
+    } catch (err) {
+        console.error('PDF 导出失败:', err);
+        setStatus('PDF 导出失败: ' + (err.message || '未知错误'), 5000);
+        
+        // 确保清理临时容器
+        const pdfContainer = document.getElementById('pdf-export-wrapper');
+        if (pdfContainer && document.body.contains(pdfContainer)) {
+            document.body.removeChild(pdfContainer);
+        }
+    }
+}
+
+/**
  * 导出 HTML
  */
 function exportHTML() {
@@ -2115,6 +2607,7 @@ function initEventListeners() {
     });
     
     // 更多选项按钮
+    document.getElementById('exportPdfBtn').addEventListener('click', exportPDF);
     document.getElementById('exportHtmlBtn').addEventListener('click', exportHTML);
     document.getElementById('copyMdBtn').addEventListener('click', copyMarkdown);
     document.getElementById('copyHtmlBtn').addEventListener('click', copyHTML);
