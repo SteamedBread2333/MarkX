@@ -371,8 +371,16 @@ svg.icon {
     background: var(--bg-secondary);
     border-radius: 8px;
     border-left: 4px solid var(--accent-color);
-    overflow-x: auto;
+    overflow: visible !important;
+    overflow-wrap: break-word;
+    word-wrap: break-word;
     text-align: center;
+    max-width: 100%;
+}
+
+.katex-display .katex {
+    max-width: 100%;
+    overflow: visible;
 }
 
 /* 暗色主题优化 */
@@ -392,25 +400,6 @@ svg.icon {
     padding: 2px 6px;
     border-radius: 4px;
     font-family: var(--font-mono);
-}
-
-/* 公式滚动条美化 */
-.katex-display::-webkit-scrollbar {
-    height: 8px;
-}
-
-.katex-display::-webkit-scrollbar-track {
-    background: var(--bg-tertiary);
-    border-radius: 4px;
-}
-
-.katex-display::-webkit-scrollbar-thumb {
-    background: var(--text-tertiary);
-    border-radius: 4px;
-}
-
-.katex-display::-webkit-scrollbar-thumb:hover {
-    background: var(--text-secondary);
 }
 
 /* 数学公式按钮特殊效果 */
@@ -818,7 +807,10 @@ body.layout-vertical .editor-container {
 
 .markdown-body pre {
     padding: 16px;
-    overflow: auto;
+    overflow: visible;
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+    white-space: pre-wrap;
     font-size: 85%;
     line-height: 1.45;
     background: var(--bg-secondary);
@@ -832,6 +824,9 @@ body.layout-vertical .editor-container {
     margin: 0;
     font-size: 100%;
     border-radius: 0;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
 }
 
 .markdown-body blockquote {
