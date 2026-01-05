@@ -1,0 +1,104 @@
+/* ==================== 编辑器样式 ==================== */
+
+/* 编辑器容器 */
+.editor-container {
+    flex: 1;
+    min-width: 0;
+    background: var(--editor-bg);
+    border-right: 1px solid var(--border-color);
+    display: flex;
+    flex-direction: column;
+    transition: flex var(--transition-normal);
+    position: relative;
+}
+
+/* 编辑器容器右侧拖拽区域 */
+.editor-container::after {
+    content: '';
+    position: absolute;
+    right: -4px;
+    top: 0;
+    bottom: 0;
+    width: 8px;
+    cursor: col-resize;
+    z-index: 10;
+    background: transparent;
+    transition: background var(--transition-fast);
+}
+
+.editor-container:hover::after {
+    background: rgba(9, 105, 218, 0.1);
+}
+
+[data-theme="dark"] .editor-container:hover::after {
+    background: rgba(47, 129, 247, 0.2);
+}
+
+.editor-container.dragging::after {
+    background: var(--accent-color);
+    cursor: col-resize;
+}
+
+.editor {
+    flex: 1;
+    width: 100%;
+    padding: var(--spacing-lg);
+    background: var(--editor-bg);
+    color: var(--editor-text);
+    border: none;
+    outline: none;
+    font-family: var(--font-mono);
+    font-size: 14px;
+    line-height: 1.6;
+    resize: none;
+    overflow-y: auto;
+    tab-size: 2;
+}
+
+.editor::placeholder {
+    color: var(--text-tertiary);
+}
+
+/* Ace Editor 自定义样式 */
+.ace_editor {
+    font-family: var(--font-mono) !important;
+    line-height: 1.8 !important;
+}
+
+.ace_gutter {
+    background: var(--bg-secondary) !important;
+    color: var(--text-tertiary) !important;
+    border-right: 1px solid var(--border-color) !important;
+}
+
+.ace_gutter-active-line {
+    background: var(--bg-hover) !important;
+}
+
+.ace_cursor {
+    color: var(--accent-color) !important;
+}
+
+/* 选中文本高亮 - 确保明显可见 */
+.ace_marker-layer .ace_selection {
+    background: var(--selection-bg) !important;
+    border-radius: 2px;
+}
+
+/* 聚焦时的选中文本 */
+.ace_editor.ace_focus .ace_marker-layer .ace_selection {
+    background: var(--selection-bg) !important;
+}
+
+.ace_marker-layer .ace_active-line {
+    background: var(--bg-hover) !important;
+}
+
+/* 暗色主题覆盖 */
+[data-theme="dark"] .ace_gutter {
+    background: rgba(0, 0, 0, 0.3) !important;
+}
+
+[data-theme="dark"] .ace_gutter-active-line {
+    background: rgba(255, 255, 255, 0.05) !important;
+}

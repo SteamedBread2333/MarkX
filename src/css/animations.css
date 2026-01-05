@@ -1,0 +1,307 @@
+/* ==================== 动画样式 ==================== */
+
+/* Logo 动画 - 酷炫悬浮 + 光效 */
+.logo-icon {
+    animation: logoFloat 4s ease-in-out infinite;
+}
+
+@keyframes logoFloat {
+    0%, 100% {
+        transform: translateY(0) rotate(0deg);
+        filter: drop-shadow(0 2px 8px rgba(91, 134, 229, 0.3));
+    }
+    50% {
+        transform: translateY(-3px) rotate(1deg);
+        filter: drop-shadow(0 4px 16px rgba(91, 134, 229, 0.5));
+    }
+}
+
+[data-theme="dark"] .logo-icon {
+    animation: logoFloatDark 4s ease-in-out infinite;
+}
+
+@keyframes logoFloatDark {
+    0%, 100% {
+        transform: translateY(0) rotate(0deg);
+        filter: drop-shadow(0 2px 12px rgba(102, 126, 234, 0.5));
+    }
+    50% {
+        transform: translateY(-3px) rotate(1deg);
+        filter: drop-shadow(0 4px 20px rgba(102, 126, 234, 0.8));
+    }
+}
+
+/* Logo 悬停效果 */
+.logo:hover .logo-icon {
+    animation: logoSpin 0.6s ease;
+}
+
+@keyframes logoSpin {
+    0% {
+        transform: rotate(0deg) scale(1);
+    }
+    50% {
+        transform: rotate(180deg) scale(1.1);
+    }
+    100% {
+        transform: rotate(360deg) scale(1);
+    }
+}
+
+/* 工具栏按钮图标悬停效果 */
+.toolbar-btn:hover svg.icon {
+    transform: scale(1.1);
+}
+
+.toolbar-btn:active svg.icon {
+    transform: scale(0.95);
+}
+
+/* 主题切换按钮 - 超酷动画 */
+#themeBtn {
+    position: relative;
+    overflow: visible;
+}
+
+#themeBtn svg.icon {
+    transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+#themeBtn:hover svg.icon {
+    transform: rotate(180deg) scale(1.2);
+}
+
+#themeBtn:active svg.icon {
+    transform: rotate(360deg) scale(1);
+}
+
+[data-theme="dark"] #themeBtn svg.icon {
+    filter: drop-shadow(0 0 10px rgba(255, 193, 7, 0.6));
+    color: #FDD835;
+}
+
+[data-theme="light"] #themeBtn svg.icon {
+    filter: drop-shadow(0 0 8px rgba(63, 81, 181, 0.4));
+    color: #5C6BC0;
+}
+
+/* 主题切换按钮光环效果 */
+#themeBtn::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: var(--accent-color);
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0);
+    transition: all 0.5s ease;
+}
+
+#themeBtn:hover::after {
+    opacity: 0.1;
+    transform: translate(-50%, -50%) scale(1.5);
+}
+
+/* 布局切换按钮 - 3D 翻转效果 */
+#layoutBtn svg.icon {
+    transition: all 0.4s ease;
+}
+
+#layoutBtn:hover svg.icon {
+    transform: rotateY(180deg) scale(1.15);
+}
+
+/* 图表按钮 - 脉冲效果 */
+#mermaidBtn {
+    position: relative;
+}
+
+#mermaidBtn svg.icon {
+    transition: all 0.3s ease;
+}
+
+#mermaidBtn:hover svg.icon {
+    animation: chartPulse 1s ease infinite;
+    color: #36D1DC;
+}
+
+@keyframes chartPulse {
+    0%, 100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+    50% {
+        transform: scale(1.15);
+        opacity: 0.8;
+    }
+}
+
+/* Markdown 格式化按钮 - 统一色彩提示 */
+#boldBtn:hover svg.icon { color: #E91E63; }
+#italicBtn:hover svg.icon { color: #9C27B0; }
+#headingBtn:hover svg.icon { color: #3F51B5; }
+#linkBtn:hover svg.icon { color: #2196F3; }
+#imageBtn:hover svg.icon { color: #00BCD4; }
+#codeBtn:hover svg.icon { color: #009688; }
+#tableBtn:hover svg.icon { color: #4CAF50; }
+
+/* Mermaid 导出按钮图标 */
+.mermaid-export-btn:hover svg.icon {
+    transform: translateY(-2px);
+}
+
+/* 图标渐变效果（高级设计）*/
+.toolbar-btn:hover svg.icon use {
+    animation: iconPulse 0.6s ease;
+}
+
+@keyframes iconPulse {
+    0% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.7;
+    }
+    100% {
+        opacity: 1;
+    }
+}
+
+/* 保存按钮特殊效果 - 更酷炫 */
+#saveBtn {
+    position: relative;
+    overflow: hidden;
+}
+
+#saveBtn::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: var(--accent-color);
+    opacity: 0.3;
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+}
+
+#saveBtn:hover::before {
+    width: 200%;
+    height: 200%;
+}
+
+#saveBtn:hover svg.icon {
+    animation: saveBounce 0.5s ease;
+}
+
+@keyframes saveBounce {
+    0%, 100% {
+        transform: scale(1);
+    }
+    25% {
+        transform: scale(1.15) rotate(-5deg);
+    }
+    75% {
+        transform: scale(1.15) rotate(5deg);
+    }
+}
+
+/* 文件操作按钮组 - 高级渐变效果 */
+#newBtn,
+#openBtn,
+#saveBtn {
+    position: relative;
+    overflow: hidden;
+}
+
+#newBtn:hover,
+#openBtn:hover,
+#saveBtn:hover {
+    background: linear-gradient(135deg, var(--bg-hover) 0%, var(--bg-tertiary) 100%);
+    box-shadow: 0 2px 8px rgba(91, 134, 229, 0.15);
+}
+
+#newBtn:hover svg.icon {
+    color: #36D1DC;
+}
+
+#openBtn:hover svg.icon {
+    color: #5B86E5;
+}
+
+#saveBtn:hover svg.icon {
+    color: #4CAF50;
+}
+
+/* Mermaid 导出按钮渐变效果 */
+.mermaid-export-btn:hover {
+    background: linear-gradient(135deg, var(--bg-hover) 0%, var(--bg-tertiary) 100%);
+    border-color: var(--accent-color);
+}
+
+.mermaid-export-btn[data-format="svg"]:hover {
+    box-shadow: 0 4px 12px rgba(76, 175, 80, 0.2);
+}
+
+.mermaid-export-btn[data-format="png"]:hover {
+    box-shadow: 0 4px 12px rgba(33, 150, 243, 0.2);
+}
+
+/* 数学公式按钮特殊效果 */
+#mathBtn:hover svg.icon {
+    color: #FF6B6B;
+    animation: formulaShake 0.5s ease;
+}
+
+@keyframes formulaShake {
+    0%, 100% { transform: rotate(0deg); }
+    25% { transform: rotate(-5deg); }
+    75% { transform: rotate(5deg); }
+}
+
+/* 下拉菜单动画 */
+@keyframes dropdownFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-4px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* 对话框动画 */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* GitHub 角标动画 */
+@keyframes octocat-wave {
+    0%, 100% {
+        transform: rotate(0);
+    }
+    20%, 60% {
+        transform: rotate(-25deg);
+    }
+    40%, 80% {
+        transform: rotate(10deg);
+    }
+}

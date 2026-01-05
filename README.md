@@ -3,7 +3,7 @@
     <p>Modern · Ready-to-use · Powerful</p>
 </div>
 <div align="center">
-<img src="./logo-banner-en.svg" alt="MarkX Banner" width="100%">
+<img src="./assets/images/logo-banner-en.svg" alt="MarkX Banner" width="100%">
 </div>
 
 **English** | [中文](README.zh-CN.md)
@@ -333,23 +333,51 @@ classDiagram
 ```
 markx/
 ├── index.html          # Main page (HTML structure)
-├── styles.css          # Stylesheet (CSS + themes)
-├── app.js              # Application logic (JavaScript)
+├── src/                # Source code directory
+│   ├── app.js          # Application entry point
+│   ├── css/            # Stylesheets (modular CSS)
+│   │   ├── styles.css  # Main stylesheet (imports all modules)
+│   │   ├── variables.css
+│   │   ├── base.css
+│   │   ├── toolbar.css
+│   │   ├── editor.css
+│   │   ├── preview.css
+│   │   ├── markdown.css
+│   │   ├── mermaid.css
+│   │   ├── katex.css
+│   │   ├── components.css
+│   │   ├── statusbar.css
+│   │   ├── github-corner.css
+│   │   ├── animations.css
+│   │   └── responsive.css
+│   ├── core/           # Core modules
+│   ├── editor/         # Editor modules
+│   ├── renderer/       # Renderer modules
+│   ├── export/         # Export modules
+│   ├── file/           # File operations
+│   ├── ui/             # UI modules
+│   └── config/         # Configuration
+├── assets/             # Static assets
+│   └── images/         # Images (logos, favicon)
+│       ├── favicon.svg
+│       ├── logo.svg
+│       ├── logo-en.svg
+│       ├── logo-zh.svg
+│       ├── logo-dark.svg
+│       ├── logo-banner.svg
+│       ├── logo-banner-en.svg
+│       └── logo-banner-zh.svg
 ├── README.md           # Project documentation (this file)
 ├── README.zh-CN.md     # Chinese documentation
 ├── LICENSE             # MIT License
-├── .gitignore          # Git ignore file
-└── screenshots/        # Screenshots directory
-    ├── light-mode.png
-    ├── dark-mode.png
-    └── mobile.png
+└── .gitignore          # Git ignore file
 ```
 
 ---
 
 <div align="center">
 
-<img src="./logo-en.svg" width="150">
+<img src="./assets/images/logo-en.svg" width="150">
 
 <br><br>
 

@@ -1,0 +1,79 @@
+/* ==================== CSS 变量和主题 ==================== */
+
+:root {
+    /* 亮色主题颜色 */
+    --bg-primary: #ffffff;
+    --bg-secondary: #f6f8fa;
+    --bg-tertiary: #f0f2f5;
+    --bg-hover: #e8eaed;
+    --text-primary: #24292f;
+    --text-secondary: #57606a;
+    --text-tertiary: #8b949e;
+    --border-color: #d0d7de;
+    --border-hover: #a8b1ba;
+    --accent-color: #0969da;
+    --accent-hover: #0550ae;
+    --accent-color-alpha: rgba(9, 105, 218, 0.2);
+    --selection-bg: rgba(9, 105, 218, 0.25);
+    --success-color: #1a7f37;
+    --danger-color: #cf222e;
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
+    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.15);
+    --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.2);
+    
+    /* 编辑器颜色 */
+    --editor-bg: #ffffff;
+    --editor-text: #24292f;
+    --editor-line-number: #8b949e;
+    
+    /* 滚动条 */
+    --scrollbar-track: #f6f8fa;
+    --scrollbar-thumb: #d0d7de;
+    --scrollbar-thumb-hover: #a8b1ba;
+    
+    /* 间距 */
+    --toolbar-height: 56px;
+    --statusbar-height: 32px;
+    --spacing-xs: 4px;
+    --spacing-sm: 8px;
+    --spacing-md: 16px;
+    --spacing-lg: 24px;
+    
+    /* 字体 */
+    --font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', Helvetica, Arial, sans-serif;
+    --font-mono: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
+    
+    /* 动画 */
+    --transition-fast: 0.15s ease;
+    --transition-normal: 0.25s ease;
+}
+
+/* 暗色主题 */
+[data-theme="dark"] {
+    --bg-primary: #0d1117;
+    --bg-secondary: #161b22;
+    --bg-tertiary: #1c2128;
+    --bg-hover: #262c36;
+    --text-primary: #e6edf3;
+    --text-secondary: #8b949e;
+    --text-tertiary: #6e7681;
+    --border-color: #30363d;
+    --border-hover: #484f58;
+    --accent-color: #2f81f7;
+    --accent-hover: #539bf5;
+    --accent-color-alpha: rgba(47, 129, 247, 0.3);
+    --selection-bg: rgba(47, 129, 247, 0.35);
+    --success-color: #3fb950;
+    --danger-color: #f85149;
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.4);
+    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.5);
+    --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.6);
+    
+    --editor-bg: #0d1117;
+    --editor-text: #e6edf3;
+    --editor-line-number: #6e7681;
+    
+    --scrollbar-track: #161b22;
+    --scrollbar-thumb: #30363d;
+    --scrollbar-thumb-hover: #484f58;
+}

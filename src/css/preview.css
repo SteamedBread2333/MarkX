@@ -1,0 +1,47 @@
+/* ==================== 预览区样式 ==================== */
+
+.main-content {
+    height: calc(100vh - var(--toolbar-height) - var(--statusbar-height));
+    display: flex;
+    position: relative;
+    overflow: hidden;
+    z-index: 1;
+}
+
+/* 预览容器 */
+.preview-container {
+    flex: 1;
+    min-width: 0;
+    background: var(--bg-primary);
+    overflow-y: auto;
+    transition: flex var(--transition-normal);
+}
+
+.preview {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: var(--spacing-lg);
+    min-height: 100%;
+}
+
+/* 布局模式 */
+body.layout-editor-only .preview-container {
+    display: none;
+}
+
+body.layout-editor-only .editor-container {
+    border-right: none;
+}
+
+body.layout-preview-only .editor-container {
+    display: none;
+}
+
+body.layout-vertical .main-content {
+    flex-direction: column;
+}
+
+body.layout-vertical .editor-container {
+    border-right: none;
+    border-bottom: 1px solid var(--border-color);
+}

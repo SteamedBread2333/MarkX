@@ -3,7 +3,7 @@
     <p>现代化 · 开箱即用 · 功能强大</p>
 </div>
 <div align="center">
-<img src="./logo-banner-zh.svg" alt="MarkX Banner" width="100%">
+<img src="./assets/images/logo-banner-zh.svg" alt="MarkX Banner" width="100%">
 </div>
 
 [English](README.md) | **中文**
@@ -332,23 +332,51 @@ classDiagram
 ```
 markx/
 ├── index.html          # 主页面（HTML 结构）
-├── styles.css          # 样式文件（CSS + 主题）
-├── app.js              # 应用逻辑（JavaScript）
+├── src/                # 源代码目录
+│   ├── app.js          # 应用入口文件
+│   ├── css/            # 样式文件（模块化 CSS）
+│   │   ├── styles.css  # 主样式文件（导入所有模块）
+│   │   ├── variables.css
+│   │   ├── base.css
+│   │   ├── toolbar.css
+│   │   ├── editor.css
+│   │   ├── preview.css
+│   │   ├── markdown.css
+│   │   ├── mermaid.css
+│   │   ├── katex.css
+│   │   ├── components.css
+│   │   ├── statusbar.css
+│   │   ├── github-corner.css
+│   │   ├── animations.css
+│   │   └── responsive.css
+│   ├── core/           # 核心模块
+│   ├── editor/         # 编辑器模块
+│   ├── renderer/       # 渲染器模块
+│   ├── export/         # 导出模块
+│   ├── file/           # 文件操作
+│   ├── ui/             # UI 模块
+│   └── config/         # 配置
+├── assets/             # 静态资源
+│   └── images/         # 图片（Logo、Favicon）
+│       ├── favicon.svg
+│       ├── logo.svg
+│       ├── logo-en.svg
+│       ├── logo-zh.svg
+│       ├── logo-dark.svg
+│       ├── logo-banner.svg
+│       ├── logo-banner-en.svg
+│       └── logo-banner-zh.svg
 ├── README.md           # 项目文档（英文版）
 ├── README.zh-CN.md     # 项目文档（中文版，本文件）
 ├── LICENSE             # MIT 许可证
-├── .gitignore          # Git 忽略文件
-└── screenshots/        # 截图目录
-    ├── light-mode.png
-    ├── dark-mode.png
-    └── mobile.png
+└── .gitignore          # Git 忽略文件
 ```
 
 ---
 
 <div align="center">
 
-<img src="./logo-zh.svg" width="150">
+<img src="./assets/images/logo-zh.svg" width="150">
 
 <br><br>
 

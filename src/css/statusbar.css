@@ -1,0 +1,27 @@
+/* ==================== 状态栏样式 ==================== */
+
+.statusbar {
+    height: var(--statusbar-height);
+    background: var(--bg-secondary);
+    border-top: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 var(--spacing-md);
+    font-size: 12px;
+    color: var(--text-secondary);
+    flex-shrink: 0;
+    position: relative;
+    z-index: 1;
+}
+
+.statusbar-left,
+.statusbar-right {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
+.statusbar-divider {
+    color: var(--border-color);
+}

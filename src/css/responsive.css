@@ -1,0 +1,104 @@
+/* ==================== 响应式设计 ==================== */
+
+@media (max-width: 768px) {
+    .toolbar {
+        padding: 0 var(--spacing-sm);
+    }
+    
+    .toolbar-btn .text {
+        display: none;
+    }
+    
+    .toolbar-divider {
+        display: none;
+    }
+    
+    .logo {
+        font-size: 16px;
+    }
+    
+    /* 移动端默认单栏布局 */
+    .main-content {
+        flex-direction: column;
+    }
+    
+    .editor-container,
+    .preview-container {
+        height: 50vh;
+        border-right: none;
+    }
+    
+    .editor-container {
+        border-bottom: 1px solid var(--border-color);
+    }
+    
+    body.layout-editor-only .editor-container,
+    body.layout-preview-only .preview-container {
+        height: 100%;
+    }
+    
+    .editor,
+    .preview {
+        padding: var(--spacing-md);
+    }
+    
+    /* 移动端 Mermaid 导出工具栏始终显示 */
+    .mermaid-export-toolbar {
+        opacity: 1;
+    }
+    
+    /* GitHub 角标缩小 */
+    .github-corner {
+        width: 60px;
+        height: 60px;
+    }
+    
+    .github-corner svg {
+        width: 60px;
+        height: 60px;
+    }
+    
+    /* 移动端工具栏右侧padding调整 */
+    .toolbar-right {
+        padding-right: 30px;
+    }
+}
+
+@media (max-width: 480px) {
+    .statusbar-right span:not(#charCount):not(#readTime) {
+        display: none;
+    }
+    
+    .statusbar-divider {
+        display: none;
+    }
+}
+
+/* ==================== 打印样式 ==================== */
+
+@media print {
+    .toolbar,
+    .editor-container,
+    .statusbar {
+        display: none !important;
+    }
+    
+    .main-content {
+        display: block;
+        height: auto;
+    }
+    
+    .preview-container {
+        border: none;
+        overflow: visible;
+    }
+    
+    .preview {
+        max-width: 100%;
+        padding: 0;
+    }
+    
+    .github-corner {
+        display: none !important;
+    }
+}
