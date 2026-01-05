@@ -27,7 +27,7 @@ Perfect integration with Mermaid.js, supporting various professional diagrams:
 - ✅ **Gantt Charts** - Project progress management
 - ✅ **Class Diagrams** - UML class relationship diagrams
 - ✅ **State Diagrams** - State machine visualization
-- ✅ **One-click Export** - Support SVG/PNG formats
+- ✅ **One-click Export** - Hover over any diagram to export as SVG (vector, scalable) or PNG (high-res 2x), plus fullscreen view with zoom & drag
 
 </td>
 <td width="50%">
@@ -55,6 +55,9 @@ Powerful math formula rendering engine:
 - 📊 **Real-time Stats** - Word count, line count, reading time
 - 🔒 **Security** - DOMPurify XSS protection
 - 📱 **Responsive** - Perfect adaptation for desktop and mobile
+- 📄 **Export PDF** - Three export modes: Default (natural truncation), Full Page (single long image), Smart Pagination (intelligent page breaks)
+- 🌐 **Export HTML** - Export rendered content as standalone HTML file
+- 📋 **Copy to Clipboard** - Quick copy Markdown or HTML content
 
 ## 🚀 Quick Start
 
@@ -153,7 +156,10 @@ graph TD
 ```
 ````
 
-**💡 Tip:** Each Mermaid diagram supports export as SVG or PNG format!
+**💡 Export Feature:** Hover over any Mermaid diagram to see the export toolbar:
+- **SVG Export** - Export as vector graphics (recommended, scalable)
+- **PNG Export** - Export as high-resolution image (2x scale)
+- **Fullscreen View** - View in fullscreen with zoom and drag support
 
 ---
 
@@ -241,6 +247,18 @@ function hello() {
 }
 ```
 ````
+
+#### 📄 Export Functions
+
+**Export PDF** - Click the "More" button (three dots) in the toolbar, then select one of the PDF export options:
+
+1. **Export PDF (Default)** - Natural page truncation, suitable for quick export
+2. **Export PDF (Full Page)** - Export as a single long image without pagination, perfect for presentations
+3. **Export PDF (Smart Pagination)** - Intelligent page breaks that avoid truncating Mermaid diagrams, code blocks, and math formulas
+
+**Export HTML** - Export the rendered content as a standalone HTML file that can be opened in any browser.
+
+**Copy Functions** - Quickly copy Markdown source or rendered HTML to clipboard for easy sharing.
 
 ---
 
