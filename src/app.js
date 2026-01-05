@@ -29,7 +29,7 @@ import { initScrollSync } from './ui/scroll-sync.js';
 import { newDocument, openFile, saveFile, handleFileSelect } from './file/operations.js';
 
 // ==================== 导入导出模块 ====================
-import { exportPDF } from './export/pdf.js';
+import { exportPDF, exportPDFDefault, exportPDFFullPage } from './export/pdf.js';
 import { exportHTML, copyMarkdown, copyHTML, clearContent } from './export/html.js';
 
 // ==================== 键盘快捷键 ====================
@@ -128,6 +128,8 @@ function initEventListeners() {
     
     // 更多选项按钮
     document.getElementById('exportPdfBtn').addEventListener('click', exportPDF);
+    document.getElementById('exportPdfDefaultBtn').addEventListener('click', exportPDFDefault);
+    document.getElementById('exportPdfFullPageBtn').addEventListener('click', exportPDFFullPage);
     document.getElementById('exportHtmlBtn').addEventListener('click', exportHTML);
     document.getElementById('copyMdBtn').addEventListener('click', copyMarkdown);
     document.getElementById('copyHtmlBtn').addEventListener('click', copyHTML);
