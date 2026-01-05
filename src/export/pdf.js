@@ -28,19 +28,30 @@ function findPageBreaks(elements, containerRect, pageHeightPx, scale = 2) {
             continue;
         }
         
-        // 判断元素类型
-        // 文字元素：包含文本内容的块级或行内元素
-        const isTextElement = element.matches('p, li, span, strong, em, a, code:not(pre code), b, i, u, mark, del, ins') ||
-            (element.textContent && element.textContent.trim().length > 0 && 
-             !element.matches('pre, table, svg, .mermaid-wrapper, .mermaid-content, .katex-display, h1, h2, h3, h4, h5, h6, blockquote'));
+        // 判断元素类型（按优先级顺序检测）
+        // 先检测特殊块，避免被误判为文字元素
+        
+        // 数学块：检测 .katex-block（占位符）、.katex-display（KaTeX 渲染后），以及包含 .katex-display 的父元素
+        const isMathBlock = element.matches('.katex-display, .katex-block') || 
+            element.closest('.katex-display, .katex-block') ||
+            (element.classList && element.classList.contains('katex') && element.querySelector('.katex-display'));
+        
+        // 代码块（使用 closest 确保子元素也能被识别）
+        const isCodeBlock = element.matches('pre') || element.closest('pre');
+        
+        // SVG 和 Mermaid 包装器
         const isSvg = element.matches('svg') || (element.querySelector && element.querySelector('svg'));
         const isSvgWrapper = element.matches('.mermaid-wrapper, .mermaid-content') ||
             element.closest('.mermaid-wrapper, .mermaid-content');
-        // 代码块和数学公式块（使用 closest 确保子元素也能被识别）
-        const isCodeBlock = element.matches('pre') || element.closest('pre');
-        const isMathBlock = element.matches('.katex-display') || element.closest('.katex-display');
+        
         // 其他不应该被分割的元素
         const shouldAvoidBreak = element.matches('table, h1, h2, h3, h4, h5, h6, blockquote');
+        
+        // 文字元素：包含文本内容的块级或行内元素（排除已检测的特殊块）
+        const isTextElement = !isMathBlock && !isCodeBlock && !isSvg && !isSvgWrapper && !shouldAvoidBreak &&
+            (element.matches('p, li, span, strong, em, a, code:not(pre code), b, i, u, mark, del, ins') ||
+            (element.textContent && element.textContent.trim().length > 0 && 
+             !element.matches('pre, table, svg, .mermaid-wrapper, .mermaid-content, .katex-display, .katex-block, h1, h2, h3, h4, h5, h6, blockquote')));
         
         // 计算当前页剩余空间
         const currentPageBottom = currentPageTop + pageHeightPx;
@@ -515,7 +526,7 @@ export async function exportPDF() {
                 return false;
             }
             
-            const isChildOfSpecialElement = el.closest('pre, .katex-display, .mermaid-wrapper, .mermaid-content, .mermaid');
+            const isChildOfSpecialElement = el.closest('pre, .katex-display, .katex-block, .mermaid-wrapper, .mermaid-content, .mermaid');
             if (isChildOfSpecialElement && isChildOfSpecialElement !== el) {
                 return false;
             }
