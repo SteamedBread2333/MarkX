@@ -1713,10 +1713,11 @@ function findPageBreaks(elements, containerRect, pageHeightPx, scale = 2) {
             (element.textContent && element.textContent.trim().length > 0 && 
              !element.matches('pre, table, svg, .mermaid-wrapper, .mermaid-content, .katex-display, h1, h2, h3, h4, h5, h6, blockquote'));
         const isSvg = element.matches('svg') || (element.querySelector && element.querySelector('svg'));
-        const isSvgWrapper = element.matches('.mermaid-wrapper, .mermaid-content');
-        // 代码块和数学公式块
-        const isCodeBlock = element.matches('pre');
-        const isMathBlock = element.matches('.katex-display');
+        const isSvgWrapper = element.matches('.mermaid-wrapper, .mermaid-content') ||
+            element.closest('.mermaid-wrapper, .mermaid-content');
+        // 代码块和数学公式块（使用 closest 确保子元素也能被识别）
+        const isCodeBlock = element.matches('pre') || element.closest('pre');
+        const isMathBlock = element.matches('.katex-display') || element.closest('.katex-display');
         // 其他不应该被分割的元素
         const shouldAvoidBreak = element.matches('table, h1, h2, h3, h4, h5, h6, blockquote');
         
@@ -1749,27 +1750,17 @@ function findPageBreaks(elements, containerRect, pageHeightPx, scale = 2) {
                     }
                 }
             } else if (isSvg || isSvgWrapper || isCodeBlock || isMathBlock) {
-                // Mermaid 图表、代码块、数学公式块的处理逻辑
-                if (elementHeight > pageHeightPx) {
-                    // 元素超过一页高度：不提前分页（不在元素之前分页），但允许截断跨页
-                    // 不添加 elementTop 的分页点，让它从当前位置开始显示
-                    // 但是要添加分页点，让内容可以跨页显示（允许截断）
-                    let pageStart = Math.max(currentPageTop, elementTop);
-                    
-                    // 添加分页点，让内容可以跨页显示
-                    while (elementBottom > pageStart + pageHeightPx) {
-                        breaks.push((pageStart + pageHeightPx) * scale);
-                        pageStart += pageHeightPx;
-                    }
-                    
-                    // 更新 currentPageTop 到元素结束位置
-                    currentPageTop = elementBottom;
-                } else {
-                    // 元素不超过一页高度，但会跨页：在元素之前分页，避免跨页
-                    if (elementTop > currentPageTop) {
-                        breaks.push(elementTop * scale);
-                        currentPageTop = elementTop;
-                    }
+                // Mermaid 图表、代码块、数学公式块：只要可能被截断就提前分页
+                // 在元素之前分页，避免跨页截断
+                if (elementTop > currentPageTop) {
+                    breaks.push(elementTop * scale);
+                    currentPageTop = elementTop;
+                }
+                
+                // 如果元素仍然超过新页底部，继续分页（元素超过一页高度的情况）
+                while (elementBottom > currentPageTop + pageHeightPx) {
+                    breaks.push((currentPageTop + pageHeightPx) * scale);
+                    currentPageTop += pageHeightPx;
                 }
             } else if (shouldAvoidBreak) {
                 // 不应该被分割的元素：在它之前分页
