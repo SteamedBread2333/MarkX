@@ -51,6 +51,7 @@
     <script src="https://cdn.jsdelivr.net/npm/ace-builds@1.32.2/src-min-noconflict/ext-searchbox.js"></script>
     
     <!-- Import Maps 用于 ES 模块 -->
+    <!-- 注意：Import Maps 需要现代浏览器支持（Chrome 89+, Edge 89+, Safari 16.4+, Firefox 108+） -->
     <script type="importmap">
     {
         "imports": {
@@ -60,6 +61,13 @@
             "highlight.js": "https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/+esm"
         }
     }
+    </script>
+    <!-- 浏览器兼容性检查 -->
+    <script>
+        // 检查浏览器是否支持 Import Maps
+        if (!HTMLScriptElement.supports || !HTMLScriptElement.supports('importmap')) {
+            console.warn('当前浏览器不支持 Import Maps，请使用现代浏览器（Chrome 89+, Edge 89+, Safari 16.4+, Firefox 108+）');
+        }
     </script>
 </head>
 <body data-theme="light">
