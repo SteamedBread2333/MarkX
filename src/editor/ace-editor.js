@@ -27,7 +27,8 @@ export function initEditor() {
             mode: 'ace/mode/markdown',
             theme: 'ace/theme/github',
             value: DEFAULT_CONTENT,
-            fontSize: '14px',  // 改为偶数，避免中文输入时光标错位
+            fontSize: 14,  // 使用数字而不是字符串，避免中文输入时光标错位
+            fontFamily: "Consolas, 'Courier New', 'Source Code Pro', Monaco, monospace",  // 强制使用等宽字体，修复中文输入光标错位
             showPrintMargin: false,
             highlightActiveLine: true,
             highlightGutterLine: true,
@@ -42,7 +43,7 @@ export function initEditor() {
             showLineNumbers: true,
             showGutter: true,
             displayIndentGuides: true,
-            animatedScroll: true,
+            animatedScroll: false,  // 禁用动画滚动，避免 IME 问题
             vScrollBarAlwaysVisible: false,
             hScrollBarAlwaysVisible: false,
             scrollPastEnd: 0.5,
@@ -55,6 +56,28 @@ export function initEditor() {
         
         // 设置编辑器选项
         session.setUseWrapMode(true);
+        
+        // 修复中文输入法光标错位：强制设置等宽字体
+        // 确保字体设置正确应用
+        aceEditor.setOptions({
+            fontFamily: "Consolas, 'Courier New', 'Source Code Pro', Monaco, monospace"
+        });
+        
+        const editorElement = aceEditor.container;
+        if (editorElement) {
+            editorElement.style.fontFamily = "Consolas, 'Courier New', 'Source Code Pro', Monaco, monospace";
+            editorElement.style.fontVariantLigatures = 'none';
+            editorElement.style.fontFeatureSettings = '"liga" 0';
+            editorElement.style.textRendering = 'optimizeSpeed';
+        }
+        
+        // 确保输入框也使用相同的字体
+        const textInput = aceEditor.textInput.getElement();
+        if (textInput) {
+            textInput.style.fontFamily = "Consolas, 'Courier New', 'Source Code Pro', Monaco, monospace";
+            textInput.style.fontSize = '14px';
+            textInput.style.letterSpacing = '0';
+        }
         
         // 修复中文输入法（IME）光标错位问题
         fixIMEComposition(aceEditor);
@@ -214,13 +237,16 @@ function fixIMEComposition(editor) {
 }
 
 /**
- * 检测光标是否在代码块或引用块内
+ * 检测光标是否在代码块或引用块内，并返回代码块的语言类型
+ * @returns {Object} { inCodeBlock: boolean, language: string|null, inBlockquote: boolean }
  */
 function checkIfInsideBlock(session, pos) {
     const lines = session.getLines(0, pos.row + 1);
     let inCodeBlock = false;
     let inBlockquote = false;
     let codeBlockMarker = null;
+    let codeBlockLanguage = null;
+    let codeBlockStartRow = -1;
     
     // 检查当前行及之前的行
     for (let i = 0; i <= pos.row; i++) {
@@ -234,14 +260,20 @@ function checkIfInsideBlock(session, pos) {
                 if (i < pos.row) {
                     inCodeBlock = false;
                     codeBlockMarker = null;
+                    codeBlockLanguage = null;
+                    codeBlockStartRow = -1;
                 } else {
                     // 当前行是结束标记，但光标可能在标记上
-                    return true;
+                    return { inCodeBlock: true, language: codeBlockLanguage, inBlockquote: false };
                 }
             } else {
-                // 代码块开始
+                // 代码块开始，提取语言类型
                 inCodeBlock = true;
                 codeBlockMarker = '```';
+                codeBlockStartRow = i;
+                // 提取语言：```language 或 ```language:title
+                const match = trimmedLine.match(/^```(\w+)/);
+                codeBlockLanguage = match ? match[1].toLowerCase() : null;
             }
         } else if (trimmedLine.startsWith('~~~')) {
             if (inCodeBlock && codeBlockMarker === '~~~') {
@@ -249,12 +281,18 @@ function checkIfInsideBlock(session, pos) {
                 if (i < pos.row) {
                     inCodeBlock = false;
                     codeBlockMarker = null;
+                    codeBlockLanguage = null;
+                    codeBlockStartRow = -1;
                 } else {
-                    return true;
+                    return { inCodeBlock: true, language: codeBlockLanguage, inBlockquote: false };
                 }
             } else {
                 inCodeBlock = true;
                 codeBlockMarker = '~~~';
+                codeBlockStartRow = i;
+                // 提取语言：~~~language
+                const match = trimmedLine.match(/^~~~(\w+)/);
+                codeBlockLanguage = match ? match[1].toLowerCase() : null;
             }
         }
         
@@ -270,19 +308,19 @@ function checkIfInsideBlock(session, pos) {
     }
     
     // 如果当前行在代码块内
-    if (inCodeBlock && pos.row >= 0) {
-        return true;
+    if (inCodeBlock && pos.row >= 0 && pos.row > codeBlockStartRow) {
+        return { inCodeBlock: true, language: codeBlockLanguage, inBlockquote: false };
     }
     
     // 如果当前行在引用块内
     if (inBlockquote && pos.row >= 0) {
         const currentLine = lines[pos.row];
         if (currentLine.trim().startsWith('>')) {
-            return true;
+            return { inCodeBlock: false, language: null, inBlockquote: true };
         }
     }
     
-    return false;
+    return { inCodeBlock: false, language: null, inBlockquote: false };
 }
 
 /**
@@ -378,40 +416,61 @@ function setupAutocompletion(editor) {
                 // 创建 Markdown 自动完成器
                 const markdownCompleter = createMarkdownCompleter();
                 
-                // 设置自动完成器（Markdown 编辑器主要使用自定义完成器）
+                // 设置自动完成器（初始使用 Markdown 完成器）
                 langTools.setCompleters([markdownCompleter]);
+                
+                // 保存原始设置，用于动态切换
+                editor._markdownCompleter = markdownCompleter;
+                editor._langTools = langTools;
+                editor._currentLanguageMode = 'markdown';  // 初始为 Markdown 模式
                 
                 // 动态控制实时自动完成
                 let lastCursorPos = { row: 0, column: 0 };
                 
-                // 监听光标位置变化，动态调整自动完成设置
+                // 监听光标位置变化，动态调整自动完成设置和语言模式
                 editor.on('changeSelection', function() {
                     const pos = editor.getCursorPosition();
                     const session = editor.getSession();
                     
-                    // 检测是否在块内
-                    const isInsideBlock = checkIfInsideBlock(session, pos);
+                    // 检测是否在块内，并获取代码块语言
+                    const blockInfo = checkIfInsideBlock(session, pos);
                     
                     // 根据是否在块内动态调整自动完成
-                    if (isInsideBlock) {
-                        // 在块内：禁用实时自动完成，只允许手动触发
+                    if (blockInfo.inCodeBlock && blockInfo.language) {
+                        // 在代码块内：切换到对应语言的自动完成
+                        switchToLanguageMode(editor, blockInfo.language);
                         editor.setOptions({
                             enableBasicAutocompletion: true,
-                            enableLiveAutocompletion: false,  // 禁用实时自动完成
+                            enableLiveAutocompletion: true,  // 在代码块内启用实时自动完成
                             enableSnippets: true
                         });
-                        
-                        // 显示提示
+                        showAutocompleteHint(editor, false);
+                    } else if (blockInfo.inCodeBlock) {
+                        // 在代码块内但没有指定语言：禁用实时自动完成，只允许手动触发
+                        switchToMarkdownMode(editor);
+                        editor.setOptions({
+                            enableBasicAutocompletion: true,
+                            enableLiveAutocompletion: false,
+                            enableSnippets: true
+                        });
+                        showAutocompleteHint(editor, true);
+                    } else if (blockInfo.inBlockquote) {
+                        // 在引用块内：禁用实时自动完成
+                        switchToMarkdownMode(editor);
+                        editor.setOptions({
+                            enableBasicAutocompletion: true,
+                            enableLiveAutocompletion: false,
+                            enableSnippets: true
+                        });
                         showAutocompleteHint(editor, true);
                     } else {
-                        // 不在块内：启用实时自动完成
+                        // 不在块内：使用 Markdown 自动完成
+                        switchToMarkdownMode(editor);
                         editor.setOptions({
                             enableBasicAutocompletion: true,
                             enableLiveAutocompletion: true,  // 启用实时自动完成
                             enableSnippets: true
                         });
-                        
-                        // 隐藏提示
                         showAutocompleteHint(editor, false);
                     }
                     
@@ -484,5 +543,173 @@ function setupAutocompletion(editor) {
         }, 300);  // 增加延迟时间，确保扩展完全加载
     } catch (error) {
         console.error('❌ 设置自动完成功能失败:', error);
+    }
+}
+
+/**
+ * 检测光标是否在字符串内
+ */
+function isInsideString(session, pos) {
+    try {
+        const line = session.getLine(pos.row);
+        const beforeCursor = line.substring(0, pos.column);
+        
+        // 检测单引号、双引号、反引号
+        let inSingleQuote = false;
+        let inDoubleQuote = false;
+        let inBacktick = false;
+        let escapeNext = false;
+        
+        for (let i = 0; i < beforeCursor.length; i++) {
+            const char = beforeCursor[i];
+            
+            if (escapeNext) {
+                escapeNext = false;
+                continue;
+            }
+            
+            if (char === '\\') {
+                escapeNext = true;
+                continue;
+            }
+            
+            if (char === "'" && !inDoubleQuote && !inBacktick) {
+                inSingleQuote = !inSingleQuote;
+            } else if (char === '"' && !inSingleQuote && !inBacktick) {
+                inDoubleQuote = !inDoubleQuote;
+            } else if (char === '`' && !inSingleQuote && !inDoubleQuote) {
+                inBacktick = !inBacktick;
+            }
+        }
+        
+        return inSingleQuote || inDoubleQuote || inBacktick;
+    } catch (error) {
+        return false;
+    }
+}
+
+/**
+ * 创建语言特定的自动完成器
+ */
+function createLanguageCompleter(language) {
+    return {
+        getCompletions: function(editor, session, pos, prefix, callback) {
+            // 检测是否在字符串内
+            if (isInsideString(session, pos)) {
+                callback(null, []);
+                return;
+            }
+            
+            // 语言关键字映射
+            const languageKeywords = getLanguageKeywords(language);
+            
+            if (!languageKeywords || languageKeywords.length === 0) {
+                callback(null, []);
+                return;
+            }
+            
+            // 过滤匹配的关键字
+            const matches = languageKeywords
+                .filter(keyword => keyword.toLowerCase().startsWith(prefix.toLowerCase()))
+                .map(keyword => ({
+                    name: keyword,
+                    value: keyword,
+                    score: 1000,
+                    meta: language
+                }));
+            
+            callback(null, matches);
+        },
+        getDocTooltip: function(item) {
+            return item.meta ? `[${item.meta}] ${item.name}` : item.name;
+        }
+    };
+}
+
+/**
+ * 获取指定语言的关键字列表
+ */
+function getLanguageKeywords(language) {
+    const normalizedLang = language.toLowerCase();
+    
+    const keywordsMap = {
+        'javascript': ['function', 'const', 'let', 'var', 'if', 'else', 'for', 'while', 'return', 'class', 'extends', 'import', 'export', 'async', 'await', 'try', 'catch', 'finally', 'throw', 'new', 'this', 'super', 'static', 'typeof', 'instanceof'],
+        'js': ['function', 'const', 'let', 'var', 'if', 'else', 'for', 'while', 'return', 'class', 'extends', 'import', 'export', 'async', 'await', 'try', 'catch', 'finally', 'throw', 'new', 'this', 'super', 'static', 'typeof', 'instanceof'],
+        'typescript': ['function', 'const', 'let', 'var', 'if', 'else', 'for', 'while', 'return', 'class', 'extends', 'import', 'export', 'async', 'await', 'try', 'catch', 'finally', 'throw', 'new', 'this', 'super', 'static', 'interface', 'type', 'enum', 'namespace', 'declare', 'public', 'private', 'protected', 'readonly'],
+        'ts': ['function', 'const', 'let', 'var', 'if', 'else', 'for', 'while', 'return', 'class', 'extends', 'import', 'export', 'async', 'await', 'try', 'catch', 'finally', 'throw', 'new', 'this', 'super', 'static', 'interface', 'type', 'enum', 'namespace', 'declare', 'public', 'private', 'protected', 'readonly'],
+        'python': ['def', 'class', 'if', 'else', 'elif', 'for', 'while', 'return', 'import', 'from', 'as', 'try', 'except', 'finally', 'raise', 'with', 'lambda', 'yield', 'pass', 'break', 'continue', 'and', 'or', 'not', 'in', 'is', 'None', 'True', 'False'],
+        'py': ['def', 'class', 'if', 'else', 'elif', 'for', 'while', 'return', 'import', 'from', 'as', 'try', 'except', 'finally', 'raise', 'with', 'lambda', 'yield', 'pass', 'break', 'continue', 'and', 'or', 'not', 'in', 'is', 'None', 'True', 'False'],
+        'java': ['public', 'private', 'protected', 'static', 'final', 'class', 'interface', 'extends', 'implements', 'if', 'else', 'for', 'while', 'return', 'try', 'catch', 'finally', 'throw', 'new', 'this', 'super', 'void', 'int', 'String', 'boolean', 'double', 'float'],
+        'cpp': ['#include', 'using', 'namespace', 'class', 'struct', 'public', 'private', 'protected', 'if', 'else', 'for', 'while', 'return', 'try', 'catch', 'throw', 'new', 'delete', 'this', 'virtual', 'static', 'const', 'void', 'int', 'char', 'bool', 'double', 'float'],
+        'c': ['#include', '#define', 'if', 'else', 'for', 'while', 'return', 'int', 'char', 'void', 'struct', 'typedef', 'enum', 'static', 'const', 'extern'],
+        'css': ['color', 'background', 'margin', 'padding', 'border', 'width', 'height', 'display', 'position', 'flex', 'grid', 'font', 'text', 'align', 'justify', 'center', 'left', 'right', 'top', 'bottom'],
+        'html': ['div', 'span', 'p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'a', 'img', 'ul', 'ol', 'li', 'table', 'tr', 'td', 'th', 'form', 'input', 'button', 'script', 'style', 'link', 'meta', 'title', 'head', 'body'],
+        'json': ['true', 'false', 'null'],
+        'sql': ['SELECT', 'FROM', 'WHERE', 'INSERT', 'UPDATE', 'DELETE', 'CREATE', 'ALTER', 'DROP', 'TABLE', 'INDEX', 'JOIN', 'INNER', 'LEFT', 'RIGHT', 'ON', 'GROUP', 'BY', 'ORDER', 'HAVING', 'AS', 'AND', 'OR', 'NOT', 'IN', 'LIKE', 'BETWEEN'],
+        'go': ['package', 'import', 'func', 'var', 'const', 'type', 'struct', 'interface', 'if', 'else', 'for', 'range', 'return', 'go', 'defer', 'chan', 'select', 'case', 'default', 'switch', 'break', 'continue', 'fallthrough'],
+        'rust': ['fn', 'let', 'mut', 'const', 'static', 'if', 'else', 'match', 'for', 'while', 'loop', 'return', 'pub', 'struct', 'enum', 'impl', 'trait', 'use', 'mod', 'unsafe', 'async', 'await'],
+        'php': ['<?php', '?>', 'function', 'class', 'if', 'else', 'for', 'while', 'return', 'echo', 'print', 'array', 'isset', 'empty', 'include', 'require', 'public', 'private', 'protected', 'static'],
+        'bash': ['if', 'then', 'else', 'fi', 'for', 'while', 'do', 'done', 'case', 'esac', 'function', 'return', 'echo', 'export', 'read', 'cd', 'ls', 'pwd', 'mkdir', 'rm', 'cp', 'mv'],
+        'sh': ['if', 'then', 'else', 'fi', 'for', 'while', 'do', 'done', 'case', 'esac', 'function', 'return', 'echo', 'export', 'read', 'cd', 'ls', 'pwd', 'mkdir', 'rm', 'cp', 'mv'],
+    };
+    
+    return keywordsMap[normalizedLang] || [];
+}
+
+/**
+ * 切换到指定语言的模式（用于代码块内的自动完成）
+ */
+function switchToLanguageMode(editor, language) {
+    if (!editor || !language) return;
+    
+    // 如果已经是该语言，不需要切换
+    if (editor._currentLanguageMode === language) {
+        return;
+    }
+    
+    try {
+        const langTools = editor._langTools;
+        if (!langTools) return;
+        
+        // 创建语言特定的自动完成器
+        const languageCompleter = createLanguageCompleter(language);
+        
+        // 组合 Markdown 和语言特定的自动完成器
+        const completers = [
+            editor._markdownCompleter,  // Markdown 补全
+            languageCompleter            // 语言关键字补全
+        ];
+        
+        langTools.setCompleters(completers);
+        editor._currentLanguageMode = language;
+        
+        console.log(`✅ 已切换到 ${language} 语言的自动完成`);
+    } catch (error) {
+        console.warn('切换语言模式失败:', error);
+        // 失败时回退到 Markdown 模式
+        switchToMarkdownMode(editor);
+    }
+}
+
+/**
+ * 切换回 Markdown 模式
+ */
+function switchToMarkdownMode(editor) {
+    if (!editor) return;
+    
+    // 如果已经是 Markdown 模式，不需要切换
+    if (editor._currentLanguageMode === 'markdown') {
+        return;
+    }
+    
+    try {
+        const langTools = editor._langTools;
+        if (!langTools) return;
+        
+        // 恢复 Markdown 自动完成器
+        langTools.setCompleters([editor._markdownCompleter]);
+        editor._currentLanguageMode = 'markdown';
+    } catch (error) {
+        console.warn('切换回 Markdown 模式失败:', error);
     }
 }

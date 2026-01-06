@@ -4,6 +4,48 @@
  */
 
 /**
+ * 检测光标是否在字符串内
+ */
+function isInsideString(session, pos) {
+    try {
+        const line = session.getLine(pos.row);
+        const beforeCursor = line.substring(0, pos.column);
+        
+        // 检测单引号、双引号、反引号
+        let inSingleQuote = false;
+        let inDoubleQuote = false;
+        let inBacktick = false;
+        let escapeNext = false;
+        
+        for (let i = 0; i < beforeCursor.length; i++) {
+            const char = beforeCursor[i];
+            
+            if (escapeNext) {
+                escapeNext = false;
+                continue;
+            }
+            
+            if (char === '\\') {
+                escapeNext = true;
+                continue;
+            }
+            
+            if (char === "'" && !inDoubleQuote && !inBacktick) {
+                inSingleQuote = !inSingleQuote;
+            } else if (char === '"' && !inSingleQuote && !inBacktick) {
+                inDoubleQuote = !inDoubleQuote;
+            } else if (char === '`' && !inSingleQuote && !inDoubleQuote) {
+                inBacktick = !inBacktick;
+            }
+        }
+        
+        return inSingleQuote || inDoubleQuote || inBacktick;
+    } catch (error) {
+        return false;
+    }
+}
+
+/**
  * Markdown 自动完成项配置
  * 包含所有常用的 Markdown 语法和模板
  */
@@ -184,6 +226,12 @@ export const markdownCompletions = [
 export function createMarkdownCompleter() {
     return {
         getCompletions: function(editor, session, pos, prefix, callback) {
+            // 检测是否在字符串内
+            if (isInsideString(session, pos)) {
+                callback(null, []);
+                return;
+            }
+            
             // 获取当前行的文本
             const line = session.getLine(pos.row);
             const beforeCursor = line.substring(0, pos.column);
