@@ -33,15 +33,15 @@ export default {
 
 A modern Markdown editor with **Mermaid Charts** and **KaTeX Math** support!
 
-## ✨ Features
+## Features
 
-- ✅ Live Preview
-- ✅ Mermaid Chart Support
-- ✅ KaTeX Math Formulas
-- ✅ Code Highlighting
-- ✅ Dark/Light Theme
-- ✅ File Import/Export
-- ✅ Auto-save Drafts
+- Live Preview
+- Mermaid Chart Support
+- KaTeX Math Formulas
+- Code Highlighting
+- Dark/Light Theme
+- File Import/Export
+- Auto-save Drafts
 
 ---
 
