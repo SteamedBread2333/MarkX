@@ -2,54 +2,14 @@
  * 应用常量定义
  */
 
-// 默认文档内容
-export const DEFAULT_CONTENT = `# 欢迎使用 MarkX！
+import { t } from './i18n.js';
 
-现代化的 Markdown 编辑器，支持 **Mermaid 图表** 和 **KaTeX 数学公式**！
+/**
+ * 获取默认文档内容（根据当前语言）
+ */
+export function getDefaultContent() {
+    return t('ui.editor.placeholder');
+}
 
-## ✨ 特色功能
-
-- ✅ 实时预览
-- ✅ Mermaid 图表支持
-- ✅ KaTeX 数学公式
-- ✅ 代码高亮
-- ✅ 暗色/亮色主题
-- ✅ 文件导入导出
-- ✅ 自动保存草稿
-
----
-
-## 📊 Mermaid 图表示例
-
-点击工具栏的「图表」按钮快速插入模板！
-
-\`\`\`mermaid
-graph TD
-    A[开始] --> B{是否喜欢?}
-    B -->|是| C[太棒了!]
-    B -->|否| D[试试其他功能]
-    C --> E[分享给朋友]
-    D --> E
-\`\`\`
-
----
-
-## 🧮 数学公式示例
-
-点击工具栏的「公式」按钮快速插入模板！
-
-**行内公式**：质能方程 $E = mc^2$，勾股定理 $a^2 + b^2 = c^2$
-
-**块级公式**：
-
-$$
-x = \\frac{-b \\pm \\sqrt{b^2 - 4ac}}{2a}
-$$
-
-$$
-\\sum_{i=1}^{n} i = \\frac{n(n+1)}{2}
-$$
-
----
-
-试试编辑内容，右侧会实时更新！🚀`;
+// 为了向后兼容，保留常量导出（使用英文作为默认值）
+export const DEFAULT_CONTENT = getDefaultContent();

@@ -8,6 +8,7 @@ import { setStatus } from '../core/ui-utils.js';
 import { getEditorContent, setEditorContent } from '../editor/ace-editor.js';
 import { renderMarkdown } from '../renderer/markdown.js';
 import { t } from '../core/i18n.js';
+import { getDefaultContent } from '../core/constants.js';
 
 /**
  * 新建文档
@@ -19,7 +20,8 @@ export function newDocument() {
         }
     }
     
-    setEditorContent('');
+    // 使用多语言默认内容
+    setEditorContent(getDefaultContent());
     AppState.currentFileName = 'untitled.md';
     AppState.isDirty = false;
     renderMarkdown();

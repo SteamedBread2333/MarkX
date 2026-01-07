@@ -3,7 +3,7 @@
  */
 
 import { AppState } from '../core/state.js';
-import { DEFAULT_CONTENT } from '../core/constants.js';
+import { getDefaultContent } from '../core/constants.js';
 import { elements } from '../core/elements.js';
 import { setStatus } from '../core/ui-utils.js';
 import { createMarkdownCompleter } from './autocomplete.js';
@@ -22,6 +22,19 @@ window.addEventListener('languagechange', () => {
             editor._langTools.setCompleters([markdownCompleter]);
         }
     }
+    
+    // 如果编辑器内容为空或者是默认内容，更新为新语言的默认内容
+    if (editor) {
+        const currentContent = editor.getValue();
+        const oldDefaultContent = editor._lastDefaultContent || '';
+        
+        // 如果当前内容是空的，或者是之前的默认内容，则更新为新语言的默认内容
+        if (currentContent.trim() === '' || currentContent === oldDefaultContent) {
+            const newDefaultContent = getDefaultContent();
+            editor.setValue(newDefaultContent, -1);
+            editor._lastDefaultContent = newDefaultContent;
+        }
+    }
 });
 
 // 全局编辑器实例
@@ -38,11 +51,14 @@ export function initEditor() {
             return;
         }
         
+        // 获取默认内容
+        const defaultContent = getDefaultContent();
+        
         // 创建编辑器实例
         aceEditor = window.ace.edit('editor', {
             mode: 'ace/mode/markdown',
             theme: 'ace/theme/github',
-            value: DEFAULT_CONTENT,
+            value: defaultContent, // 使用多语言默认内容
             fontSize: 14,  // 使用数字而不是字符串，避免中文输入时光标错位
             fontFamily: "Consolas, 'Courier New', 'Source Code Pro', Monaco, monospace",  // 强制使用等宽字体，修复中文输入光标错位
             showPrintMargin: false,
@@ -66,6 +82,9 @@ export function initEditor() {
             behavioursEnabled: true,
             wrapBehavioursEnabled: true
         });
+        
+        // 保存当前默认内容，用于语言切换时判断
+        aceEditor._lastDefaultContent = defaultContent;
         
         // 获取 session
         const session = aceEditor.getSession();

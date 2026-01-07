@@ -6,6 +6,7 @@ import { AppState } from '../core/state.js';
 import { elements } from '../core/elements.js';
 import { setStatus } from '../core/ui-utils.js';
 import { t } from '../core/i18n.js';
+import { getDefaultContent } from '../core/constants.js';
 
 /**
  * 导出 HTML
@@ -107,7 +108,8 @@ export async function clearContent() {
     }
     const { setEditorContent } = await import('../editor/ace-editor.js');
     const { renderMarkdown } = await import('../renderer/markdown.js');
-    setEditorContent('');
+    // 清空后设置为多语言默认内容
+    setEditorContent(getDefaultContent());
     AppState.isDirty = false;
     await renderMarkdown();
     setStatus(t('messages.contentCleared'));
