@@ -17,7 +17,7 @@
         window.APP_VERSION = '2026.01.07.045308';
         window.APP_BUILD_TIME = '2026-01-07T04:53:08Z';
         
-        // 检查版本并强制刷新
+        // 检查版本并强制刷新（不添加查询参数，因为 HTML 不会被缓存）
         (function() {
             const storedVersion = localStorage.getItem('markx_version');
             const storedBuildTime = localStorage.getItem('markx_build_time');
@@ -27,12 +27,13 @@
                 console.log('🔄 检测到新版本 ' + window.APP_VERSION + '，正在更新...');
                 localStorage.clear();
                 sessionStorage.clear();
-                // 强制刷新页面（添加时间戳确保获取最新版本）
-                window.location.href = window.location.href.split('?')[0] + '?v=' + window.APP_VERSION + '&_t=' + Date.now();
+                // 直接刷新页面，不添加查询参数（HTML 不会被缓存）
+                window.location.reload(true);
             } else if (storedBuildTime && storedBuildTime !== window.APP_BUILD_TIME) {
                 // 构建时间不匹配，刷新
                 console.log('🔄 检测到新构建，正在更新...');
-                window.location.href = window.location.href.split('?')[0] + '?v=' + window.APP_VERSION + '&_t=' + Date.now();
+                // 直接刷新页面，不添加查询参数（HTML 不会被缓存）
+                window.location.reload(true);
             } else {
                 // 保存当前版本和构建时间
                 localStorage.setItem('markx_version', window.APP_VERSION);
