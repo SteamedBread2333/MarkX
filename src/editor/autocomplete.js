@@ -341,15 +341,11 @@ export function createMarkdownCompleter() {
                 availableCompletions = markdownCompletions.filter(item => 
                     item.name.includes('code') || item.meta.includes('代码')
                 );
-                console.log('🔍 代码块内（无语言），过滤后的选项数量:', availableCompletions.length);
             } else if (blockInfo.inBlockquote) {
                 // 在引用块内：只显示引用块相关的选项
                 availableCompletions = markdownCompletions.filter(item => 
                     item.name.includes('blockquote')
                 );
-                console.log('🔍 引用块内，过滤后的选项数量:', availableCompletions.length);
-            } else if (!blockInfo.inCodeBlock && !blockInfo.inBlockquote) {
-                console.log('🔍 不在块内，显示所有选项');
             }
             
             // 特殊字符触发：输入 #, *, [, !, -, >, `, |, $, ^, ~, =, _, +, :, < 等字符时自动触发

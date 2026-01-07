@@ -39,25 +39,51 @@ import { exportHTML, copyMarkdown, copyHTML, clearContent } from './export/html.
  */
 function handleKeyboard(event) {
     const ctrl = event.ctrlKey || event.metaKey;
+    const key = event.key.toLowerCase();
     
-    if (ctrl && event.key === 's') {
+    // 优先处理，阻止默认行为
+    if (ctrl && key === 's') {
         event.preventDefault();
+        event.stopPropagation();
         saveFile();
-    } else if (ctrl && event.key === 'o') {
+        return false;
+    } else if (ctrl && key === 'o') {
         event.preventDefault();
+        event.stopPropagation();
         openFile();
-    } else if (ctrl && event.key === 'n') {
+        return false;
+    } else if (ctrl && key === 'n') {
         event.preventDefault();
+        event.stopPropagation();
         newDocument();
-    } else if (ctrl && event.key === 'b') {
-        event.preventDefault();
-        insertText('**', '**', '加粗文本');
-    } else if (ctrl && event.key === 'i') {
-        event.preventDefault();
-        insertText('*', '*', '斜体文本');
-    } else if (ctrl && event.key === 'k') {
-        event.preventDefault();
-        insertText('[', '](https://example.com)', '链接文本');
+        return false;
+    } else if (ctrl && key === 'b') {
+        // 只在编辑器聚焦时处理，避免与浏览器书签快捷键冲突
+        const editor = getEditorInstance();
+        if (editor && editor.isFocused()) {
+            event.preventDefault();
+            event.stopPropagation();
+            insertText('**', '**', '加粗文本');
+            return false;
+        }
+    } else if (ctrl && key === 'i') {
+        // 只在编辑器聚焦时处理
+        const editor = getEditorInstance();
+        if (editor && editor.isFocused()) {
+            event.preventDefault();
+            event.stopPropagation();
+            insertText('*', '*', '斜体文本');
+            return false;
+        }
+    } else if (ctrl && key === 'k') {
+        // 只在编辑器聚焦时处理
+        const editor = getEditorInstance();
+        if (editor && editor.isFocused()) {
+            event.preventDefault();
+            event.stopPropagation();
+            insertText('[', '](https://example.com)', '链接文本');
+            return false;
+        }
     }
 }
 
@@ -135,24 +161,13 @@ function initEventListeners() {
     document.getElementById('copyHtmlBtn').addEventListener('click', copyHTML);
     document.getElementById('clearBtn').addEventListener('click', clearContent);
     
-    // 帮助文档按钮 - 使用事件委托确保能捕获点击
+    // 帮助文档按钮
     function initHelpModal() {
         const helpBtn = document.getElementById('helpBtn');
         const helpModal = document.getElementById('helpModal');
         const helpModalClose = document.getElementById('helpModalClose');
         
-        console.log('🔍 初始化帮助文档:', { helpBtn, helpModal, helpModalClose });
-        
-        if (!helpBtn) {
-            console.error('❌ helpBtn 未找到');
-            return;
-        }
-        if (!helpModal) {
-            console.error('❌ helpModal 未找到');
-            return;
-        }
-        if (!helpModalClose) {
-            console.error('❌ helpModalClose 未找到');
+        if (!helpBtn || !helpModal || !helpModalClose) {
             return;
         }
         
@@ -160,27 +175,23 @@ function initEventListeners() {
         helpBtn.addEventListener('mousedown', function(e) {
             e.preventDefault();
             e.stopPropagation();
-            console.log('✅ 帮助按钮被点击 (mousedown)');
             toggleHelpModal(true);
         });
         
         helpBtn.addEventListener('click', function(e) {
             e.preventDefault();
             e.stopPropagation();
-            console.log('✅ 帮助按钮被点击 (click)');
             toggleHelpModal(true);
         });
         
         helpModalClose.addEventListener('click', function(e) {
             e.preventDefault();
             e.stopPropagation();
-            console.log('❌ 关闭按钮被点击');
             toggleHelpModal(false);
         });
         
         helpModal.addEventListener('click', function(e) {
             if (e.target === helpModal) {
-                console.log('❌ 背景被点击，关闭模态框');
                 toggleHelpModal(false);
             }
         });
@@ -188,7 +199,6 @@ function initEventListeners() {
         // ESC 键关闭帮助文档
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Escape' && helpModal.style.display === 'flex') {
-                console.log('❌ ESC 键被按下，关闭模态框');
                 toggleHelpModal(false);
             }
         });
@@ -198,16 +208,11 @@ function initEventListeners() {
                 helpModal.style.display = 'flex';
                 helpModal.style.setProperty('display', 'flex', 'important');
                 document.body.style.overflow = 'hidden';
-                console.log('📦 模态框已显示');
             } else {
                 helpModal.style.display = 'none';
                 document.body.style.overflow = '';
-                console.log('📦 模态框已隐藏');
             }
         }
-        
-        // 暴露到全局，方便调试
-        window.toggleHelpModal = toggleHelpModal;
     }
     
     initHelpModal();
@@ -215,8 +220,8 @@ function initEventListeners() {
     // 文件输入
     elements.fileInput.addEventListener('change', handleFileSelect);
     
-    // 键盘快捷键
-    document.addEventListener('keydown', handleKeyboard);
+    // 键盘快捷键 - 使用 capture 模式确保优先捕获
+    document.addEventListener('keydown', handleKeyboard, true);
     
     // 页面离开警告（有未保存内容时）
     window.addEventListener('beforeunload', (e) => {

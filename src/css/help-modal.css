@@ -1,4 +1,4 @@
-/* ==================== 帮助文档模态框样式 ==================== */
+/* ==================== 帮助文档模态框样式 - 朴素风格 ==================== */
 
 .help-modal {
     position: fixed !important;
@@ -27,14 +27,14 @@
 .help-modal-content {
     background: var(--bg-primary);
     border: 1px solid var(--border-color);
-    border-radius: 12px;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-    max-width: 700px;
+    border-radius: 8px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    max-width: 800px;
     width: 100%;
     max-height: 85vh;
     display: flex;
     flex-direction: column;
-    animation: slideUp 0.3s ease;
+    animation: slideUp 0.2s ease;
     overflow: hidden;
 }
 
@@ -42,13 +42,25 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: var(--spacing-lg);
+    padding: 24px 32px;
     border-bottom: 1px solid var(--border-color);
+}
+
+.help-header-title {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
+.help-header-icon {
+    width: 20px;
+    height: 20px;
+    color: var(--text-secondary);
 }
 
 .help-modal-header h2 {
     margin: 0;
-    font-size: 20px;
+    font-size: 18px;
     font-weight: 600;
     color: var(--text-primary);
 }
@@ -60,73 +72,89 @@
     align-items: center;
     justify-content: center;
     background: transparent;
-    border: 1px solid transparent;
-    border-radius: 6px;
+    border: none;
+    border-radius: 4px;
     color: var(--text-secondary);
     cursor: pointer;
-    transition: all var(--transition-fast);
+    transition: color 0.15s ease;
 }
 
 .help-modal-close:hover {
-    background: var(--bg-hover);
-    border-color: var(--border-color);
     color: var(--text-primary);
 }
 
 .help-modal-close .icon {
-    width: 18px;
-    height: 18px;
+    width: 16px;
+    height: 16px;
 }
 
 .help-modal-body {
-    padding: var(--spacing-lg);
+    padding: 32px;
     overflow-y: auto;
     flex: 1;
+    min-height: 0;
 }
 
 .help-section {
-    margin-bottom: var(--spacing-xl);
+    margin-bottom: 32px;
 }
 
 .help-section:last-child {
     margin-bottom: 0;
 }
 
+.help-section-header {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.help-section-icon {
+    width: 18px;
+    height: 18px;
+    color: var(--text-secondary);
+    flex-shrink: 0;
+}
+
 .help-section h3 {
-    margin: 0 0 var(--spacing-md) 0;
-    font-size: 18px;
+    margin: 0;
+    font-size: 16px;
     font-weight: 600;
     color: var(--text-primary);
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-xs);
 }
 
-.help-shortcuts {
+/* 快捷键网格 */
+.help-shortcuts-grid {
     display: grid;
-    gap: var(--spacing-sm);
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 12px;
 }
 
-.help-shortcut-item {
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-md);
-    padding: var(--spacing-sm) var(--spacing-md);
+.help-shortcut-card {
+    padding: 12px 16px;
     background: var(--bg-secondary);
-    border-radius: 8px;
-    transition: background var(--transition-fast);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    transition: border-color 0.15s ease;
 }
 
-.help-shortcut-item:hover {
-    background: var(--bg-hover);
+.help-shortcut-card:hover {
+    border-color: var(--accent-color);
 }
 
 .help-shortcut-keys {
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: 4px;
-    min-width: 120px;
-    flex-shrink: 0;
+    margin-bottom: 6px;
+}
+
+.help-shortcut-keys.large {
+    margin-bottom: 10px;
 }
 
 .help-shortcut-keys kbd {
@@ -135,68 +163,128 @@
     border-radius: 4px;
     font-family: var(--font-mono);
     font-size: 12px;
+    font-weight: 500;
     border: 1px solid var(--border-color);
     color: var(--text-primary);
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    min-width: 28px;
+    text-align: center;
 }
 
-.help-shortcut-desc {
-    color: var(--text-secondary);
-    font-size: 14px;
-}
-
-.help-note {
-    margin-top: var(--spacing-md);
-    padding: var(--spacing-sm) var(--spacing-md);
-    background: var(--bg-secondary);
-    border-radius: 6px;
+.help-shortcut-keys.large kbd {
+    padding: 6px 12px;
     font-size: 13px;
+    min-width: 36px;
+}
+
+.help-shortcut-keys span {
     color: var(--text-secondary);
+    font-size: 12px;
+    margin: 0 2px;
 }
 
-.help-note strong {
-    color: var(--text-primary);
+.help-shortcut-label {
+    text-align: center;
+    color: var(--text-secondary);
+    font-size: 13px;
 }
 
-.help-note kbd {
-    background: var(--bg-tertiary);
-    padding: 2px 6px;
-    border-radius: 3px;
-    font-family: var(--font-mono);
-    font-size: 11px;
-    border: 1px solid var(--border-color);
-    color: var(--text-primary);
+/* 自动完成卡片网格 */
+.help-autocomplete-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 12px;
 }
 
-.help-autocomplete {
-    display: flex;
-    flex-direction: column;
-    gap: var(--spacing-md);
-}
-
-.help-autocomplete-item {
-    padding: var(--spacing-md);
+.help-autocomplete-card {
+    padding: 16px;
     background: var(--bg-secondary);
-    border-radius: 8px;
-    border-left: 3px solid var(--accent-color);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    transition: border-color 0.15s ease;
 }
 
-.help-autocomplete-title {
+.help-autocomplete-card:hover {
+    border-color: var(--accent-color);
+}
+
+.help-autocomplete-card.highlight {
+    border-color: var(--accent-color);
+    border-width: 2px;
+    background: var(--bg-secondary);
+}
+
+.help-card-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+}
+
+.help-card-icon {
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg-tertiary);
+    border-radius: 4px;
+    color: var(--accent-color);
+    flex-shrink: 0;
+}
+
+.help-card-icon svg {
+    width: 16px;
+    height: 16px;
+}
+
+.help-card-title {
     font-weight: 600;
     color: var(--text-primary);
-    margin-bottom: var(--spacing-xs);
-    font-size: 15px;
-}
-
-.help-autocomplete-desc {
-    color: var(--text-secondary);
     font-size: 14px;
-    line-height: 1.6;
 }
 
-.help-autocomplete-desc code {
+.help-card-content {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.help-card-desc {
+    color: var(--text-secondary);
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+/* 功能说明 */
+.help-features {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.help-feature-item {
+    padding: 12px 16px;
+    background: var(--bg-secondary);
+    border-left: 3px solid var(--accent-color);
+    border-radius: 4px;
+}
+
+.help-feature-title {
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+    font-size: 14px;
+}
+
+.help-feature-desc {
+    color: var(--text-secondary);
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.help-feature-desc code {
     background: var(--bg-tertiary);
-    padding: 2px 6px;
+    padding: 2px 4px;
     border-radius: 3px;
     font-family: var(--font-mono);
     font-size: 12px;
@@ -204,19 +292,26 @@
     border: 1px solid var(--border-color);
 }
 
-.help-autocomplete-desc ul {
-    margin: var(--spacing-sm) 0 0 0;
-    padding-left: var(--spacing-lg);
-    list-style-type: disc;
+/* 页脚 */
+.help-footer {
+    margin-top: 32px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border-color);
 }
 
-.help-autocomplete-desc li {
-    margin-bottom: var(--spacing-xs);
+.help-footer-note {
+    text-align: center;
+    font-size: 12px;
+    color: var(--text-secondary);
 }
 
-.help-autocomplete-desc kbd {
+.help-footer-note strong {
+    color: var(--text-primary);
+}
+
+.help-footer-note kbd {
     background: var(--bg-tertiary);
-    padding: 2px 6px;
+    padding: 2px 4px;
     border-radius: 3px;
     font-family: var(--font-mono);
     font-size: 11px;
@@ -246,20 +341,41 @@
     }
 }
 
+/* 滚动条样式 */
+.help-modal-body::-webkit-scrollbar {
+    width: 8px;
+}
+
+.help-modal-body::-webkit-scrollbar-track {
+    background: var(--bg-secondary);
+}
+
+.help-modal-body::-webkit-scrollbar-thumb {
+    background: var(--border-color);
+    border-radius: 4px;
+}
+
+.help-modal-body::-webkit-scrollbar-thumb:hover {
+    background: var(--text-secondary);
+}
+
 /* 响应式 */
 @media (max-width: 768px) {
     .help-modal-content {
         max-width: 100%;
-        max-height: 90vh;
+        max-height: 95vh;
     }
     
-    .help-shortcut-item {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: var(--spacing-xs);
+    .help-modal-header {
+        padding: 16px 20px;
     }
     
-    .help-shortcut-keys {
-        min-width: auto;
+    .help-modal-body {
+        padding: 20px;
+    }
+    
+    .help-shortcuts-grid,
+    .help-autocomplete-grid {
+        grid-template-columns: 1fr;
     }
 }

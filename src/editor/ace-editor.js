@@ -572,11 +572,6 @@ function setupAutocompletion(editor) {
                     }
                 });
                 
-                console.log('✅ 自动完成功能已配置');
-                console.log('📝 使用方法：');
-                console.log('   1. 输入关键词（如：标题、链接、表格）后会自动显示提示');
-                console.log('   2. 按 Ctrl+E (Windows/Linux) 或 Cmd+E (Mac) 手动触发');
-                console.log('   3. 使用方向键选择，Enter 确认，Tab 跳转到下一个占位符');
             } catch (error) {
                 console.error('❌ 配置自动完成功能时出错:', error);
                 console.error('错误详情:', error.stack);
@@ -723,7 +718,6 @@ function switchToLanguageMode(editor, language) {
         langTools.setCompleters(completers);
         editor._currentLanguageMode = language;
         
-        console.log(`✅ 已切换到 ${language} 语言的自动完成`);
     } catch (error) {
         console.warn('切换语言模式失败:', error);
         // 失败时回退到 Markdown 模式

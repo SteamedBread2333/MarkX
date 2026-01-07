@@ -210,11 +210,4 @@ export function initScrollSync() {
     // 监听预览区滚动
     elements.previewContainer.addEventListener('scroll', scrollSyncState.previewScrollHandler, { passive: true });
     
-    console.log('✅ 滚动同步已初始化', {
-        aceEditor: !!aceEditor,
-        previewContainer: !!elements.previewContainer,
-        renderer: !!aceEditor.renderer,
-        container: !!aceEditor.renderer.container,
-        pollingInterval: !!scrollSyncState.pollingInterval
-    });
 }

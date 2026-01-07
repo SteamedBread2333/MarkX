@@ -106,8 +106,4 @@ export function initEditorResize() {
     document.addEventListener('mousedown', handleMouseDown);
     document.addEventListener('mouseup', handleMouseUp);
     
-    console.log('✅ 编辑器拖拽功能已初始化', {
-        editorContainer: !!elements.editorContainer,
-        previewContainer: !!elements.previewContainer
-    });
 }

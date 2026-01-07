@@ -42,8 +42,6 @@ export async function renderMermaidCharts() {
                 // 确保 gitGraph 后面有换行
                 code = code.replace(/^gitGraph\s*/, 'gitGraph\n');
             }
-            
-            console.log('🔧 已自动修复 gitGraph 语法');
         }
         
         try {
@@ -104,7 +102,6 @@ function bindMermaidExportEvents(wrapper, diagramId) {
         btn.addEventListener('click', (e) => {
             // 防止重复点击
             if (btn.disabled) {
-                console.log('按钮已禁用，忽略点击');
                 return;
             }
             
@@ -190,14 +187,12 @@ ${svgString}`;
 function exportMermaidAsPNG(svgElement, diagramId) {
     try {
         setStatus('正在导出 PNG...');
-        console.log('开始导出 PNG:', diagramId);
         
         // 获取 SVG 尺寸
         const bbox = svgElement.getBoundingClientRect();
         const width = Math.floor(bbox.width);
         const height = Math.floor(bbox.height);
         
-        console.log('SVG 尺寸:', width, 'x', height);
         
         // 检查尺寸是否有效
         if (width <= 0 || height <= 0) {
@@ -243,7 +238,6 @@ function exportMermaidAsPNG(svgElement, diagramId) {
         
         img.onload = () => {
             clearTimeout(timeout);
-            console.log('图片加载成功');
             
             try {
                 ctx.drawImage(img, 0, 0, width, height);
@@ -256,7 +250,6 @@ function exportMermaidAsPNG(svgElement, diagramId) {
                         return;
                     }
                     
-                    console.log('PNG Blob 创建成功，大小:', blob.size);
                     
                     const pngUrl = URL.createObjectURL(blob);
                     const a = document.createElement('a');
@@ -272,7 +265,6 @@ function exportMermaidAsPNG(svgElement, diagramId) {
                     }, 100);
                     
                     setStatus('PNG 导出成功 ✅');
-                    console.log('PNG 导出完成');
                 }, 'image/png');
             } catch (err) {
                 clearTimeout(timeout);
@@ -368,7 +360,6 @@ function openMermaidFullscreenViewer(svgElement, diagramId, originalWrapper) {
         });
     }
     
-    console.log('获取到的 SVG 尺寸:', { svgWidth, svgHeight });
     
     // 创建全屏容器
     const viewer = document.createElement('div');
@@ -452,7 +443,6 @@ function openMermaidFullscreenViewer(svgElement, diagramId, originalWrapper) {
                     if (newRect.width > 0 && newRect.height > 0) {
                         viewer._svgWidth = newRect.width;
                         viewer._svgHeight = newRect.height;
-                        console.log('重新获取 SVG 尺寸:', { width: viewer._svgWidth, height: viewer._svgHeight });
                     }
                 }
                 initMermaidViewer(viewer, svgClone);

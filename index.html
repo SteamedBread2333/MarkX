@@ -224,6 +224,36 @@
             <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
             <circle cx="12" cy="17" r="1" fill="currentColor"/>
         </symbol>
+        <symbol id="icon-keyboard" viewBox="0 0 24 24">
+            <rect x="3" y="5" width="18" height="14" rx="2" fill="none" stroke="currentColor" stroke-width="2"/>
+            <rect x="5" y="8" width="2" height="2" rx="0.5" fill="currentColor"/>
+            <rect x="9" y="8" width="2" height="2" rx="0.5" fill="currentColor"/>
+            <rect x="13" y="8" width="2" height="2" rx="0.5" fill="currentColor"/>
+            <rect x="17" y="8" width="2" height="2" rx="0.5" fill="currentColor"/>
+            <rect x="7" y="12" width="6" height="2" rx="0.5" fill="currentColor"/>
+            <rect x="15" y="12" width="4" height="2" rx="0.5" fill="currentColor"/>
+        </symbol>
+        <symbol id="icon-autocomplete" viewBox="0 0 24 24">
+            <path d="M12 2L2 7l10 5 10-5-10-5z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M2 17l10 5 10-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M2 12l10 5 10-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </symbol>
+        <symbol id="icon-search" viewBox="0 0 24 24">
+            <circle cx="11" cy="11" r="8" fill="none" stroke="currentColor" stroke-width="2"/>
+            <path d="m21 21-4.35-4.35" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </symbol>
+        <symbol id="icon-arrow-up-down" viewBox="0 0 24 24">
+            <path d="M7 13l5-5 5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M7 11l5 5 5-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </symbol>
+        <symbol id="icon-enter" viewBox="0 0 24 24">
+            <path d="M9 18l6-6-6-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M3 12h12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </symbol>
+        <symbol id="icon-tab" viewBox="0 0 24 24">
+            <path d="M3 12h18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            <path d="M9 6l-6 6 6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </symbol>
     </svg>
 
     <!-- GitHub 角标 -->
@@ -445,98 +475,172 @@ $$
     <div id="helpModal" class="help-modal" style="display: none;">
         <div class="help-modal-content">
             <div class="help-modal-header">
-                <h2>📚 快捷键与自动完成</h2>
-                <button class="help-modal-close" id="helpModalClose">
+                <div class="help-header-title">
+                    <svg class="help-header-icon"><use href="#icon-help"></use></svg>
+                    <h2>快捷键与自动完成</h2>
+                </div>
+                <button class="help-modal-close" id="helpModalClose" title="关闭 (ESC)">
                     <svg class="icon"><use href="#icon-close"></use></svg>
                 </button>
             </div>
             <div class="help-modal-body">
+                <!-- 快捷键部分 -->
                 <div class="help-section">
-                    <h3>⌨️ 快捷键</h3>
-                    <div class="help-shortcuts">
-                        <div class="help-shortcut-item">
-                            <div class="help-shortcut-keys">
-                                <kbd>Ctrl</kbd> + <kbd>S</kbd>
-                            </div>
-                            <div class="help-shortcut-desc">保存文件</div>
-                        </div>
-                        <div class="help-shortcut-item">
-                            <div class="help-shortcut-keys">
-                                <kbd>Ctrl</kbd> + <kbd>O</kbd>
-                            </div>
-                            <div class="help-shortcut-desc">打开文件</div>
-                        </div>
-                        <div class="help-shortcut-item">
-                            <div class="help-shortcut-keys">
-                                <kbd>Ctrl</kbd> + <kbd>N</kbd>
-                            </div>
-                            <div class="help-shortcut-desc">新建文档</div>
-                        </div>
-                        <div class="help-shortcut-item">
-                            <div class="help-shortcut-keys">
-                                <kbd>Ctrl</kbd> + <kbd>B</kbd>
-                            </div>
-                            <div class="help-shortcut-desc">加粗文本</div>
-                        </div>
-                        <div class="help-shortcut-item">
-                            <div class="help-shortcut-keys">
-                                <kbd>Ctrl</kbd> + <kbd>I</kbd>
-                            </div>
-                            <div class="help-shortcut-desc">斜体文本</div>
-                        </div>
-                        <div class="help-shortcut-item">
-                            <div class="help-shortcut-keys">
-                                <kbd>Ctrl</kbd> + <kbd>K</kbd>
-                            </div>
-                            <div class="help-shortcut-desc">插入链接</div>
-                        </div>
-                        <div class="help-shortcut-item">
-                            <div class="help-shortcut-keys">
-                                <kbd>Ctrl</kbd> + <kbd>E</kbd>
-                            </div>
-                            <div class="help-shortcut-desc">手动触发自动完成</div>
-                        </div>
+                    <div class="help-section-header">
+                        <svg class="help-section-icon"><use href="#icon-keyboard"></use></svg>
+                        <h3>编辑器快捷键</h3>
                     </div>
-                    <div class="help-note">
-                        <strong>提示：</strong>在 Mac 上，<kbd>Ctrl</kbd> 键对应 <kbd>Cmd</kbd> 键
+                    <div class="help-shortcuts-grid">
+                        <div class="help-shortcut-card">
+                            <div class="help-shortcut-keys">
+                                <kbd>Ctrl</kbd><span>+</span><kbd>S</kbd>
+                            </div>
+                            <div class="help-shortcut-label">保存文件</div>
+                        </div>
+                        <div class="help-shortcut-card">
+                            <div class="help-shortcut-keys">
+                                <kbd>Ctrl</kbd><span>+</span><kbd>O</kbd>
+                            </div>
+                            <div class="help-shortcut-label">打开文件</div>
+                        </div>
+                        <div class="help-shortcut-card">
+                            <div class="help-shortcut-keys">
+                                <kbd>Ctrl</kbd><span>+</span><kbd>N</kbd>
+                            </div>
+                            <div class="help-shortcut-label">新建文档</div>
+                        </div>
+                        <div class="help-shortcut-card">
+                            <div class="help-shortcut-keys">
+                                <kbd>Ctrl</kbd><span>+</span><kbd>B</kbd>
+                            </div>
+                            <div class="help-shortcut-label">加粗文本</div>
+                        </div>
+                        <div class="help-shortcut-card">
+                            <div class="help-shortcut-keys">
+                                <kbd>Ctrl</kbd><span>+</span><kbd>I</kbd>
+                            </div>
+                            <div class="help-shortcut-label">斜体文本</div>
+                        </div>
+                        <div class="help-shortcut-card">
+                            <div class="help-shortcut-keys">
+                                <kbd>Ctrl</kbd><span>+</span><kbd>K</kbd>
+                            </div>
+                            <div class="help-shortcut-label">插入链接</div>
+                        </div>
                     </div>
                 </div>
-                
+
+                <!-- 自动完成快捷键部分 -->
                 <div class="help-section">
-                    <h3>✨ 自动完成功能</h3>
-                    <div class="help-autocomplete">
-                        <div class="help-autocomplete-item">
-                            <div class="help-autocomplete-title">🎯 智能提示</div>
-                            <div class="help-autocomplete-desc">
-                                输入 Markdown 语法关键词时，会自动显示相关模板和快捷方式。
-                                支持标题、列表、表格、代码块、链接、图片等多种语法。
+                    <div class="help-section-header">
+                        <svg class="help-section-icon"><use href="#icon-autocomplete"></use></svg>
+                        <h3>自动完成快捷键</h3>
+                    </div>
+                    <div class="help-autocomplete-grid">
+                        <div class="help-autocomplete-card highlight">
+                            <div class="help-card-header">
+                                <svg class="help-card-icon"><use href="#icon-keyboard"></use></svg>
+                                <div class="help-card-title">手动触发</div>
+                            </div>
+                            <div class="help-card-content">
+                                <div class="help-shortcut-keys large">
+                                    <kbd>Ctrl</kbd><span>+</span><kbd>E</kbd>
+                                </div>
+                                <div class="help-card-desc">
+                                    在任何位置手动触发自动完成菜单。在代码块或引用块内编辑时，底部状态栏会显示提示。
+                                </div>
                             </div>
                         </div>
-                        <div class="help-autocomplete-item">
-                            <div class="help-autocomplete-title">🔤 特殊字符触发</div>
-                            <div class="help-autocomplete-desc">
-                                输入特殊字符（如 <code>#</code>、<code>*</code>、<code>[</code>、<code>`</code> 等）时，
-                                会自动显示相关的自动完成选项。
+                        <div class="help-autocomplete-card">
+                            <div class="help-card-header">
+                                <svg class="help-card-icon"><use href="#icon-arrow-up-down"></use></svg>
+                                <div class="help-card-title">导航选择</div>
+                            </div>
+                            <div class="help-card-content">
+                                <div class="help-shortcut-keys">
+                                    <kbd>↑</kbd> <kbd>↓</kbd>
+                                </div>
+                                <div class="help-card-desc">
+                                    在自动完成菜单中上下移动选择项
+                                </div>
                             </div>
                         </div>
-                        <div class="help-autocomplete-item">
-                            <div class="help-autocomplete-title">📦 块内编辑</div>
-                            <div class="help-autocomplete-desc">
-                                在代码块或引用块内编辑时，自动完成会智能过滤，只显示与该块相关的选项。
-                                按 <kbd>Ctrl+E</kbd>（Mac: <kbd>Cmd+E</kbd>）可手动触发自动完成。
+                        <div class="help-autocomplete-card">
+                            <div class="help-card-header">
+                                <svg class="help-card-icon"><use href="#icon-enter"></use></svg>
+                                <div class="help-card-title">确认选择</div>
+                            </div>
+                            <div class="help-card-content">
+                                <div class="help-shortcut-keys">
+                                    <kbd>Enter</kbd>
+                                </div>
+                                <div class="help-card-desc">
+                                    确认当前选中的自动完成项并插入
+                                </div>
                             </div>
                         </div>
-                        <div class="help-autocomplete-item">
-                            <div class="help-autocomplete-title">🎨 使用技巧</div>
-                            <div class="help-autocomplete-desc">
-                                <ul>
-                                    <li>使用方向键 <kbd>↑</kbd> <kbd>↓</kbd> 选择选项</li>
-                                    <li>按 <kbd>Enter</kbd> 确认选择</li>
-                                    <li>按 <kbd>Tab</kbd> 跳转到下一个占位符</li>
-                                    <li>按 <kbd>Esc</kbd> 关闭自动完成菜单</li>
-                                </ul>
+                        <div class="help-autocomplete-card">
+                            <div class="help-card-header">
+                                <svg class="help-card-icon"><use href="#icon-tab"></use></svg>
+                                <div class="help-card-title">跳转占位符</div>
+                            </div>
+                            <div class="help-card-content">
+                                <div class="help-shortcut-keys">
+                                    <kbd>Tab</kbd>
+                                </div>
+                                <div class="help-card-desc">
+                                    跳转到模板中的下一个占位符位置
+                                </div>
                             </div>
                         </div>
+                        <div class="help-autocomplete-card">
+                            <div class="help-card-header">
+                                <svg class="help-card-icon"><use href="#icon-close"></use></svg>
+                                <div class="help-card-title">关闭菜单</div>
+                            </div>
+                            <div class="help-card-content">
+                                <div class="help-shortcut-keys">
+                                    <kbd>Esc</kbd>
+                                </div>
+                                <div class="help-card-desc">
+                                    关闭自动完成菜单，取消当前操作
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 自动完成功能说明 -->
+                <div class="help-section">
+                    <div class="help-section-header">
+                        <svg class="help-section-icon"><use href="#icon-search"></use></svg>
+                        <h3>自动完成功能</h3>
+                    </div>
+                    <div class="help-features">
+                        <div class="help-feature-item">
+                            <div class="help-feature-title">智能触发</div>
+                            <div class="help-feature-desc">
+                                输入 Markdown 关键词或特殊字符（<code>#</code>、<code>*</code>、<code>[</code>、<code>`</code> 等）时自动显示相关模板
+                            </div>
+                        </div>
+                        <div class="help-feature-item">
+                            <div class="help-feature-title">上下文感知</div>
+                            <div class="help-feature-desc">
+                                在代码块或引用块内编辑时，自动过滤只显示相关选项。状态栏会显示提示信息。
+                            </div>
+                        </div>
+                        <div class="help-feature-item">
+                            <div class="help-feature-title">模板支持</div>
+                            <div class="help-feature-desc">
+                                支持 200+ Markdown 模板，包括标题、列表、表格、代码块、Mermaid 图表、数学公式等
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="help-footer">
+                    <div class="help-footer-note">
+                        <strong>Mac 用户：</strong>将 <kbd>Ctrl</kbd> 替换为 <kbd>Cmd</kbd>
                     </div>
                 </div>
             </div>
