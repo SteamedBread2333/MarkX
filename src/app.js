@@ -216,10 +216,173 @@ function initEventListeners() {
     }
     
     initHelpModal();
+    initTemplateSearch();
     
     // 文件输入
     elements.fileInput.addEventListener('change', handleFileSelect);
+}
+
+/**
+ * 初始化模板搜索功能
+ */
+function initTemplateSearch() {
+    const searchInput = document.getElementById('templateSearchInput');
+    const searchClear = document.getElementById('templateSearchClear');
+    const searchResult = document.getElementById('templateSearchResult');
+    const templatesContainer = document.getElementById('helpTemplates');
     
+    if (!searchInput || !searchClear || !searchResult || !templatesContainer) {
+        return;
+    }
+    
+    // 搜索功能
+    function performSearch(query) {
+        const searchTerm = query.trim().toLowerCase();
+        
+        if (!searchTerm) {
+            // 清空搜索
+            searchClear.style.display = 'none';
+            searchResult.style.display = 'none';
+            searchResult.textContent = '';
+            
+            // 显示所有模板并移除高亮
+            const allItems = templatesContainer.querySelectorAll('.help-template-item');
+            allItems.forEach(item => {
+                item.style.display = '';
+                item.classList.remove('help-template-match');
+            });
+            
+            const allCategories = templatesContainer.querySelectorAll('.help-template-category');
+            allCategories.forEach(category => {
+                category.style.display = '';
+            });
+            
+            return;
+        }
+        
+        // 显示清除按钮
+        searchClear.style.display = 'flex';
+        
+        // 搜索所有模板项
+        const allItems = templatesContainer.querySelectorAll('.help-template-item');
+        let matchCount = 0;
+        const matchedCategories = new Set();
+        
+        allItems.forEach(item => {
+            const tag = item.querySelector('.help-template-tag');
+            const desc = item.querySelector('.help-template-desc');
+            
+            if (!tag || !desc) return;
+            
+            const tagText = tag.textContent.toLowerCase();
+            const descText = desc.textContent.toLowerCase();
+            
+            // 检查是否匹配
+            let matches = tagText.includes(searchTerm) || descText.includes(searchTerm);
+            
+            // 特殊处理：处理范围标签（如 h1-h6）
+            if (!matches) {
+                // 如果搜索的是 h1-h6 中的某个，且标签是 h1-h6，应该匹配
+                if (/^h[1-6]$/.test(searchTerm) && tagText.includes('h1-h6')) {
+                    matches = true;
+                }
+                // 如果搜索的是数字（如 2、3、4），且标签包含范围（如 h1-h6、table-2col），检查是否在范围内
+                else if (/^\d+$/.test(searchTerm)) {
+                    const num = parseInt(searchTerm);
+                    // 检查标签中是否包含范围，如 "h1-h6" 或 "table-2col"
+                    const rangeMatch = tagText.match(/(\d+)-(\d+)/);
+                    if (rangeMatch) {
+                        const start = parseInt(rangeMatch[1]);
+                        const end = parseInt(rangeMatch[2]);
+                        if (num >= start && num <= end) {
+                            matches = true;
+                        }
+                    }
+                }
+                // 如果搜索词是标签的一部分（如搜索 "h2" 匹配 "h1-h6"）
+                else if (tagText.includes('-')) {
+                    // 检查搜索词是否匹配标签中的任何部分
+                    const parts = tagText.split(/[-_]/);
+                    if (parts.some(part => part.includes(searchTerm) || searchTerm.includes(part))) {
+                        matches = true;
+                    }
+                }
+            }
+            
+            if (matches) {
+                item.style.display = '';
+                item.classList.add('help-template-match');
+                matchCount++;
+                
+                // 标记父类别
+                const category = item.closest('.help-template-category');
+                if (category) {
+                    matchedCategories.add(category);
+                }
+            } else {
+                item.style.display = 'none';
+                item.classList.remove('help-template-match');
+            }
+        });
+        
+        // 显示/隐藏类别
+        const allCategories = templatesContainer.querySelectorAll('.help-template-category');
+        allCategories.forEach(category => {
+            const hasVisibleItems = Array.from(category.querySelectorAll('.help-template-item'))
+                .some(item => item.style.display !== 'none');
+            
+            if (hasVisibleItems || matchedCategories.has(category)) {
+                category.style.display = '';
+            } else {
+                category.style.display = 'none';
+            }
+        });
+        
+        // 显示搜索结果统计
+        if (matchCount > 0) {
+            searchResult.textContent = `找到 ${matchCount} 个匹配项`;
+            searchResult.style.display = 'block';
+            
+            // 滚动到第一个匹配项
+            const firstMatch = templatesContainer.querySelector('.help-template-match');
+            if (firstMatch) {
+                setTimeout(() => {
+                    firstMatch.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                }, 100);
+            }
+        } else {
+            searchResult.textContent = '未找到匹配的模板';
+            searchResult.style.display = 'block';
+        }
+    }
+    
+    // 输入事件
+    searchInput.addEventListener('input', (e) => {
+        performSearch(e.target.value);
+    });
+    
+    // 清除按钮
+    searchClear.addEventListener('click', () => {
+        searchInput.value = '';
+        performSearch('');
+        searchInput.focus();
+    });
+    
+    // Enter 键跳转到第一个结果
+    searchInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            const firstMatch = templatesContainer.querySelector('.help-template-match');
+            if (firstMatch) {
+                firstMatch.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }
+    });
+}
+
+// ==================== 其他事件监听 ====================
+
+function initOtherEventListeners() {
     // 键盘快捷键 - 使用 capture 模式确保优先捕获
     document.addEventListener('keydown', handleKeyboard, true);
     
@@ -250,6 +413,9 @@ function initEventListeners() {
         });
     }
 }
+
+// 初始化其他事件监听
+initOtherEventListeners();
 
 // ==================== 应用初始化 ====================
 

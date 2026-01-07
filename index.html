@@ -620,7 +620,13 @@ $$
                         <div class="help-feature-item">
                             <div class="help-feature-title">智能触发</div>
                             <div class="help-feature-desc">
-                                输入 Markdown 关键词或特殊字符（<code>#</code>、<code>*</code>、<code>[</code>、<code>`</code> 等）时自动显示相关模板
+                                输入 Markdown 关键词或特殊字符（<code>#</code>、<code>*</code>、<code>[</code>、<code>`</code> 等）时自动显示相关模板。也可以输入关键词（如"标题"、"表格"、"代码"）来搜索模板。
+                            </div>
+                        </div>
+                        <div class="help-feature-item">
+                            <div class="help-feature-title">手动唤起</div>
+                            <div class="help-feature-desc">
+                                按 <kbd>Ctrl+E</kbd>（Mac: <kbd>Cmd+E</kbd>）可随时手动触发自动完成菜单，查看所有可用模板。
                             </div>
                         </div>
                         <div class="help-feature-item">
@@ -629,12 +635,297 @@ $$
                                 在代码块或引用块内编辑时，自动过滤只显示相关选项。状态栏会显示提示信息。
                             </div>
                         </div>
-                        <div class="help-feature-item">
-                            <div class="help-feature-title">模板支持</div>
-                            <div class="help-feature-desc">
-                                支持 200+ Markdown 模板，包括标题、列表、表格、代码块、Mermaid 图表、数学公式等
+                    </div>
+                </div>
+
+                <!-- 支持的模板列表 -->
+                <div class="help-section">
+                    <div class="help-section-header">
+                        <svg class="help-section-icon"><use href="#icon-code"></use></svg>
+                        <h3>支持的模板</h3>
+                    </div>
+                    <div class="help-template-search-wrapper">
+                        <div class="help-template-search">
+                            <svg class="help-search-icon"><use href="#icon-search"></use></svg>
+                            <input type="text" id="templateSearchInput" class="help-search-input" placeholder="搜索模板关键词或说明...">
+                            <button id="templateSearchClear" class="help-search-clear" style="display: none;">
+                                <svg class="icon"><use href="#icon-close"></use></svg>
+                            </button>
+                        </div>
+                        <div id="templateSearchResult" class="help-search-result" style="display: none;"></div>
+                    </div>
+                    <div class="help-templates" id="helpTemplates">
+                        <div class="help-template-category">
+                            <div class="help-category-header">
+                                <div class="help-category-title">基础语法</div>
+                                <div class="help-category-desc">标题、文本格式、链接和图片等基础 Markdown 语法</div>
+                            </div>
+                            <div class="help-category-items">
+                                <div class="help-template-item">
+                                    <span class="help-template-tag">h1-h6</span>
+                                    <span class="help-template-desc">标题（一级到六级）</span>
+                                </div>
+                                <div class="help-template-item">
+                                    <span class="help-template-tag">bold</span>
+                                    <span class="help-template-desc">加粗文本</span>
+                                </div>
+                                <div class="help-template-item">
+                                    <span class="help-template-tag">italic</span>
+                                    <span class="help-template-desc">斜体文本</span>
+                                </div>
+                                <div class="help-template-item">
+                                    <span class="help-template-tag">code-inline</span>
+                                    <span class="help-template-desc">行内代码</span>
+                                </div>
+                                <div class="help-template-item">
+                                    <span class="help-template-tag">link</span>
+                                    <span class="help-template-desc">链接</span>
+                                </div>
+                                <div class="help-template-item">
+                                    <span class="help-template-tag">image</span>
+                                    <span class="help-template-desc">图片</span>
+                                </div>
                             </div>
                         </div>
+                        <div class="help-template-category">
+                            <div class="help-category-header">
+                                <div class="help-category-title">列表</div>
+                                <div class="help-category-desc">有序列表、无序列表和任务列表</div>
+                            </div>
+                            <div class="help-category-items">
+                                <div class="help-template-item">
+                                    <span class="help-template-tag">ul</span>
+                                    <span class="help-template-desc">无序列表（使用 -、* 或 +）</span>
+                                </div>
+                                <div class="help-template-item">
+                                    <span class="help-template-tag">ol</span>
+                                    <span class="help-template-desc">有序列表（数字编号）</span>
+                                </div>
+                                <div class="help-template-item">
+                                    <span class="help-template-tag">task</span>
+                                    <span class="help-template-desc">任务列表（复选框）</span>
+                                </div>
+                                <div class="help-template-item">
+                                    <span class="help-template-tag">nested-ul</span>
+                                    <span class="help-template-desc">嵌套无序列表</span>
+                                </div>
+                                <div class="help-template-item">
+                                    <span class="help-template-tag">nested-ol</span>
+                                    <span class="help-template-desc">嵌套有序列表</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="help-template-category">
+                            <div class="help-category-header">
+                                <div class="help-category-title">表格</div>
+                                <div class="help-category-desc">各种列数和对齐方式的表格</div>
+                            </div>
+                            <div class="help-category-items">
+                                <div class="help-template-item">
+                                    <span class="help-template-tag">table</span>
+                                    <span class="help-template-desc">3列表格</span>
+                                </div>
+                                <div class="help-template-item">
+                                    <span class="help-template-tag">table-2col</span>
+                                    <span class="help-template-desc">2列表格</span>
+                                </div>
+                                <div class="help-template-item">
+                                    <span class="help-template-tag">table-4col</span>
+                                    <span class="help-template-desc">4列表格</span>
+                                </div>
+                                <div class="help-template-item">
+                                    <span class="help-template-tag">table-left</span>
+                                    <span class="help-template-desc">左对齐表格</span>
+                                </div>
+                                <div class="help-template-item">
+                                    <span class="help-template-tag">table-right</span>
+                                    <span class="help-template-desc">右对齐表格</span>
+                                </div>
+                                <div class="help-template-item">
+                                    <span class="help-template-tag">table-center</span>
+                                    <span class="help-template-desc">居中对齐表格</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="help-template-category">
+                            <div class="help-category-header">
+                                <div class="help-category-title">代码块</div>
+                                <div class="help-category-desc">支持多种编程语言的代码块模板</div>
+                            </div>
+                            <div class="help-category-items">
+                                <div class="help-template-item">
+                                    <span class="help-template-tag">code-block</span>
+                                    <span class="help-template-desc">通用代码块（可指定语言）</span>
+                                </div>
+                                <div class="help-template-item">
+                                    <span class="help-template-tag">code-js</span>
+                                    <span class="help-template-desc">JavaScript 代码块</span>
+                                </div>
+                                <div class="help-template-item">
+                                    <span class="help-template-tag">code-python</span>
+                                    <span class="help-template-desc">Python 代码块</span>
+                                </div>
+                                <div class="help-template-item">
+                                    <span class="help-template-tag">code-java</span>
+                                    <span class="help-template-desc">Java 代码块</span>
+                                </div>
+                                <div class="help-template-item">
+                                    <span class="help-template-tag">code-cpp</span>
+                                    <span class="help-template-desc">C++ 代码块</span>
+                                </div>
+                                <div class="help-template-item">
+                                    <span class="help-template-tag">code-css</span>
+                                    <span class="help-template-desc">CSS 代码块</span>
+                                </div>
+                                <div class="help-template-item">
+                                    <span class="help-template-tag">code-html</span>
+                                    <span class="help-template-desc">HTML 代码块</span>
+                                </div>
+                                <div class="help-template-item">
+                                    <span class="help-template-tag">code-json</span>
+                                    <span class="help-template-desc">JSON 代码块</span>
+                                </div>
+                                <div class="help-template-item">
+                                    <span class="help-template-tag">code-sql</span>
+                                    <span class="help-template-desc">SQL 代码块</span>
+                                </div>
+                                <div class="help-template-item">
+                                    <span class="help-template-tag">code-bash</span>
+                                    <span class="help-template-desc">Bash/Shell 代码块</span>
+                                </div>
+                                <div class="help-template-item">
+                                    <span class="help-template-tag">code-go</span>
+                                    <span class="help-template-desc">Go 代码块</span>
+                                </div>
+                                <div class="help-template-item">
+                                    <span class="help-template-tag">code-rust</span>
+                                    <span class="help-template-desc">Rust 代码块</span>
+                                </div>
+                                <div class="help-template-item">
+                                    <span class="help-template-tag">code-yaml</span>
+                                    <span class="help-template-desc">YAML 代码块</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="help-template-category">
+                            <div class="help-category-header">
+                                <div class="help-category-title">Mermaid 图表</div>
+                                <div class="help-category-desc">流程图、时序图、甘特图等可视化图表</div>
+                            </div>
+                            <div class="help-category-items">
+                                <div class="help-template-item">
+                                    <span class="help-template-tag">mermaid-flowchart</span>
+                                    <span class="help-template-desc">流程图（垂直方向）</span>
+                                </div>
+                                <div class="help-template-item">
+                                    <span class="help-template-tag">mermaid-sequence</span>
+                                    <span class="help-template-desc">时序图</span>
+                                </div>
+                                <div class="help-template-item">
+                                    <span class="help-template-tag">mermaid-gantt</span>
+                                    <span class="help-template-desc">甘特图（项目时间线）</span>
+                                </div>
+                                <div class="help-template-item">
+                                    <span class="help-template-tag">mermaid-class</span>
+                                    <span class="help-template-desc">类图（UML）</span>
+                                </div>
+                                <div class="help-template-item">
+                                    <span class="help-template-tag">mermaid-state</span>
+                                    <span class="help-template-desc">状态图</span>
+                                </div>
+                                <div class="help-template-item">
+                                    <span class="help-template-tag">mermaid-pie</span>
+                                    <span class="help-template-desc">饼图</span>
+                                </div>
+                                <div class="help-template-item">
+                                    <span class="help-template-tag">mermaid-gitgraph</span>
+                                    <span class="help-template-desc">Git 分支图</span>
+                                </div>
+                                <div class="help-template-item">
+                                    <span class="help-template-tag">mermaid-er</span>
+                                    <span class="help-template-desc">ER 图（实体关系图）</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="help-template-category">
+                            <div class="help-category-header">
+                                <div class="help-category-title">数学公式</div>
+                                <div class="help-category-desc">行内公式、块级公式和常用数学符号</div>
+                            </div>
+                            <div class="help-category-items">
+                                <div class="help-template-item">
+                                    <span class="help-template-tag">math-inline</span>
+                                    <span class="help-template-desc">行内公式（$...$）</span>
+                                </div>
+                                <div class="help-template-item">
+                                    <span class="help-template-tag">math-block</span>
+                                    <span class="help-template-desc">块级公式（$$...$$）</span>
+                                </div>
+                                <div class="help-template-item">
+                                    <span class="help-template-tag">math-fraction</span>
+                                    <span class="help-template-desc">分数</span>
+                                </div>
+                                <div class="help-template-item">
+                                    <span class="help-template-tag">math-sqrt</span>
+                                    <span class="help-template-desc">平方根</span>
+                                </div>
+                                <div class="help-template-item">
+                                    <span class="help-template-tag">math-sum</span>
+                                    <span class="help-template-desc">求和符号</span>
+                                </div>
+                                <div class="help-template-item">
+                                    <span class="help-template-tag">math-integral</span>
+                                    <span class="help-template-desc">积分</span>
+                                </div>
+                                <div class="help-template-item">
+                                    <span class="help-template-tag">math-matrix</span>
+                                    <span class="help-template-desc">矩阵</span>
+                                </div>
+                                <div class="help-template-item">
+                                    <span class="help-template-tag">math-equation</span>
+                                    <span class="help-template-desc">对齐公式组</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="help-template-category">
+                            <div class="help-category-header">
+                                <div class="help-category-title">其他</div>
+                                <div class="help-category-desc">引用块、分隔线、脚注和常用模板</div>
+                            </div>
+                            <div class="help-category-items">
+                                <div class="help-template-item">
+                                    <span class="help-template-tag">blockquote</span>
+                                    <span class="help-template-desc">引用块</span>
+                                </div>
+                                <div class="help-template-item">
+                                    <span class="help-template-tag">hr</span>
+                                    <span class="help-template-desc">分隔线</span>
+                                </div>
+                                <div class="help-template-item">
+                                    <span class="help-template-tag">footnote</span>
+                                    <span class="help-template-desc">脚注</span>
+                                </div>
+                                <div class="help-template-item">
+                                    <span class="help-template-tag">html-div</span>
+                                    <span class="help-template-desc">HTML div 标签</span>
+                                </div>
+                                <div class="help-template-item">
+                                    <span class="help-template-tag">html-table</span>
+                                    <span class="help-template-desc">HTML 表格</span>
+                                </div>
+                                <div class="help-template-item">
+                                    <span class="help-template-tag">template-readme</span>
+                                    <span class="help-template-desc">README 模板</span>
+                                </div>
+                                <div class="help-template-item">
+                                    <span class="help-template-tag">template-changelog</span>
+                                    <span class="help-template-desc">更新日志模板</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="help-template-note">
+                        <strong>使用方法：</strong>输入上述关键词或对应的中文描述（如"标题"、"表格"、"代码"）即可快速找到相关模板。选择模板后，使用 <kbd>Tab</kbd> 键在占位符之间跳转，<kbd>Enter</kbd> 确认插入。
                     </div>
                 </div>
 

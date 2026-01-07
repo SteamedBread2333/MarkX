@@ -265,7 +265,7 @@
 .help-feature-item {
     padding: 12px 16px;
     background: var(--bg-secondary);
-    border-left: 3px solid var(--accent-color);
+    border: 1px solid var(--border-color);
     border-radius: 4px;
 }
 
@@ -290,6 +290,206 @@
     font-size: 12px;
     color: var(--accent-color);
     border: 1px solid var(--border-color);
+}
+
+/* 模板搜索 */
+.help-template-search-wrapper {
+    margin-bottom: 16px;
+}
+
+.help-template-search {
+    position: relative;
+    display: flex;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.help-search-icon {
+    position: absolute;
+    left: 12px;
+    width: 16px;
+    height: 16px;
+    color: var(--text-secondary);
+    pointer-events: none;
+    z-index: 1;
+}
+
+.help-search-input {
+    width: 100%;
+    padding: 8px 36px 8px 36px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    font-size: 14px;
+    color: var(--text-primary);
+    transition: all 0.15s ease;
+}
+
+.help-search-input:focus {
+    outline: none;
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 3px var(--accent-color-alpha);
+}
+
+.help-search-input::placeholder {
+    color: var(--text-secondary);
+}
+
+.help-search-clear {
+    position: absolute;
+    right: 8px;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    border-radius: 4px;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: color 0.15s ease;
+}
+
+.help-search-clear:hover {
+    color: var(--text-primary);
+    background: var(--bg-hover);
+}
+
+.help-search-clear .icon {
+    width: 14px;
+    height: 14px;
+}
+
+.help-search-result {
+    font-size: 12px;
+    color: var(--text-secondary);
+    padding: 4px 0;
+}
+
+/* 模板列表 */
+.help-templates {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.help-template-category {
+    padding: 16px;
+    background: var(--bg-secondary);
+    border-radius: 6px;
+    border: 1px solid var(--border-color);
+}
+
+.help-category-header {
+    margin-bottom: 12px;
+}
+
+.help-category-title {
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+    font-size: 14px;
+}
+
+.help-category-desc {
+    font-size: 12px;
+    color: var(--text-secondary);
+    line-height: 1.5;
+}
+
+.help-category-items {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.help-template-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 6px 0;
+}
+
+.help-template-tag {
+    display: inline-block;
+    padding: 4px 8px;
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--text-primary);
+    cursor: default;
+    transition: all 0.15s ease;
+    min-width: 100px;
+    flex-shrink: 0;
+    text-align: center;
+}
+
+.help-template-tag:hover {
+    background: var(--bg-hover);
+    border-color: var(--accent-color);
+    color: var(--accent-color);
+}
+
+.help-template-desc {
+    font-size: 13px;
+    color: var(--text-secondary);
+    flex: 1;
+}
+
+.help-template-item.help-template-match {
+    background: var(--accent-color-alpha);
+    border-radius: 4px;
+    padding: 6px 8px;
+    margin: 0 -8px;
+}
+
+.help-template-item.help-template-match .help-template-tag {
+    background: var(--accent-color);
+    color: white;
+    border-color: var(--accent-color);
+}
+
+.help-template-item.help-template-match .help-template-desc {
+    color: var(--text-primary);
+    font-weight: 500;
+}
+
+.help-template-note {
+    margin-top: 16px;
+    padding: 12px 16px;
+    background: var(--bg-secondary);
+    border-radius: 6px;
+    font-size: 13px;
+    color: var(--text-secondary);
+    line-height: 1.6;
+}
+
+.help-template-note strong {
+    color: var(--text-primary);
+}
+
+.help-template-note code {
+    background: var(--bg-tertiary);
+    padding: 2px 4px;
+    border-radius: 3px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--accent-color);
+    border: 1px solid var(--border-color);
+}
+
+.help-template-note kbd {
+    background: var(--bg-tertiary);
+    padding: 2px 4px;
+    border-radius: 3px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    margin: 0 2px;
 }
 
 /* 页脚 */
