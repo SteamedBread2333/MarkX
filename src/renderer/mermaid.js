@@ -7,6 +7,7 @@ import { elements } from '../core/elements.js';
 import { AppState } from '../core/state.js';
 import { escapeHtml } from '../core/utils.js';
 import { setStatus } from '../core/ui-utils.js';
+import { t } from '../core/i18n.js';
 
 /**
  * 渲染所有 Mermaid 图表
@@ -83,7 +84,7 @@ export async function renderMermaidCharts() {
             console.error('Mermaid 渲染错误:', error);
             element.innerHTML = `
                 <div class="mermaid-error">
-                    <div class="mermaid-error-title">Mermaid 图表渲染失败</div>
+                    <div class="mermaid-error-title">${t('messages.mermaidRenderFailed')}</div>
                     <div>${escapeHtml(error.message)}</div>
                     <pre><code>${escapeHtml(code)}</code></pre>
                 </div>
@@ -111,7 +112,7 @@ function bindMermaidExportEvents(wrapper, diagramId) {
             
             if (!svgElement) {
                 console.error('找不到 SVG 元素');
-                setStatus('操作失败：找不到图表 ❌', 3000);
+                setStatus(t('messages.chartNotFound'), 3000);
                 return;
             }
             
@@ -151,7 +152,7 @@ function bindMermaidExportEvents(wrapper, diagramId) {
  */
 function exportMermaidAsSVG(svgElement, diagramId) {
     try {
-        setStatus('正在导出 SVG...');
+        setStatus(t('messages.exportingSvg'));
         
         // 克隆 SVG 元素
         const svgClone = svgElement.cloneNode(true);
@@ -174,10 +175,10 @@ ${svgString}`;
         a.click();
         URL.revokeObjectURL(url);
         
-        setStatus('SVG 导出成功 ✅');
+        setStatus(t('messages.svgExportSuccess'));
     } catch (error) {
         console.error('SVG 导出失败:', error);
-        setStatus('SVG 导出失败 ❌', 3000);
+        setStatus(t('messages.svgExportFailed'), 3000);
     }
 }
 
@@ -186,7 +187,7 @@ ${svgString}`;
  */
 function exportMermaidAsPNG(svgElement, diagramId) {
     try {
-        setStatus('正在导出 PNG...');
+        setStatus(t('messages.exportingPng'));
         
         // 获取 SVG 尺寸
         const bbox = svgElement.getBoundingClientRect();
@@ -232,8 +233,8 @@ function exportMermaidAsPNG(svgElement, diagramId) {
         // 设置超时（10秒）
         const timeout = setTimeout(() => {
             console.error('PNG 导出超时');
-            setStatus('PNG 导出超时 ⏱️ 请重试或使用 SVG 格式', 5000);
-            alert('PNG 导出超时\n\n可能原因：\n1. 图表太大或太复杂\n2. 浏览器性能限制\n\n建议：\n• 再次点击重试\n• 或使用 SVG 格式导出');
+            setStatus(t('messages.pngExportTimeout'), 5000);
+            alert(t('messages.pngExportTimeoutDetails'));
         }, 10000);
         
         img.onload = () => {
@@ -246,7 +247,7 @@ function exportMermaidAsPNG(svgElement, diagramId) {
                 canvas.toBlob((blob) => {
                     if (!blob) {
                         console.error('Canvas toBlob 失败');
-                        setStatus('PNG 转换失败 ❌', 3000);
+                        setStatus(t('messages.pngConvertFailed'), 3000);
                         return;
                     }
                     
@@ -264,22 +265,22 @@ function exportMermaidAsPNG(svgElement, diagramId) {
                         URL.revokeObjectURL(pngUrl);
                     }, 100);
                     
-                    setStatus('PNG 导出成功 ✅');
+                    setStatus(t('messages.pngExportSuccess'));
                 }, 'image/png');
             } catch (err) {
                 clearTimeout(timeout);
                 console.error('绘制或导出失败:', err);
-                setStatus('PNG 导出失败 ❌', 3000);
+                setStatus(t('messages.pngExportFailed'), 3000);
             }
         };
         
         img.onerror = (err) => {
             clearTimeout(timeout);
             console.error('图片加载失败:', err);
-            setStatus('PNG 导出失败 ❌ 建议使用 SVG 格式', 5000);
+            setStatus(t('messages.pngExportFailedSuggestSvg'), 5000);
             
             // 提示用户
-            if (confirm('PNG 导出失败\n\n建议改用 SVG 格式导出（矢量图，质量更好）\n\n是否立即导出为 SVG？')) {
+            if (confirm(t('messages.pngExportFailedConfirm'))) {
                 exportMermaidAsSVG(svgElement, diagramId);
             }
         };
@@ -289,10 +290,10 @@ function exportMermaidAsPNG(svgElement, diagramId) {
         
     } catch (error) {
         console.error('PNG 导出异常:', error);
-        setStatus(`PNG 导出失败 ❌`, 5000);
+        setStatus(t('messages.pngExportFailed'), 5000);
         
         // 显示详细错误信息
-        alert(`PNG 导出失败\n\n错误信息：${error.message}\n\n可能的解决方案：\n1. 刷新页面后重试\n2. 使用 SVG 格式导出\n3. 尝试缩小图表大小\n4. 使用其他浏览器\n\n如果问题持续，请打开浏览器控制台（F12）查看详细日志。`);
+        alert(t('messages.pngExportFailedDetails', { message: error.message }));
     }
 }
 
@@ -370,7 +371,7 @@ function openMermaidFullscreenViewer(svgElement, diagramId, originalWrapper) {
     // 创建查看器内容
     viewer.innerHTML = `
         <div class="mermaid-viewer-header">
-            <div class="mermaid-viewer-title">Mermaid 图表查看器</div>
+            <div class="mermaid-viewer-title">${t('messages.mermaidViewerTitle')}</div>
             <div class="mermaid-viewer-controls">
                 <button class="mermaid-viewer-btn" data-action="zoom-in" title="放大 (滚轮向上)">
                     <svg class="icon"><use href="#icon-zoom-in"></use></svg>
@@ -450,7 +451,7 @@ function openMermaidFullscreenViewer(svgElement, diagramId, originalWrapper) {
         });
     });
     
-    setStatus('已打开全屏查看器');
+    setStatus(t('messages.fullscreenOpened'));
 }
 
 /**
@@ -736,5 +737,5 @@ function closeMermaidViewer(viewer) {
     }
     document.body.classList.remove('mermaid-viewer-active');
     
-    setStatus('已关闭全屏查看器');
+    setStatus(t('messages.fullscreenClosed'));
 }

@@ -9,6 +9,7 @@ import { escapeHtml } from '../core/utils.js';
 import { setStatus, updateStats } from '../core/ui-utils.js';
 import { getEditorContent } from '../editor/ace-editor.js';
 import { renderMermaidCharts } from './mermaid.js';
+import { t } from '../core/i18n.js';
 
 /**
  * 渲染 Markdown 为 HTML
@@ -86,16 +87,16 @@ export async function renderMarkdown() {
         // 更新统计信息
         updateStats(markdown);
         
-        setStatus('预览已更新');
+        setStatus(t('messages.previewUpdated'));
         
     } catch (error) {
         console.error('渲染错误:', error);
         elements.preview.innerHTML = `
             <div class="mermaid-error">
-                <div class="mermaid-error-title">渲染失败</div>
+                <div class="mermaid-error-title">${t('messages.renderFailed')}</div>
                 <div>${escapeHtml(error.message)}</div>
             </div>
         `;
-        setStatus('渲染失败', 5000);
+        setStatus(t('messages.renderFailed'), 5000);
     }
 }

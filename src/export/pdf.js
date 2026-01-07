@@ -2,6 +2,8 @@
  * PDF 导出模块
  */
 
+import { t } from '../core/i18n.js';
+
 import { AppState } from '../core/state.js';
 import { elements } from '../core/elements.js';
 import { setStatus } from '../core/ui-utils.js';
@@ -129,7 +131,7 @@ function findPageBreaks(elements, containerRect, pageHeightPx, scale = 2) {
 export async function exportPDF() {
     // 检查库是否已加载
     if (typeof window.jspdf === 'undefined' || typeof html2canvas === 'undefined') {
-        setStatus('PDF 导出库未加载，请刷新页面重试', 5000);
+        setStatus(t('messages.pdfLibNotLoaded'), 5000);
         return;
     }
     
@@ -139,7 +141,7 @@ export async function exportPDF() {
         return;
     }
     
-    setStatus('正在生成 PDF，请稍候...');
+    setStatus(t('messages.generatingPdf'));
     
     try {
         // 克隆预览区内容（深度克隆，包括SVG）
@@ -586,10 +588,10 @@ export async function exportPDF() {
             document.body.removeChild(pdfContainer);
         }
         
-        setStatus('PDF 导出成功');
+        setStatus(t('messages.pdfExportSuccess'));
     } catch (err) {
         console.error('PDF 导出失败:', err);
-        setStatus('PDF 导出失败: ' + (err.message || '未知错误'), 5000);
+        setStatus(t('messages.pdfExportFailed', { error: err.message || t('messages.unknownError') }), 5000);
         
         // 确保清理临时容器
         const pdfContainer = document.getElementById('pdf-export-wrapper');
@@ -822,7 +824,7 @@ async function waitForContentRender(pdfContainer) {
 export async function exportPDFDefault() {
     // 检查库是否已加载
     if (typeof window.jspdf === 'undefined' || typeof html2canvas === 'undefined') {
-        setStatus('PDF 导出库未加载，请刷新页面重试', 5000);
+        setStatus(t('messages.pdfLibNotLoaded'), 5000);
         return;
     }
     
@@ -832,7 +834,7 @@ export async function exportPDFDefault() {
         return;
     }
     
-    setStatus('正在生成 PDF（默认模式），请稍候...');
+    setStatus(t('messages.generatingPdfDefault'));
     
     try {
         const { pdfContainer, contentWrapper } = preparePDFContainer();
@@ -980,10 +982,10 @@ export async function exportPDFDefault() {
             document.body.removeChild(pdfContainer);
         }
         
-        setStatus('PDF 导出成功（默认模式）');
+        setStatus(t('messages.pdfExportSuccessDefault'));
     } catch (err) {
         console.error('PDF 导出失败:', err);
-        setStatus('PDF 导出失败: ' + (err.message || '未知错误'), 5000);
+        setStatus(t('messages.pdfExportFailed', { error: err.message || t('messages.unknownError') }), 5000);
         
         // 确保清理临时容器
         const pdfContainer = document.getElementById('pdf-export-wrapper');
@@ -999,7 +1001,7 @@ export async function exportPDFDefault() {
 export async function exportPDFFullPage() {
     // 检查库是否已加载
     if (typeof window.jspdf === 'undefined' || typeof html2canvas === 'undefined') {
-        setStatus('PDF 导出库未加载，请刷新页面重试', 5000);
+        setStatus(t('messages.pdfLibNotLoaded'), 5000);
         return;
     }
     
@@ -1009,7 +1011,7 @@ export async function exportPDFFullPage() {
         return;
     }
     
-    setStatus('正在生成 PDF（整张模式），请稍候...');
+    setStatus(t('messages.generatingPdfFullPage'));
     
     try {
         const { pdfContainer, contentWrapper } = preparePDFContainer();
@@ -1124,10 +1126,10 @@ export async function exportPDFFullPage() {
             document.body.removeChild(pdfContainer);
         }
         
-        setStatus('PDF 导出成功（整张模式）');
+        setStatus(t('messages.pdfExportSuccessFullPage'));
     } catch (err) {
         console.error('PDF 导出失败:', err);
-        setStatus('PDF 导出失败: ' + (err.message || '未知错误'), 5000);
+        setStatus(t('messages.pdfExportFailed', { error: err.message || t('messages.unknownError') }), 5000);
         
         // 确保清理临时容器
         const pdfContainer = document.getElementById('pdf-export-wrapper');

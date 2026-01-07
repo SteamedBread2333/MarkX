@@ -105,3 +105,9 @@
 .draft-btn-secondary:hover {
     background: var(--bg-hover);
 }
+
+.dropdown-item.active {
+    background: var(--accent-color-alpha);
+    color: var(--accent-color);
+    font-weight: 600;
+}

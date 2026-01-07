@@ -8,6 +8,10 @@ import { AppState } from './core/state.js';
 import { elements } from './core/elements.js';
 import { setStatus } from './core/ui-utils.js';
 import { loadDraft, startAutoSave } from './core/draft.js';
+import { initI18n, t, setLanguage, getLanguage } from './core/i18n.js';
+
+// 导出 t 函数供其他模块使用
+window.t = t;
 
 // ==================== 导入配置模块 ====================
 import { initMermaid } from './config/mermaid.js';
@@ -102,32 +106,31 @@ function initEventListeners() {
     
     // Markdown 格式化按钮
     document.getElementById('boldBtn').addEventListener('click', () => {
-        insertText('**', '**', '加粗文本');
+        insertText('**', '**', t('insertText.bold'));
     });
     
     document.getElementById('italicBtn').addEventListener('click', () => {
-        insertText('*', '*', '斜体文本');
+        insertText('*', '*', t('insertText.italic'));
     });
     
     document.getElementById('headingBtn').addEventListener('click', () => {
-        insertText('## ', '', '标题');
+        insertText('## ', '', t('insertText.heading'));
     });
     
     document.getElementById('linkBtn').addEventListener('click', () => {
-        insertText('[', '](https://example.com)', '链接文本');
+        insertText('[', '](https://example.com)', t('insertText.link'));
     });
     
     document.getElementById('imageBtn').addEventListener('click', () => {
-        insertText('![', '](https://example.com/image.jpg)', '图片描述');
+        insertText('![', '](https://example.com/image.jpg)', t('insertText.image'));
     });
     
     document.getElementById('codeBtn').addEventListener('click', () => {
-        insertText('```javascript\n', '\n```\n', '代码');
+        insertText('```javascript\n', '\n```\n', t('insertText.code'));
     });
     
     document.getElementById('tableBtn').addEventListener('click', () => {
-        const table = '| 列1 | 列2 | 列3 |\n| --- | --- | --- |\n| 单元格1 | 单元格2 | 单元格3 |\n\n';
-        insertText(table);
+        insertText(t('insertText.table'));
     });
     
     // Mermaid 模板按钮（使用 mousedown 事件以避免菜单过早关闭）
@@ -137,7 +140,8 @@ function initEventListeners() {
             e.stopPropagation();
             const type = btn.getAttribute('data-mermaid');
             insertText(mermaidTemplates[type]);
-            setStatus(`已插入${btn.textContent}模板`);
+            const templateName = btn.textContent.trim();
+            setStatus(t('messages.insertedTemplate', { name: templateName }));
         });
     });
     
@@ -148,7 +152,8 @@ function initEventListeners() {
             e.stopPropagation();
             const type = btn.getAttribute('data-math');
             insertText(mathTemplates[type]);
-            setStatus(`已插入${btn.textContent.split(' ')[0]}`);
+            const mathName = btn.textContent.split(' ')[0].trim();
+            setStatus(t('messages.insertedMath', { name: mathName }));
         });
     });
     
@@ -217,9 +222,246 @@ function initEventListeners() {
     
     initHelpModal();
     initTemplateSearch();
+    initLanguageSwitcher();
+    initHelpModalContent();
     
     // 文件输入
     elements.fileInput.addEventListener('change', handleFileSelect);
+    
+    // 初始化 UI 文本（应用 i18n）
+    updateUITexts();
+    
+    // 监听语言变化事件
+    window.addEventListener('languagechange', () => {
+        updateUITexts();
+        updateHelpModalContent();
+    });
+}
+
+/**
+ * 初始化并更新帮助文档内容
+ */
+function initHelpModalContent() {
+    updateHelpModalContent();
+}
+
+function updateHelpModalContent() {
+    // 更新快捷键标签
+    const shortcuts = [
+        { key: 'Ctrl+S', i18n: 'ui.help.sections.shortcuts.items.save' },
+        { key: 'Ctrl+O', i18n: 'ui.help.sections.shortcuts.items.open' },
+        { key: 'Ctrl+N', i18n: 'ui.help.sections.shortcuts.items.new' },
+        { key: 'Ctrl+B', i18n: 'ui.help.sections.shortcuts.items.bold' },
+        { key: 'Ctrl+I', i18n: 'ui.help.sections.shortcuts.items.italic' },
+        { key: 'Ctrl+K', i18n: 'ui.help.sections.shortcuts.items.link' }
+    ];
+    
+    const shortcutCards = document.querySelectorAll('.help-shortcut-card');
+    shortcutCards.forEach((card, index) => {
+        if (index < shortcuts.length) {
+            const label = card.querySelector('.help-shortcut-label');
+            if (label) {
+                label.textContent = t(shortcuts[index].i18n);
+            }
+        }
+    });
+    
+    // 更新自动完成快捷键卡片
+    const autocompleteCards = [
+        { selector: '.help-autocomplete-card.highlight .help-card-title', i18n: 'ui.help.sections.autocompleteShortcuts.items.manualTrigger.title' },
+        { selector: '.help-autocomplete-card.highlight .help-card-desc', i18n: 'ui.help.sections.autocompleteShortcuts.items.manualTrigger.desc' },
+        { selector: '.help-autocomplete-card:nth-child(2) .help-card-title', i18n: 'ui.help.sections.autocompleteShortcuts.items.navigate.title' },
+        { selector: '.help-autocomplete-card:nth-child(2) .help-card-desc', i18n: 'ui.help.sections.autocompleteShortcuts.items.navigate.desc' },
+        { selector: '.help-autocomplete-card:nth-child(3) .help-card-title', i18n: 'ui.help.sections.autocompleteShortcuts.items.confirm.title' },
+        { selector: '.help-autocomplete-card:nth-child(3) .help-card-desc', i18n: 'ui.help.sections.autocompleteShortcuts.items.confirm.desc' },
+        { selector: '.help-autocomplete-card:nth-child(4) .help-card-title', i18n: 'ui.help.sections.autocompleteShortcuts.items.jumpPlaceholder.title' },
+        { selector: '.help-autocomplete-card:nth-child(4) .help-card-desc', i18n: 'ui.help.sections.autocompleteShortcuts.items.jumpPlaceholder.desc' },
+        { selector: '.help-autocomplete-card:nth-child(5) .help-card-title', i18n: 'ui.help.sections.autocompleteShortcuts.items.closeMenu.title' },
+        { selector: '.help-autocomplete-card:nth-child(5) .help-card-desc', i18n: 'ui.help.sections.autocompleteShortcuts.items.closeMenu.desc' }
+    ];
+    
+    autocompleteCards.forEach(({ selector, i18n }) => {
+        const el = document.querySelector(selector);
+        if (el) {
+            el.innerHTML = t(i18n);
+        }
+    });
+    
+    // 更新功能说明
+    const featureItems = [
+        { selector: '.help-feature-item:nth-child(1) .help-feature-title', i18n: 'ui.help.sections.autocompleteFeatures.items.smartTrigger.title' },
+        { selector: '.help-feature-item:nth-child(1) .help-feature-desc', i18n: 'ui.help.sections.autocompleteFeatures.items.smartTrigger.desc' },
+        { selector: '.help-feature-item:nth-child(2) .help-feature-title', i18n: 'ui.help.sections.autocompleteFeatures.items.manualTrigger.title' },
+        { selector: '.help-feature-item:nth-child(2) .help-feature-desc', i18n: 'ui.help.sections.autocompleteFeatures.items.manualTrigger.desc' },
+        { selector: '.help-feature-item:nth-child(3) .help-feature-title', i18n: 'ui.help.sections.autocompleteFeatures.items.contextAware.title' },
+        { selector: '.help-feature-item:nth-child(3) .help-feature-desc', i18n: 'ui.help.sections.autocompleteFeatures.items.contextAware.desc' }
+    ];
+    
+    featureItems.forEach(({ selector, i18n }) => {
+        const el = document.querySelector(selector);
+        if (el) {
+            el.innerHTML = t(i18n);
+        }
+    });
+    
+    // 更新类别标题和描述
+    const categories = [
+        { selector: '.help-template-category:nth-child(1) .help-category-title', i18n: 'ui.help.sections.templates.categories.basic.title' },
+        { selector: '.help-template-category:nth-child(1) .help-category-desc', i18n: 'ui.help.sections.templates.categories.basic.desc' },
+        { selector: '.help-template-category:nth-child(2) .help-category-title', i18n: 'ui.help.sections.templates.categories.list.title' },
+        { selector: '.help-template-category:nth-child(2) .help-category-desc', i18n: 'ui.help.sections.templates.categories.list.desc' },
+        { selector: '.help-template-category:nth-child(3) .help-category-title', i18n: 'ui.help.sections.templates.categories.table.title' },
+        { selector: '.help-template-category:nth-child(3) .help-category-desc', i18n: 'ui.help.sections.templates.categories.table.desc' },
+        { selector: '.help-template-category:nth-child(4) .help-category-title', i18n: 'ui.help.sections.templates.categories.code.title' },
+        { selector: '.help-template-category:nth-child(4) .help-category-desc', i18n: 'ui.help.sections.templates.categories.code.desc' },
+        { selector: '.help-template-category:nth-child(5) .help-category-title', i18n: 'ui.help.sections.templates.categories.mermaid.title' },
+        { selector: '.help-template-category:nth-child(5) .help-category-desc', i18n: 'ui.help.sections.templates.categories.mermaid.desc' },
+        { selector: '.help-template-category:nth-child(6) .help-category-title', i18n: 'ui.help.sections.templates.categories.math.title' },
+        { selector: '.help-template-category:nth-child(6) .help-category-desc', i18n: 'ui.help.sections.templates.categories.math.desc' },
+        { selector: '.help-template-category:nth-child(7) .help-category-title', i18n: 'ui.help.sections.templates.categories.other.title' },
+        { selector: '.help-template-category:nth-child(7) .help-category-desc', i18n: 'ui.help.sections.templates.categories.other.desc' }
+    ];
+    
+    categories.forEach(({ selector, i18n }) => {
+        const el = document.querySelector(selector);
+        if (el) {
+            el.textContent = t(i18n);
+        }
+    });
+    
+    // 更新模板项描述
+    document.querySelectorAll('.help-template-item').forEach(item => {
+        const tag = item.querySelector('.help-template-tag');
+        if (tag) {
+            const tagName = tag.textContent.trim();
+            const desc = item.querySelector('.help-template-desc');
+            if (desc) {
+                const i18nKey = `ui.help.sections.templates.items.${tagName}`;
+                const translated = t(i18nKey);
+                if (translated !== i18nKey) {
+                    desc.textContent = translated;
+                }
+            }
+        }
+    });
+    
+    // 更新章节标题
+    const sectionTitles = [
+        { selector: '.help-section:nth-child(1) h3', i18n: 'ui.help.sections.shortcuts.title' },
+        { selector: '.help-section:nth-child(2) h3', i18n: 'ui.help.sections.autocompleteShortcuts.title' },
+        { selector: '.help-section:nth-child(3) h3', i18n: 'ui.help.sections.autocompleteFeatures.title' },
+        { selector: '.help-section:nth-child(4) h3', i18n: 'ui.help.sections.templates.title' }
+    ];
+    
+    sectionTitles.forEach(({ selector, i18n }) => {
+        const el = document.querySelector(selector);
+        if (el) {
+            el.textContent = t(i18n);
+        }
+    });
+}
+
+/**
+ * 初始化语言切换器
+ */
+function initLanguageSwitcher() {
+    const langBtn = document.getElementById('langBtn');
+    const langDropdown = document.getElementById('langDropdown');
+    
+    if (!langBtn || !langDropdown) return;
+    
+    // 更新当前语言标记
+    function updateLangIndicator() {
+        const currentLang = getLanguage();
+        const items = langDropdown.querySelectorAll('.dropdown-item');
+        items.forEach(item => {
+            if (item.getAttribute('data-lang') === currentLang) {
+                item.classList.add('active');
+            } else {
+                item.classList.remove('active');
+            }
+        });
+    }
+    
+    // 语言切换
+    langDropdown.querySelectorAll('.dropdown-item').forEach(item => {
+        item.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            const lang = item.getAttribute('data-lang');
+            if (lang) {
+                setLanguage(lang);
+                updateLangIndicator();
+            }
+        });
+    });
+    
+    updateLangIndicator();
+}
+
+/**
+ * 更新所有 UI 文本
+ */
+function updateUITexts() {
+    // 更新所有带有 data-i18n 属性的元素
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        if (key) {
+            // 检查是否有参数
+            const paramsAttr = el.getAttribute('data-i18n-params');
+            let params = {};
+            if (paramsAttr) {
+                try {
+                    params = JSON.parse(paramsAttr);
+                } catch (e) {
+                    console.warn('Invalid i18n params:', paramsAttr);
+                }
+            }
+            // 检查是否是嵌套键（如 toolbar.newTooltip）
+            const translated = key.startsWith('ui.') || key.startsWith('toolbar.') || key.startsWith('messages.') || key.startsWith('insertText.') || key.startsWith('file.') || key.startsWith('autocomplete.') 
+                ? t(key, params) 
+                : t(`ui.${key}`, params);
+            el.textContent = translated;
+        }
+    });
+    
+    // 更新所有带有 data-i18n-title 属性的元素
+    document.querySelectorAll('[data-i18n-title]').forEach(el => {
+        const key = el.getAttribute('data-i18n-title');
+        if (key) {
+            // 检查是否是嵌套键
+            const translated = key.startsWith('ui.') || key.startsWith('toolbar.') || key.startsWith('messages.') || key.startsWith('insertText.') || key.startsWith('file.') || key.startsWith('autocomplete.')
+                ? t(key)
+                : t(`ui.${key}`);
+            el.setAttribute('title', translated);
+        }
+    });
+    
+    // 更新所有带有 data-i18n-placeholder 属性的元素
+    document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+        const key = el.getAttribute('data-i18n-placeholder');
+        if (key) {
+            const translated = key.startsWith('ui.') || key.startsWith('toolbar.') || key.startsWith('messages.') || key.startsWith('insertText.') || key.startsWith('file.') || key.startsWith('autocomplete.')
+                ? t(key)
+                : t(`ui.${key}`);
+            el.setAttribute('placeholder', translated);
+        }
+    });
+    
+    // 更新状态栏
+    if (elements.statusMessage) {
+        elements.statusMessage.textContent = t('messages.ready');
+    }
+    
+    // 更新编辑器占位符
+    const editor = getEditorInstance();
+    if (editor) {
+        const placeholder = t('ui.editor.placeholder');
+        // Ace Editor 设置占位符的方式
+        if (editor.setOption) {
+            editor.setOption('placeholder', placeholder);
+        }
+    }
 }
 
 /**
@@ -340,7 +582,7 @@ function initTemplateSearch() {
         
         // 显示搜索结果统计
         if (matchCount > 0) {
-            searchResult.textContent = `找到 ${matchCount} 个匹配项`;
+            searchResult.textContent = t('ui.help.sections.templates.searchResult', { count: matchCount });
             searchResult.style.display = 'block';
             
             // 滚动到第一个匹配项
@@ -351,7 +593,7 @@ function initTemplateSearch() {
                 }, 100);
             }
         } else {
-            searchResult.textContent = '未找到匹配的模板';
+            searchResult.textContent = t('ui.help.sections.templates.searchNoResult');
             searchResult.style.display = 'block';
         }
     }
@@ -378,6 +620,14 @@ function initTemplateSearch() {
             }
         }
     });
+    
+    // 更新搜索框占位符
+    function updateSearchPlaceholder() {
+        searchInput.setAttribute('placeholder', t('ui.help.sections.templates.searchPlaceholder'));
+    }
+    
+    updateSearchPlaceholder();
+    window.addEventListener('languagechange', updateSearchPlaceholder);
 }
 
 // ==================== 其他事件监听 ====================
@@ -426,6 +676,9 @@ async function initApp() {
     console.log('🚀 MarkX 正在启动...');
     
     try {
+        // 初始化 i18n（必须在最前面）
+        initI18n();
+        
         // 初始化编辑器
         initEditor();
         
@@ -459,11 +712,11 @@ async function initApp() {
         startAutoSave();
         
         console.log('✅ MarkX 启动成功！');
-        setStatus('就绪');
+        setStatus(t('messages.ready'));
         
     } catch (error) {
         console.error('❌ 启动失败:', error);
-        setStatus('启动失败', 0);
+        setStatus(t('messages.startupFailed'), 0);
     }
 }
 

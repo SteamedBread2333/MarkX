@@ -5,6 +5,7 @@
 import { AppState } from '../core/state.js';
 import { elements } from '../core/elements.js';
 import { setStatus } from '../core/ui-utils.js';
+import { t } from '../core/i18n.js';
 
 /**
  * 导出 HTML
@@ -66,7 +67,7 @@ export function exportHTML() {
     a.click();
     URL.revokeObjectURL(url);
     
-    setStatus('已导出 HTML');
+    setStatus(t('messages.htmlExported'));
 }
 
 /**
@@ -77,10 +78,10 @@ export async function copyMarkdown() {
         const { getEditorContent } = await import('../editor/ace-editor.js');
         const content = getEditorContent();
         await navigator.clipboard.writeText(content);
-        setStatus('Markdown 已复制到剪贴板');
+        setStatus(t('messages.markdownCopied'));
     } catch (err) {
         console.error('复制失败:', err);
-        setStatus('复制失败', 3000);
+        setStatus(t('messages.copyFailed'), 3000);
     }
 }
 
@@ -90,10 +91,10 @@ export async function copyMarkdown() {
 export async function copyHTML() {
     try {
         await navigator.clipboard.writeText(elements.preview.innerHTML);
-        setStatus('HTML 已复制到剪贴板');
+        setStatus(t('messages.htmlCopied'));
     } catch (err) {
         console.error('复制失败:', err);
-        setStatus('复制失败', 3000);
+        setStatus(t('messages.copyFailed'), 3000);
     }
 }
 
@@ -101,7 +102,7 @@ export async function copyHTML() {
  * 清空内容
  */
 export async function clearContent() {
-    if (!confirm('确定要清空所有内容吗？此操作不可恢复。')) {
+    if (!confirm(t('messages.clearConfirm'))) {
         return;
     }
     const { setEditorContent } = await import('../editor/ace-editor.js');
@@ -109,5 +110,5 @@ export async function clearContent() {
     setEditorContent('');
     AppState.isDirty = false;
     await renderMarkdown();
-    setStatus('已清空内容');
+    setStatus(t('messages.contentCleared'));
 }

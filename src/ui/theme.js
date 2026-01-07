@@ -7,6 +7,7 @@ import { elements } from '../core/elements.js';
 import { setStatus } from '../core/ui-utils.js';
 import { updateEditorTheme } from '../editor/ace-editor.js';
 import { renderMarkdown } from '../renderer/markdown.js';
+import { t } from '../core/i18n.js';
 
 /**
  * 切换主题
@@ -40,7 +41,8 @@ export function toggleTheme() {
     // 重新渲染 Mermaid 图表（应用新主题）
     renderMarkdown();
     
-    setStatus(`已切换到${AppState.currentTheme === 'dark' ? '暗色' : '亮色'}模式`);
+    const themeName = AppState.currentTheme === 'dark' ? t('messages.themeDark') : t('messages.themeLight');
+    setStatus(t('messages.themeSwitched', { theme: themeName }));
 }
 
 /**

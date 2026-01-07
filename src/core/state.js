@@ -8,4 +8,5 @@ export const AppState = {
     autoSaveTimer: null,
     currentFileName: 'untitled.md',
     isDirty: false,
+    currentLanguage: 'en', // Will be set by i18n.initI18n()
 };

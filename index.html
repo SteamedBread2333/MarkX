@@ -254,6 +254,11 @@
             <path d="M3 12h18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
             <path d="M9 6l-6 6 6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
         </symbol>
+        <symbol id="icon-language" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2"/>
+            <path d="M2 12h20" fill="none" stroke="currentColor" stroke-width="2"/>
+            <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" fill="none" stroke="currentColor" stroke-width="2"/>
+        </symbol>
     </svg>
 
     <!-- GitHub 角标 -->
@@ -273,41 +278,41 @@
             <div class="toolbar-divider"></div>
             
             <!-- 文件操作 -->
-            <button class="toolbar-btn" id="newBtn" title="新建文档 (Ctrl+N)">
+            <button class="toolbar-btn" id="newBtn" data-i18n-title="toolbar.newTooltip">
                 <svg class="icon"><use href="#icon-new"></use></svg>
-                <span class="text">新建</span>
+                <span class="text" data-i18n="ui.toolbar.new">New</span>
             </button>
-            <button class="toolbar-btn" id="openBtn" title="打开文件 (Ctrl+O)">
+            <button class="toolbar-btn" id="openBtn" data-i18n-title="toolbar.openTooltip">
                 <svg class="icon"><use href="#icon-open"></use></svg>
-                <span class="text">打开</span>
+                <span class="text" data-i18n="ui.toolbar.open">Open</span>
             </button>
-            <button class="toolbar-btn" id="saveBtn" title="保存文件 (Ctrl+S)">
+            <button class="toolbar-btn" id="saveBtn" data-i18n-title="toolbar.saveTooltip">
                 <svg class="icon"><use href="#icon-save"></use></svg>
-                <span class="text">保存</span>
+                <span class="text" data-i18n="ui.toolbar.save">Save</span>
             </button>
             
             <div class="toolbar-divider"></div>
             
             <!-- Markdown 格式化工具 -->
-            <button class="toolbar-btn" id="boldBtn" title="加粗 (Ctrl+B)">
+            <button class="toolbar-btn" id="boldBtn" data-i18n-title="toolbar.boldTooltip">
                 <svg class="icon"><use href="#icon-bold"></use></svg>
             </button>
-            <button class="toolbar-btn" id="italicBtn" title="斜体 (Ctrl+I)">
+            <button class="toolbar-btn" id="italicBtn" data-i18n-title="toolbar.italicTooltip">
                 <svg class="icon"><use href="#icon-italic"></use></svg>
             </button>
-            <button class="toolbar-btn" id="headingBtn" title="标题">
+            <button class="toolbar-btn" id="headingBtn" data-i18n-title="toolbar.headingTooltip">
                 <svg class="icon"><use href="#icon-heading"></use></svg>
             </button>
-            <button class="toolbar-btn" id="linkBtn" title="链接 (Ctrl+K)">
+            <button class="toolbar-btn" id="linkBtn" data-i18n-title="toolbar.linkTooltip">
                 <svg class="icon"><use href="#icon-link"></use></svg>
             </button>
-            <button class="toolbar-btn" id="imageBtn" title="图片">
+            <button class="toolbar-btn" id="imageBtn" data-i18n-title="toolbar.imageTooltip">
                 <svg class="icon"><use href="#icon-image"></use></svg>
             </button>
-            <button class="toolbar-btn" id="codeBtn" title="代码块">
+            <button class="toolbar-btn" id="codeBtn" data-i18n-title="toolbar.codeTooltip">
                 <svg class="icon"><use href="#icon-code"></use></svg>
             </button>
-            <button class="toolbar-btn" id="tableBtn" title="表格">
+            <button class="toolbar-btn" id="tableBtn" data-i18n-title="toolbar.tableTooltip">
                 <svg class="icon"><use href="#icon-table"></use></svg>
             </button>
             
@@ -315,67 +320,78 @@
             
             <!-- Mermaid 模板 -->
             <div class="dropdown">
-                <button class="toolbar-btn" id="mermaidBtn" title="Mermaid 图表">
+                <button class="toolbar-btn" id="mermaidBtn" data-i18n-title="toolbar.mermaidTooltip">
                     <svg class="icon"><use href="#icon-chart"></use></svg>
-                    <span class="text">图表</span>
+                    <span class="text" data-i18n="toolbar.mermaidChart">Chart</span>
                 </button>
                 <div class="dropdown-content">
-                    <button class="dropdown-item" data-mermaid="flowchart">流程图</button>
-                    <button class="dropdown-item" data-mermaid="sequence">时序图</button>
-                    <button class="dropdown-item" data-mermaid="gantt">甘特图</button>
-                    <button class="dropdown-item" data-mermaid="class">类图</button>
-                    <button class="dropdown-item" data-mermaid="state">状态图</button>
+                    <button class="dropdown-item" data-mermaid="flowchart" data-i18n="toolbar.mermaidTypes.flowchart">Flowchart</button>
+                    <button class="dropdown-item" data-mermaid="sequence" data-i18n="toolbar.mermaidTypes.sequence">Sequence Diagram</button>
+                    <button class="dropdown-item" data-mermaid="gantt" data-i18n="toolbar.mermaidTypes.gantt">Gantt Chart</button>
+                    <button class="dropdown-item" data-mermaid="class" data-i18n="toolbar.mermaidTypes.class">Class Diagram</button>
+                    <button class="dropdown-item" data-mermaid="state" data-i18n="toolbar.mermaidTypes.state">State Diagram</button>
                 </div>
             </div>
             
             <!-- 数学公式 -->
             <div class="dropdown">
-                <button class="toolbar-btn" id="mathBtn" title="数学公式 (KaTeX)">
+                <button class="toolbar-btn" id="mathBtn" data-i18n-title="toolbar.mathTooltip">
                     <svg class="icon"><use href="#icon-formula"></use></svg>
-                    <span class="text">公式</span>
+                    <span class="text" data-i18n="toolbar.mathFormula">Formula</span>
                 </button>
                 <div class="dropdown-content">
-                    <button class="dropdown-item" data-math="inline">行内公式 $x$</button>
-                    <button class="dropdown-item" data-math="block">块级公式 $$x$$</button>
-                    <button class="dropdown-item" data-math="fraction">分数 $\frac{a}{b}$</button>
-                    <button class="dropdown-item" data-math="sqrt">根号 $\sqrt{x}$</button>
-                    <button class="dropdown-item" data-math="sum">求和 $\sum$</button>
-                    <button class="dropdown-item" data-math="integral">积分 $\int$</button>
-                    <button class="dropdown-item" data-math="limit">极限 $\lim$</button>
-                    <button class="dropdown-item" data-math="matrix">矩阵</button>
+                    <button class="dropdown-item" data-math="inline" data-i18n="toolbar.mathTypes.inline">Inline Formula $x$</button>
+                    <button class="dropdown-item" data-math="block" data-i18n="toolbar.mathTypes.block">Block Formula $$x$$</button>
+                    <button class="dropdown-item" data-math="fraction" data-i18n="toolbar.mathTypes.fraction">Fraction $\frac{a}{b}$</button>
+                    <button class="dropdown-item" data-math="sqrt" data-i18n="toolbar.mathTypes.sqrt">Square Root $\sqrt{x}$</button>
+                    <button class="dropdown-item" data-math="sum" data-i18n="toolbar.mathTypes.sum">Summation $\sum$</button>
+                    <button class="dropdown-item" data-math="integral" data-i18n="toolbar.mathTypes.integral">Integral $\int$</button>
+                    <button class="dropdown-item" data-math="limit" data-i18n="toolbar.mathTypes.limit">Limit $\lim$</button>
+                    <button class="dropdown-item" data-math="matrix" data-i18n="toolbar.mathTypes.matrix">Matrix</button>
                 </div>
             </div>
         </div>
         
         <div class="toolbar-right">
+            <!-- 语言切换 -->
+            <div class="dropdown">
+                <button class="toolbar-btn" id="langBtn" title="Language / 语言">
+                    <svg class="icon"><use href="#icon-language"></use></svg>
+                </button>
+                <div class="dropdown-content dropdown-right" id="langDropdown">
+                    <button class="dropdown-item" data-lang="en">English</button>
+                    <button class="dropdown-item" data-lang="zh">中文</button>
+                </div>
+            </div>
+            
             <!-- 帮助文档 -->
-            <button class="toolbar-btn" id="helpBtn" title="快捷键和帮助">
+            <button class="toolbar-btn" id="helpBtn" data-i18n-title="ui.toolbar.help">
                 <svg class="icon"><use href="#icon-help"></use></svg>
             </button>
             
             <!-- 视图切换 -->
-            <button class="toolbar-btn" id="layoutBtn" title="切换布局">
+            <button class="toolbar-btn" id="layoutBtn" data-i18n-title="ui.toolbar.layout">
                 <svg class="icon"><use href="#icon-layout"></use></svg>
             </button>
             
             <!-- 主题切换 -->
-            <button class="toolbar-btn" id="themeBtn" title="切换主题">
+            <button class="toolbar-btn" id="themeBtn" data-i18n-title="ui.toolbar.theme">
                 <svg class="icon"><use href="#icon-theme-dark"></use></svg>
             </button>
             
             <!-- 更多选项 -->
             <div class="dropdown">
-                <button class="toolbar-btn" title="更多">
+                <button class="toolbar-btn" data-i18n-title="ui.toolbar.more">
                     <svg class="icon"><use href="#icon-more"></use></svg>
                 </button>
                 <div class="dropdown-content dropdown-right">
-                    <button class="dropdown-item" id="exportPdfDefaultBtn">导出 PDF（默认）</button>
-                    <button class="dropdown-item" id="exportPdfFullPageBtn">导出 PDF（整张）</button>
-                    <button class="dropdown-item" id="exportPdfBtn">导出 PDF（智能分页）🚧</button>
-                    <button class="dropdown-item" id="exportHtmlBtn">导出 HTML</button>
-                    <button class="dropdown-item" id="copyMdBtn">复制 Markdown</button>
-                    <button class="dropdown-item" id="copyHtmlBtn">复制 HTML</button>
-                    <button class="dropdown-item" id="clearBtn">清空内容</button>
+                    <button class="dropdown-item" id="exportPdfDefaultBtn" data-i18n="ui.toolbar.exportPdfDefault"></button>
+                    <button class="dropdown-item" id="exportPdfFullPageBtn" data-i18n="ui.toolbar.exportPdfFullPage"></button>
+                    <button class="dropdown-item" id="exportPdfBtn" data-i18n="ui.toolbar.exportPdfSmart"></button>
+                    <button class="dropdown-item" id="exportHtmlBtn" data-i18n="ui.toolbar.exportHtml"></button>
+                    <button class="dropdown-item" id="copyMdBtn" data-i18n="ui.toolbar.copyMd"></button>
+                    <button class="dropdown-item" id="copyHtmlBtn" data-i18n="ui.toolbar.copyHtml"></button>
+                    <button class="dropdown-item" id="clearBtn" data-i18n="ui.toolbar.clear"></button>
                 </div>
             </div>
         </div>
@@ -390,56 +406,7 @@
             <textarea 
                 id="editorTextarea" 
                 style="display: none;" 
-                placeholder="# 欢迎使用 MarkX！
-
-现代化的 Markdown 编辑器，支持 **Mermaid 图表** 和 **KaTeX 数学公式**！
-
-## ✨ 特色功能
-
-- ✅ 实时预览
-- ✅ Mermaid 图表支持
-- ✅ KaTeX 数学公式
-- ✅ 代码高亮
-- ✅ 暗色/亮色主题
-- ✅ 文件导入导出
-- ✅ 自动保存草稿
-
----
-
-## 📊 Mermaid 图表示例
-
-点击工具栏的「图表」按钮快速插入模板！
-
-```mermaid
-graph TD
-    A[开始] --> B{是否喜欢?}
-    B -->|是| C[太棒了!]
-    B -->|否| D[试试其他功能]
-    C --> E[分享给朋友]
-    D --> E
-```
-
----
-
-## 🧮 数学公式示例
-
-点击工具栏的「公式」按钮快速插入模板！
-
-**行内公式**：质能方程 $E = mc^2$，勾股定理 $a^2 + b^2 = c^2$
-
-**块级公式**：
-
-$$
-x = \frac{-b \pm \sqrt{b^2 - 4ac}}{2a}
-$$
-
-$$
-\sum_{i=1}^{n} i = \frac{n(n+1)}{2}
-$$
-
----
-
-试试编辑内容，右侧会实时更新！🚀"
+                data-i18n-placeholder="ui.editor.placeholder"
                 spellcheck="false"
                 autocomplete="off"
                 autocorrect="off"
@@ -455,16 +422,16 @@ $$
     <!-- 底部状态栏 -->
     <footer class="statusbar">
         <div class="statusbar-left">
-            <span id="statusMessage">就绪</span>
+            <span id="statusMessage" data-i18n="ui.statusbar.ready">Ready</span>
         </div>
         <div class="statusbar-right">
-            <span id="charCount">0 字符</span>
+            <span id="charCount" data-i18n="ui.statusbar.characters" data-i18n-params='{"count": 0}'>0 characters</span>
             <span class="statusbar-divider">|</span>
-            <span id="wordCount">0 词</span>
+            <span id="wordCount" data-i18n="ui.statusbar.words" data-i18n-params='{"count": 0}'>0 words</span>
             <span class="statusbar-divider">|</span>
-            <span id="lineCount">0 行</span>
+            <span id="lineCount" data-i18n="ui.statusbar.lines" data-i18n-params='{"count": 0}'>0 lines</span>
             <span class="statusbar-divider">|</span>
-            <span id="readTime">预计阅读 1 分钟</span>
+            <span id="readTime" data-i18n="ui.statusbar.readTime" data-i18n-params='{"minutes": 1}'>Estimated 1 min read</span>
         </div>
     </footer>
 
@@ -477,9 +444,9 @@ $$
             <div class="help-modal-header">
                 <div class="help-header-title">
                     <svg class="help-header-icon"><use href="#icon-help"></use></svg>
-                    <h2>快捷键与自动完成</h2>
+                    <h2 data-i18n="ui.help.title">Shortcuts & Autocomplete</h2>
                 </div>
-                <button class="help-modal-close" id="helpModalClose" title="关闭 (ESC)">
+                <button class="help-modal-close" id="helpModalClose" data-i18n-title="ui.help.close">
                     <svg class="icon"><use href="#icon-close"></use></svg>
                 </button>
             </div>
@@ -924,14 +891,14 @@ $$
                             </div>
                         </div>
                     </div>
-                    <div class="help-template-note">
-                        <strong>使用方法：</strong>输入上述关键词或对应的中文描述（如"标题"、"表格"、"代码"）即可快速找到相关模板。选择模板后，使用 <kbd>Tab</kbd> 键在占位符之间跳转，<kbd>Enter</kbd> 确认插入。
+                    <div class="help-template-note" data-i18n="ui.help.sections.templates.usage">
+                        <strong data-i18n="ui.help.sections.templates.usage"></strong>
                     </div>
                 </div>
 
                 <div class="help-footer">
-                    <div class="help-footer-note">
-                        <strong>Mac 用户：</strong>将 <kbd>Ctrl</kbd> 替换为 <kbd>Cmd</kbd>
+                    <div class="help-footer-note" data-i18n="ui.help.footer.macNote">
+                        <strong></strong>
                     </div>
                 </div>
             </div>

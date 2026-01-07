@@ -7,6 +7,7 @@ import { elements } from './elements.js';
 import { setStatus } from './ui-utils.js';
 import { getEditorContent, setEditorContent } from '../editor/ace-editor.js';
 import { renderMarkdown } from '../renderer/markdown.js';
+import { t } from './i18n.js';
 
 /**
  * 保存草稿到 localStorage
@@ -41,7 +42,7 @@ export function loadDraft() {
                     // 自动恢复，不提示
                     setEditorContent(draft);
                     renderMarkdown();
-                    setStatus('已自动恢复草稿');
+                    setStatus(t('messages.draftAutoRestored'));
                 } else if (autoRestore === 'never') {
                     // 永不恢复，不提示
                     return;
@@ -70,17 +71,17 @@ function showDraftRestoreDialog(draft, timeStr) {
         <div class="draft-dialog-content">
             <h3>
                 <svg style="width: 20px; height: 20px; vertical-align: middle; margin-right: 8px;"><use href="#icon-save"></use></svg>
-                发现未保存的草稿
+                ${t('draft.foundTitle')}
             </h3>
-            <p>上次编辑时间：${timeStr}</p>
+            <p>${t('draft.lastEditTime', { time: timeStr })}</p>
             <div class="draft-dialog-actions">
                 <label class="draft-dialog-checkbox">
                     <input type="checkbox" id="draftRemember">
-                    <span>记住我的选择</span>
+                    <span>${t('draft.rememberChoice')}</span>
                 </label>
                 <div class="draft-dialog-buttons">
-                    <button class="draft-btn draft-btn-secondary" id="draftIgnore">忽略</button>
-                    <button class="draft-btn draft-btn-primary" id="draftRestore">恢复草稿</button>
+                    <button class="draft-btn draft-btn-secondary" id="draftIgnore">${t('draft.ignore')}</button>
+                    <button class="draft-btn draft-btn-primary" id="draftRestore">${t('draft.restore')}</button>
                 </div>
             </div>
         </div>
@@ -106,7 +107,7 @@ function showDraftRestoreDialog(draft, timeStr) {
         }
         setEditorContent(draft);
         renderMarkdown();
-        setStatus('已恢复草稿');
+        setStatus(t('messages.draftRestored'));
         document.body.removeChild(dialog);
     });
     

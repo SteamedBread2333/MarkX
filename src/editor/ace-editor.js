@@ -7,6 +7,22 @@ import { DEFAULT_CONTENT } from '../core/constants.js';
 import { elements } from '../core/elements.js';
 import { setStatus } from '../core/ui-utils.js';
 import { createMarkdownCompleter } from './autocomplete.js';
+import { t } from '../core/i18n.js';
+
+// 监听语言变化事件，重新创建自动完成器
+window.addEventListener('languagechange', () => {
+    const editor = getEditorInstance();
+    if (editor && editor._langTools) {
+        // 重新创建 Markdown 自动完成器
+        const markdownCompleter = createMarkdownCompleter();
+        editor._markdownCompleter = markdownCompleter;
+        
+        // 如果当前是 Markdown 模式，更新完成器
+        if (editor._currentLanguageMode === 'markdown') {
+            editor._langTools.setCompleters([markdownCompleter]);
+        }
+    }
+});
 
 // 全局编辑器实例
 let aceEditor = null;
@@ -327,7 +343,7 @@ function checkIfInsideBlock(session, pos) {
  * 显示/隐藏自动完成提示（在状态栏显示）
  */
 let hintTimeout = null;
-function showAutocompleteHint(editor, show, blockType = '代码块') {
+function showAutocompleteHint(editor, show, blockType = null, language = null) {
     // 清除之前的定时器
     if (hintTimeout) {
         clearTimeout(hintTimeout);
@@ -358,12 +374,24 @@ function showAutocompleteHint(editor, show, blockType = '代码块') {
         const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0;
         const shortcut = isMac ? 'Cmd+E' : 'Ctrl+E';
         
+        // 根据块类型生成提示文本
+        let hintText = '';
+        if (language) {
+            hintText = t('autocomplete.hint.inCodeBlock', { language, shortcut });
+        } else if (blockType === '代码块' || blockType === 'code block') {
+            hintText = t('autocomplete.hint.inCodeBlockNoLang', { shortcut });
+        } else if (blockType === '引用块' || blockType === 'quote block') {
+            hintText = t('autocomplete.hint.inBlockquote', { shortcut });
+        } else {
+            hintText = t('autocomplete.hint.inCodeBlockNoLang', { shortcut });
+        }
+        
         // 在状态栏显示提示，带图标和样式
         hintElement.className = 'autocomplete-hint autocomplete-hint-active';
-        hintElement.innerHTML = `💡 在${blockType}内编辑，按 <kbd>${shortcut}</kbd> 手动触发自动完成`;
+        hintElement.innerHTML = hintText;
         
         // 确保 statusMessage 显示"就绪"
-        statusElement.textContent = '就绪';
+        statusElement.textContent = t('messages.ready');
         statusElement.className = '';
         
         // 添加样式（如果还没有添加）
@@ -470,7 +498,7 @@ function setupAutocompletion(editor) {
                             enableLiveAutocompletion: true,  // 在代码块内启用实时自动完成
                             enableSnippets: true
                         });
-                        showAutocompleteHint(editor, true, `${blockInfo.language} 代码块`);
+                        showAutocompleteHint(editor, true, '代码块', blockInfo.language);
                     } else if (blockInfo.inCodeBlock) {
                         // 在代码块内但没有指定语言：禁用实时自动完成，只允许手动触发
                         switchToMarkdownMode(editor);
@@ -479,7 +507,7 @@ function setupAutocompletion(editor) {
                             enableLiveAutocompletion: false,
                             enableSnippets: true
                         });
-                        showAutocompleteHint(editor, true, '代码块');
+                        showAutocompleteHint(editor, true, '代码块', null);
                     } else if (blockInfo.inBlockquote) {
                         // 在引用块内：禁用实时自动完成
                         switchToMarkdownMode(editor);
@@ -488,7 +516,7 @@ function setupAutocompletion(editor) {
                             enableLiveAutocompletion: false,
                             enableSnippets: true
                         });
-                        showAutocompleteHint(editor, true, '引用块');
+                        showAutocompleteHint(editor, true, '引用块', null);
                     } else {
                         // 不在块内：使用 Markdown 自动完成
                         switchToMarkdownMode(editor);
@@ -517,11 +545,11 @@ function setupAutocompletion(editor) {
                     const blockInfo = checkIfInsideBlock(session, pos);
                     
                     if (blockInfo.inCodeBlock && blockInfo.language) {
-                        showAutocompleteHint(editor, true, `${blockInfo.language} 代码块`);
+                        showAutocompleteHint(editor, true, '代码块', blockInfo.language);
                     } else if (blockInfo.inCodeBlock && !blockInfo.language) {
-                        showAutocompleteHint(editor, true, '代码块');
+                        showAutocompleteHint(editor, true, '代码块', null);
                     } else if (blockInfo.inBlockquote) {
-                        showAutocompleteHint(editor, true, '引用块');
+                        showAutocompleteHint(editor, true, '引用块', null);
                     }
                 }, 100);
                 
@@ -731,17 +759,16 @@ function switchToLanguageMode(editor, language) {
 function switchToMarkdownMode(editor) {
     if (!editor) return;
     
-    // 如果已经是 Markdown 模式，不需要切换
-    if (editor._currentLanguageMode === 'markdown') {
-        return;
-    }
-    
     try {
         const langTools = editor._langTools;
         if (!langTools) return;
         
+        // 重新创建 Markdown 自动完成器（以支持语言切换）
+        const markdownCompleter = createMarkdownCompleter();
+        editor._markdownCompleter = markdownCompleter;
+        
         // 恢复 Markdown 自动完成器
-        langTools.setCompleters([editor._markdownCompleter]);
+        langTools.setCompleters([markdownCompleter]);
         editor._currentLanguageMode = 'markdown';
     } catch (error) {
         console.warn('切换回 Markdown 模式失败:', error);
