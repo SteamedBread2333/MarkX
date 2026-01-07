@@ -5,8 +5,8 @@
     top: 0;
     right: 0;
     z-index: 201;
-    width: 50px;
-    height: 50px;
+    width: 40px;
+    height: 40px;
     overflow: hidden;
     pointer-events: none; /* 默认禁用点击，只在特定区域启用 */
     transition: all var(--transition-normal);
@@ -21,8 +21,8 @@
     right: 0;
     width: 0;
     height: 0;
-    border-left: 40px solid transparent;
-    border-top: 40px solid rgba(0, 0, 0, 0.01);
+    border-left: 32px solid transparent;
+    border-top: 32px solid rgba(0, 0, 0, 0.01);
     pointer-events: auto;
     cursor: pointer;
     z-index: 1;
@@ -42,12 +42,13 @@
     position: absolute;
     top: 0;
     right: 0;
-    width: 32px;
-    height: 32px;
+    width: 24px;
+    height: 24px;
     border: 0;
     filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.2));
     transition: transform var(--transition-normal);
     z-index: 2;
+    transform: translate(-16px, 4px);
 }
 
 /* 亮色主题：使用渐变蓝色 */
@@ -67,12 +68,12 @@
 
 .github-corner:hover svg {
     filter: drop-shadow(0 4px 16px rgba(91, 134, 229, 0.5));
-    transform: scale(1.05);
+    transform: translate(-16px, 4px) scale(1.05);
 }
 
 [data-theme="dark"] .github-corner:hover svg {
     filter: drop-shadow(0 4px 20px rgba(91, 134, 229, 0.6));
-    transform: scale(1.05);
+    transform: translate(-16px, 4px) scale(1.05);
 }
 
 .github-corner .octo-arm {
