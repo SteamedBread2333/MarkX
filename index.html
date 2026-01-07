@@ -53,10 +53,12 @@
             }
             
             /**
-             * 清除所有缓存和存储
+             * 清除版本相关的缓存（保留用户数据）
              */
-            function clearAllCache() {
-                localStorage.clear();
+            function clearVersionCache() {
+                // 只清除版本相关的存储项，保留用户数据（草稿、语言、主题等）
+                localStorage.removeItem(VERSION_CONFIG.storageKey.version);
+                localStorage.removeItem(VERSION_CONFIG.storageKey.buildTime);
                 sessionStorage.clear();
             }
             
@@ -80,7 +82,8 @@
                 if (versionChanged || buildTimeChanged) {
                     console.log('🔄 检测到新版本 ' + VERSION_CONFIG.version + '，正在更新...');
                     
-                    clearAllCache();
+                    // 只清除版本缓存，保留用户数据
+                    clearVersionCache();
                     unregisterServiceWorkers().then(forceReload);
                     return;
                 }
