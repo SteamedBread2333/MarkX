@@ -455,6 +455,27 @@ function updateUITexts() {
         }
     });
     
+    // 更新版本号显示（将时间戳转换为可读格式）
+    if (elements.versionDisplay && window.APP_VERSION) {
+        const version = window.APP_VERSION;
+        // 版本号格式：YYYY.MM.DD.HHMMSS，例如：2026.01.07.052239
+        // 转换为：2026-01-07 05:22:39
+        const versionMatch = version.match(/^(\d{4})\.(\d{2})\.(\d{2})\.(\d{2})(\d{2})(\d{2})$/);
+        if (versionMatch) {
+            const [, year, month, day, hour, minute, second] = versionMatch;
+            const readableTime = `${year}-${month}-${day} ${hour}:${minute}:${second}`;
+            elements.versionDisplay.textContent = `v${readableTime}`;
+        } else if (window.APP_BUILD_TIME) {
+            // 如果有构建时间，使用构建时间
+            const buildTime = new Date(window.APP_BUILD_TIME);
+            const readableTime = buildTime.toISOString().replace('T', ' ').substring(0, 19);
+            elements.versionDisplay.textContent = `v${readableTime}`;
+        } else {
+            // 如果不是标准格式，直接显示原版本号
+            elements.versionDisplay.textContent = `v${version}`;
+        }
+    }
+    
     // 更新状态栏
     if (elements.statusMessage) {
         elements.statusMessage.textContent = t('ui.statusbar.ready');
