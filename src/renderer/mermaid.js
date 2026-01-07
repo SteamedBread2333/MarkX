@@ -58,17 +58,14 @@ export async function renderMermaidCharts() {
             wrapper.innerHTML = `
                 <div class="mermaid-content">${svg}</div>
                 <div class="mermaid-export-toolbar">
-                    <button class="mermaid-export-btn" data-format="svg" title="导出为 SVG 矢量图（推荐）">
+                    <button class="mermaid-export-btn" data-format="svg" title="${t('messages.exportSvgTooltip')}">
                         <svg class="icon"><use href="#icon-download"></use></svg>
-                        <span class="text">SVG</span>
                     </button>
-                    <button class="mermaid-export-btn" data-format="png" title="导出为 PNG 图片（高清 2x）&#10;如无反应请重试或使用 SVG">
+                    <button class="mermaid-export-btn" data-format="png" title="${t('messages.exportPngTooltip')}">
                         <svg class="icon"><use href="#icon-image-download"></use></svg>
-                        <span class="text">PNG</span>
                     </button>
-                    <button class="mermaid-export-btn" data-action="fullscreen" title="全屏查看（支持缩放和拖拽）">
+                    <button class="mermaid-export-btn" data-action="fullscreen" title="${t('messages.fullscreenViewTooltip')}">
                         <svg class="icon"><use href="#icon-fullscreen"></use></svg>
-                        <span class="text">全屏</span>
                     </button>
                 </div>
             `;
