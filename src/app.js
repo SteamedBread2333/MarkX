@@ -458,17 +458,21 @@ function updateUITexts() {
     
     // 更新状态栏
     if (elements.statusMessage) {
-        elements.statusMessage.textContent = t('messages.ready');
+        elements.statusMessage.textContent = t('ui.statusbar.ready');
     }
     
-    // 更新编辑器占位符
-    const editor = getEditorInstance();
-    if (editor) {
-        const placeholder = t('ui.editor.placeholder');
-        // Ace Editor 设置占位符的方式
-        if (editor.setOption) {
-            editor.setOption('placeholder', placeholder);
-        }
+    // 初始化状态栏统计信息（使用空内容，避免显示错误的默认值）
+    if (elements.charCount) {
+        elements.charCount.textContent = t('ui.statusbar.characters', { count: 0 });
+    }
+    if (elements.wordCount) {
+        elements.wordCount.textContent = t('ui.statusbar.words', { count: 0 });
+    }
+    if (elements.lineCount) {
+        elements.lineCount.textContent = t('ui.statusbar.lines', { count: 0 });
+    }
+    if (elements.readTime) {
+        elements.readTime.textContent = t('ui.statusbar.readTime', { minutes: 1 });
     }
 }
 
