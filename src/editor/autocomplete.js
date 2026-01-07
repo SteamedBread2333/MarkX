@@ -46,6 +46,93 @@ function isInsideString(session, pos) {
 }
 
 /**
+ * 检测光标是否在代码块或引用块内，并返回代码块的语言类型
+ * @returns {Object} { inCodeBlock: boolean, language: string|null, inBlockquote: boolean }
+ */
+function checkIfInsideBlock(session, pos) {
+    const lines = session.getLines(0, pos.row + 1);
+    let inCodeBlock = false;
+    let inBlockquote = false;
+    let codeBlockMarker = null;
+    let codeBlockLanguage = null;
+    let codeBlockStartRow = -1;
+    
+    // 检查当前行及之前的行
+    for (let i = 0; i <= pos.row; i++) {
+        const line = lines[i];
+        const trimmedLine = line.trim();
+        
+        // 检测代码块开始/结束
+        if (trimmedLine.startsWith('```')) {
+            if (inCodeBlock && codeBlockMarker === '```') {
+                // 代码块结束
+                if (i < pos.row) {
+                    inCodeBlock = false;
+                    codeBlockMarker = null;
+                    codeBlockLanguage = null;
+                    codeBlockStartRow = -1;
+                } else {
+                    // 当前行是结束标记，但光标可能在标记上
+                    return { inCodeBlock: true, language: codeBlockLanguage, inBlockquote: false };
+                }
+            } else {
+                // 代码块开始，提取语言类型
+                inCodeBlock = true;
+                codeBlockMarker = '```';
+                codeBlockStartRow = i;
+                // 提取语言：```language 或 ```language:title
+                const match = trimmedLine.match(/^```(\w+)/);
+                codeBlockLanguage = match ? match[1].toLowerCase() : null;
+            }
+        } else if (trimmedLine.startsWith('~~~')) {
+            if (inCodeBlock && codeBlockMarker === '~~~') {
+                // 代码块结束
+                if (i < pos.row) {
+                    inCodeBlock = false;
+                    codeBlockMarker = null;
+                    codeBlockLanguage = null;
+                    codeBlockStartRow = -1;
+                } else {
+                    return { inCodeBlock: true, language: codeBlockLanguage, inBlockquote: false };
+                }
+            } else {
+                inCodeBlock = true;
+                codeBlockMarker = '~~~';
+                codeBlockStartRow = i;
+                // 提取语言：~~~language
+                const match = trimmedLine.match(/^~~~(\w+)/);
+                codeBlockLanguage = match ? match[1].toLowerCase() : null;
+            }
+        }
+        
+        // 检测引用块（以 > 开头）
+        if (trimmedLine.startsWith('>') && !inCodeBlock) {
+            inBlockquote = true;
+        } else if (!trimmedLine.startsWith('>') && !trimmedLine.startsWith(' ') && trimmedLine.length > 0 && !inCodeBlock) {
+            // 如果遇到非引用行且不是空行或缩进行，则退出引用块
+            if (i < pos.row) {
+                inBlockquote = false;
+            }
+        }
+    }
+    
+    // 如果当前行在代码块内
+    if (inCodeBlock && pos.row >= 0 && pos.row > codeBlockStartRow) {
+        return { inCodeBlock: true, language: codeBlockLanguage, inBlockquote: false };
+    }
+    
+    // 如果当前行在引用块内
+    if (inBlockquote && pos.row >= 0) {
+        const currentLine = lines[pos.row];
+        if (currentLine.trim().startsWith('>')) {
+            return { inCodeBlock: false, language: null, inBlockquote: true };
+        }
+    }
+    
+    return { inCodeBlock: false, language: null, inBlockquote: false };
+}
+
+/**
  * Markdown 自动完成项配置
  * 包含所有常用的 Markdown 语法和模板
  */
@@ -153,7 +240,7 @@ export const markdownCompletions = [
     { name: 'mermaid-state', value: '```mermaid\nstateDiagram-v2\n    [*] --> ${1:待处理}\n    ${1:待处理} --> ${2:处理中}: ${3:开始处理}\n    ${2:处理中} --> ${4:已完成}: ${5:处理成功}\n    ${2:处理中} --> ${6:失败}: ${7:处理失败}\n    ${6:失败} --> ${1:待处理}: ${8:重试}\n    ${4:已完成} --> [*]\n```\n', meta: 'Mermaid 状态图', score: 900 },
     { name: 'mermaid-er', value: '```mermaid\nerDiagram\n    CUSTOMER ||--o{ ORDER : places\n    ORDER ||--|{ LINE-ITEM : contains\n    CUSTOMER }|..|{ DELIVERY-ADDRESS : uses\n```\n', meta: 'Mermaid ER 图', score: 850 },
     { name: 'mermaid-pie', value: '```mermaid\npie title ${1:饼图标题}\n    "${2:标签1}" : ${3:30}\n    "${4:标签2}" : ${5:20}\n    "${6:标签3}" : ${7:50}\n```\n', meta: 'Mermaid 饼图', score: 850 },
-    { name: 'mermaid-gitgraph', value: '```mermaid\ngitgraph:\n    commit id: "${1:初始提交}"\n    branch ${2:develop}\n    checkout ${2:develop}\n    commit id: "${3:功能开发}"\n    checkout main\n    merge ${2:develop}\n```\n', meta: 'Mermaid Git 图', score: 850 },
+    { name: 'mermaid-gitgraph', value: '```mermaid\ngitGraph\n    commit id: "${1:初始提交}"\n    branch "${2:develop}"\n    checkout "${2:develop}"\n    commit id: "${3:功能开发}"\n    checkout main\n    merge "${2:develop}"\n```\n', meta: 'Mermaid Git 图', score: 850 },
     { name: 'mermaid-journey', value: '```mermaid\njourney\n    title ${1:用户旅程}\n    section ${2:阶段1}\n      ${3:步骤1}: 5: ${4:用户}\n      ${5:步骤2}: 4: ${4:用户}\n    section ${6:阶段2}\n      ${7:步骤3}: 3: ${4:用户}\n```\n', meta: 'Mermaid 用户旅程图', score: 800 },
     { name: 'mermaid-c4', value: '```mermaid\nC4Context\n    title ${1:系统上下文图}\n    Person(user, "${2:用户}")\n    System(system, "${3:系统}")\n    Rel(user, system, "${4:使用}")\n```\n', meta: 'Mermaid C4 图', score: 750 },
     
@@ -232,10 +319,38 @@ export function createMarkdownCompleter() {
                 return;
             }
             
+            // 检测是否在块内
+            const blockInfo = checkIfInsideBlock(session, pos);
+            
+            // 如果在代码块内且指定了语言，不显示 Markdown 自动完成（会使用语言特定的自动完成器）
+            if (blockInfo.inCodeBlock && blockInfo.language) {
+                callback(null, []);
+                return;
+            }
+            
             // 获取当前行的文本
             const line = session.getLine(pos.row);
             const beforeCursor = line.substring(0, pos.column);
             const lastChar = beforeCursor.slice(-1);
+            
+            // 根据块类型过滤选项
+            let availableCompletions = markdownCompletions;
+            
+            if (blockInfo.inCodeBlock && !blockInfo.language) {
+                // 在代码块内（无语言）：只显示代码块相关的选项
+                availableCompletions = markdownCompletions.filter(item => 
+                    item.name.includes('code') || item.meta.includes('代码')
+                );
+                console.log('🔍 代码块内（无语言），过滤后的选项数量:', availableCompletions.length);
+            } else if (blockInfo.inBlockquote) {
+                // 在引用块内：只显示引用块相关的选项
+                availableCompletions = markdownCompletions.filter(item => 
+                    item.name.includes('blockquote')
+                );
+                console.log('🔍 引用块内，过滤后的选项数量:', availableCompletions.length);
+            } else if (!blockInfo.inCodeBlock && !blockInfo.inBlockquote) {
+                console.log('🔍 不在块内，显示所有选项');
+            }
             
             // 特殊字符触发：输入 #, *, [, !, -, >, `, |, $, ^, ~, =, _, +, :, < 等字符时自动触发
             const triggerChars = ['#', '*', '[', '!', '-', '>', '`', '|', '$', '^', '~', '=', '_', '+', ':', '<'];
@@ -250,10 +365,10 @@ export function createMarkdownCompleter() {
                 
                 if (isManualTrigger || isSpecialCharTrigger) {
                     // 根据特殊字符过滤相关项
-                    let filteredItems = markdownCompletions;
+                    let filteredItems = availableCompletions;
                     
                     if (isSpecialCharTrigger) {
-                        filteredItems = markdownCompletions.filter(item => {
+                        filteredItems = availableCompletions.filter(item => {
                             if (lastChar === '#') {
                                 return item.name.startsWith('h') || item.meta.includes('标题');
                             } else if (lastChar === '*') {
@@ -311,7 +426,7 @@ export function createMarkdownCompleter() {
                         });
                     } else {
                         // 手动触发时显示最常用的项
-                        filteredItems = markdownCompletions.filter(item => item.score >= 900);
+                        filteredItems = availableCompletions.filter(item => item.score >= 900);
                     }
                     
                     // 显示过滤后的自动完成项
@@ -334,7 +449,7 @@ export function createMarkdownCompleter() {
             }
             
             // 过滤匹配的自动完成项
-            const completions = markdownCompletions
+            const completions = availableCompletions
                 .filter(item => {
                     // 匹配名称或元数据
                     const nameMatch = item.name.toLowerCase().includes(prefix.toLowerCase());

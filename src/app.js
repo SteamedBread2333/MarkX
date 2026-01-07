@@ -135,6 +135,83 @@ function initEventListeners() {
     document.getElementById('copyHtmlBtn').addEventListener('click', copyHTML);
     document.getElementById('clearBtn').addEventListener('click', clearContent);
     
+    // 帮助文档按钮 - 使用事件委托确保能捕获点击
+    function initHelpModal() {
+        const helpBtn = document.getElementById('helpBtn');
+        const helpModal = document.getElementById('helpModal');
+        const helpModalClose = document.getElementById('helpModalClose');
+        
+        console.log('🔍 初始化帮助文档:', { helpBtn, helpModal, helpModalClose });
+        
+        if (!helpBtn) {
+            console.error('❌ helpBtn 未找到');
+            return;
+        }
+        if (!helpModal) {
+            console.error('❌ helpModal 未找到');
+            return;
+        }
+        if (!helpModalClose) {
+            console.error('❌ helpModalClose 未找到');
+            return;
+        }
+        
+        // 使用 mousedown 事件，确保能捕获
+        helpBtn.addEventListener('mousedown', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            console.log('✅ 帮助按钮被点击 (mousedown)');
+            toggleHelpModal(true);
+        });
+        
+        helpBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            console.log('✅ 帮助按钮被点击 (click)');
+            toggleHelpModal(true);
+        });
+        
+        helpModalClose.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            console.log('❌ 关闭按钮被点击');
+            toggleHelpModal(false);
+        });
+        
+        helpModal.addEventListener('click', function(e) {
+            if (e.target === helpModal) {
+                console.log('❌ 背景被点击，关闭模态框');
+                toggleHelpModal(false);
+            }
+        });
+        
+        // ESC 键关闭帮助文档
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && helpModal.style.display === 'flex') {
+                console.log('❌ ESC 键被按下，关闭模态框');
+                toggleHelpModal(false);
+            }
+        });
+        
+        function toggleHelpModal(show) {
+            if (show) {
+                helpModal.style.display = 'flex';
+                helpModal.style.setProperty('display', 'flex', 'important');
+                document.body.style.overflow = 'hidden';
+                console.log('📦 模态框已显示');
+            } else {
+                helpModal.style.display = 'none';
+                document.body.style.overflow = '';
+                console.log('📦 模态框已隐藏');
+            }
+        }
+        
+        // 暴露到全局，方便调试
+        window.toggleHelpModal = toggleHelpModal;
+    }
+    
+    initHelpModal();
+    
     // 文件输入
     elements.fileInput.addEventListener('change', handleFileSelect);
     

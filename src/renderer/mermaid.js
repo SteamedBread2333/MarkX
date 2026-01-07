@@ -22,7 +22,29 @@ export async function renderMermaidCharts() {
     // 渲染每个图表
     for (let i = 0; i < mermaidElements.length; i++) {
         const element = mermaidElements[i];
-        const code = element.textContent;
+        let code = element.textContent;
+        
+        // 自动修复常见的 gitGraph 语法错误
+        const trimmedCode = code.trim();
+        if (trimmedCode.toLowerCase().startsWith('gitgraph')) {
+            // 修复 gitgraph: 或 gitgraph 为 gitGraph（注意大小写）
+            code = code.replace(/^gitgraph:/gim, 'gitGraph');
+            code = code.replace(/^gitgraph(\s|$)/gim, 'gitGraph\n');
+            
+            // 如果是一行代码（没有换行），尝试格式化
+            if (!code.includes('\n') || code.split('\n').length < 3) {
+                // 在一行代码中，在关键字前添加换行和缩进
+                code = code
+                    .replace(/\s+commit\s+/g, '\n    commit ')
+                    .replace(/\s+branch\s+/g, '\n    branch ')
+                    .replace(/\s+checkout\s+/g, '\n    checkout ')
+                    .replace(/\s+merge\s+/g, '\n    merge ');
+                // 确保 gitGraph 后面有换行
+                code = code.replace(/^gitGraph\s*/, 'gitGraph\n');
+            }
+            
+            console.log('🔧 已自动修复 gitGraph 语法');
+        }
         
         try {
             // 生成唯一 ID

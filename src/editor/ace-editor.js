@@ -327,11 +327,30 @@ function checkIfInsideBlock(session, pos) {
  * 显示/隐藏自动完成提示（在状态栏显示）
  */
 let hintTimeout = null;
-function showAutocompleteHint(editor, show) {
+function showAutocompleteHint(editor, show, blockType = '代码块') {
     // 清除之前的定时器
     if (hintTimeout) {
         clearTimeout(hintTimeout);
         hintTimeout = null;
+    }
+    
+    // 确保状态栏元素存在
+    const statusElement = elements.statusMessage;
+    if (!statusElement) {
+        console.warn('⚠️ 状态栏元素不存在，无法显示自动完成提示');
+        return;
+    }
+    
+    // 获取或创建提示元素
+    let hintElement = document.getElementById('autocomplete-hint');
+    if (!hintElement) {
+        hintElement = document.createElement('span');
+        hintElement.id = 'autocomplete-hint';
+        hintElement.className = 'autocomplete-hint';
+        // 插入到 statusMessage 后面
+        if (statusElement.parentNode) {
+            statusElement.parentNode.insertBefore(hintElement, statusElement.nextSibling);
+        }
     }
     
     if (show) {
@@ -340,20 +359,31 @@ function showAutocompleteHint(editor, show) {
         const shortcut = isMac ? 'Cmd+E' : 'Ctrl+E';
         
         // 在状态栏显示提示，带图标和样式
-        const statusElement = elements.statusMessage;
-        statusElement.className = 'autocomplete-hint-active';
-        statusElement.innerHTML = `💡 在代码块内编辑，按 <kbd>${shortcut}</kbd> 手动触发自动完成`;
+        hintElement.className = 'autocomplete-hint autocomplete-hint-active';
+        hintElement.innerHTML = `💡 在${blockType}内编辑，按 <kbd>${shortcut}</kbd> 手动触发自动完成`;
+        
+        // 确保 statusMessage 显示"就绪"
+        statusElement.textContent = '就绪';
+        statusElement.className = '';
         
         // 添加样式（如果还没有添加）
         if (!document.getElementById('autocomplete-status-style')) {
             const style = document.createElement('style');
             style.id = 'autocomplete-status-style';
             style.textContent = `
-                #statusMessage.autocomplete-hint-active {
+                .autocomplete-hint {
+                    margin-left: var(--spacing-sm);
+                    font-size: 12px;
+                    color: var(--text-secondary);
+                    opacity: 0;
+                    transition: opacity 0.3s ease;
+                }
+                .autocomplete-hint-active {
+                    opacity: 1;
                     color: var(--accent-color);
                     animation: pulseHint 2s ease-in-out infinite;
                 }
-                #statusMessage.autocomplete-hint-active kbd {
+                .autocomplete-hint-active kbd {
                     background: var(--bg-tertiary);
                     padding: 2px 6px;
                     border-radius: 3px;
@@ -364,7 +394,7 @@ function showAutocompleteHint(editor, show) {
                     margin: 0 2px;
                     transition: all 0.2s ease;
                 }
-                #statusMessage.autocomplete-hint-active kbd:hover {
+                .autocomplete-hint-active kbd:hover {
                     background: var(--bg-hover);
                     border-color: var(--accent-color);
                 }
@@ -380,15 +410,11 @@ function showAutocompleteHint(editor, show) {
             document.head.appendChild(style);
         }
         
-        // 5秒后恢复为"就绪"
-        hintTimeout = setTimeout(() => {
-            statusElement.textContent = '就绪';
-            statusElement.className = '';
-        }, 5000);
+        // 不自动消失，持续显示直到光标移出块
     } else {
-        // 立即恢复为"就绪"
-        elements.statusMessage.textContent = '就绪';
-        elements.statusMessage.className = '';
+        // 隐藏提示
+        hintElement.className = 'autocomplete-hint';
+        hintElement.innerHTML = '';
     }
 }
 
@@ -437,14 +463,14 @@ function setupAutocompletion(editor) {
                     
                     // 根据是否在块内动态调整自动完成
                     if (blockInfo.inCodeBlock && blockInfo.language) {
-                        // 在代码块内：切换到对应语言的自动完成
+                        // 在代码块内（有语言）：切换到对应语言的自动完成
                         switchToLanguageMode(editor, blockInfo.language);
                         editor.setOptions({
                             enableBasicAutocompletion: true,
                             enableLiveAutocompletion: true,  // 在代码块内启用实时自动完成
                             enableSnippets: true
                         });
-                        showAutocompleteHint(editor, false);
+                        showAutocompleteHint(editor, true, `${blockInfo.language} 代码块`);
                     } else if (blockInfo.inCodeBlock) {
                         // 在代码块内但没有指定语言：禁用实时自动完成，只允许手动触发
                         switchToMarkdownMode(editor);
@@ -453,7 +479,7 @@ function setupAutocompletion(editor) {
                             enableLiveAutocompletion: false,
                             enableSnippets: true
                         });
-                        showAutocompleteHint(editor, true);
+                        showAutocompleteHint(editor, true, '代码块');
                     } else if (blockInfo.inBlockquote) {
                         // 在引用块内：禁用实时自动完成
                         switchToMarkdownMode(editor);
@@ -462,7 +488,7 @@ function setupAutocompletion(editor) {
                             enableLiveAutocompletion: false,
                             enableSnippets: true
                         });
-                        showAutocompleteHint(editor, true);
+                        showAutocompleteHint(editor, true, '引用块');
                     } else {
                         // 不在块内：使用 Markdown 自动完成
                         switchToMarkdownMode(editor);
@@ -483,6 +509,21 @@ function setupAutocompletion(editor) {
                     enableLiveAutocompletion: true,  // 默认启用实时自动完成
                     enableSnippets: true
                 });
+                
+                // 初始化时也检查一次光标位置，确保如果光标已经在块内，提示能正确显示
+                setTimeout(() => {
+                    const pos = editor.getCursorPosition();
+                    const session = editor.getSession();
+                    const blockInfo = checkIfInsideBlock(session, pos);
+                    
+                    if (blockInfo.inCodeBlock && blockInfo.language) {
+                        showAutocompleteHint(editor, true, `${blockInfo.language} 代码块`);
+                    } else if (blockInfo.inCodeBlock && !blockInfo.language) {
+                        showAutocompleteHint(editor, true, '代码块');
+                    } else if (blockInfo.inBlockquote) {
+                        showAutocompleteHint(editor, true, '引用块');
+                    }
+                }, 100);
                 
                 // 确保快捷键正确绑定（使用 Ctrl+E / Cmd+E，常用且方便）
                 // 支持切换：再次按快捷键时关闭自动完成菜单
@@ -674,9 +715,8 @@ function switchToLanguageMode(editor, language) {
         // 创建语言特定的自动完成器
         const languageCompleter = createLanguageCompleter(language);
         
-        // 组合 Markdown 和语言特定的自动完成器
+        // 在代码块内（有语言）时，只使用语言特定的自动完成器，不包含 Markdown 补全
         const completers = [
-            editor._markdownCompleter,  // Markdown 补全
             languageCompleter            // 语言关键字补全
         ];
         
