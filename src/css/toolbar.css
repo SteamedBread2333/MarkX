@@ -32,7 +32,8 @@
 
 /* 确保工具栏右侧有足够空间，不被GitHub角标遮挡 */
 .toolbar-right {
-    padding-right: 50px; /* 为GitHub角标留出空间 */
+    padding-right: 60px; /* 为GitHub角标留出更多空间，避免误触 */
+    margin-right: 8px; /* 额外的右边距，增加与GitHub角标的距离 */
 }
 
 .logo {
@@ -140,7 +141,7 @@
     position: absolute;
     top: calc(100% + 4px);
     left: 0;
-    min-width: 160px;
+    min-width: 160px; /* 默认最小宽度 */
     background: var(--bg-primary);
     border: 1px solid var(--border-color);
     border-radius: 8px;
@@ -149,6 +150,15 @@
     display: none;
     z-index: 9999;
     animation: dropdownFadeIn var(--transition-fast);
+    box-sizing: border-box;
+}
+
+/* 只针对"更多选项"下拉框设置更宽的宽度 */
+.toolbar-right > .dropdown:last-child .dropdown-content,
+.toolbar-right > .dropdown:last-child .dropdown-right {
+    width: 280px !important; /* 固定宽度，确保文字不换行（适配 "Export PDF (Smart Pagination) 🚧"） */
+    min-width: 280px !important;
+    max-width: 280px !important;
 }
 
 /* 增加下拉菜单的悬停区域，防止鼠标移动时意外关闭 */
@@ -185,6 +195,9 @@
     transition: background var(--transition-fast);
     user-select: none;
     -webkit-user-select: none;
+    white-space: nowrap; /* 防止文字换行 */
+    overflow: hidden;
+    text-overflow: ellipsis; /* 如果文字太长，显示省略号 */
 }
 
 .dropdown-item:hover {
