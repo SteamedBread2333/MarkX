@@ -604,5 +604,10 @@ $$
         image: '图片描述',
         code: '代码',
         table: '| 列1 | 列2 | 列3 |\n| --- | --- | --- |\n| 单元格1 | 单元格2 | 单元格3 |\n\n'
+    },
+    meta: {
+        title: 'MarkX - 专业 Markdown + Mermaid + KaTeX 编辑器',
+        description: '专业的 Markdown 编辑器，完美支持 Mermaid 图表和 KaTeX 数学公式渲染。现代化、开箱即用、功能强大。',
+        keywords: 'markdown, mermaid, katex, 数学公式, editor, 编辑器, 在线编辑器, markdown editor, math formula'
     }
 };

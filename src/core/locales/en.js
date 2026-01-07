@@ -604,5 +604,10 @@ Try editing the content, and the right side will update in real-time! 🚀`
         image: 'Image Description',
         code: 'Code',
         table: '| Column1 | Column2 | Column3 |\n| --- | --- | --- |\n| Cell1 | Cell2 | Cell3 |\n\n'
+    },
+    meta: {
+        title: 'MarkX - Professional Markdown + Mermaid + KaTeX Editor',
+        description: 'Professional Markdown editor with perfect support for Mermaid charts and KaTeX math formula rendering. Modern, out-of-the-box, powerful.',
+        keywords: 'markdown, mermaid, katex, math formula, editor, online editor, markdown editor'
     }
 };

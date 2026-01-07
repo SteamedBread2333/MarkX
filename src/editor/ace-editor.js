@@ -30,9 +30,13 @@ window.addEventListener('languagechange', () => {
         
         // 如果当前内容是空的，或者是之前的默认内容，则更新为新语言的默认内容
         if (currentContent.trim() === '' || currentContent === oldDefaultContent) {
+            // 标记为程序性更新，不触发 isDirty
+            editor._isProgrammaticUpdate = true;
             const newDefaultContent = getDefaultContent();
             editor.setValue(newDefaultContent, -1);
             editor._lastDefaultContent = newDefaultContent;
+            // 确保重置 isDirty（因为这是程序性更新，不是用户编辑）
+            AppState.isDirty = false;
         }
     }
 });
@@ -154,8 +158,19 @@ export function getEditorContent() {
 export function setEditorContent(content) {
     if (!aceEditor) return;
     
+    // 标记为程序性更新，不触发 isDirty
+    aceEditor._isProgrammaticUpdate = true;
+    
     const cursorPosition = aceEditor.getCursorPosition();
     aceEditor.setValue(content, -1); // -1 移动光标到开始
+    
+    // 程序性更新后，确保重置 isDirty（延迟执行，确保 change 事件已处理）
+    setTimeout(() => {
+        if (aceEditor._isProgrammaticUpdate) {
+            AppState.isDirty = false;
+            aceEditor._isProgrammaticUpdate = false;
+        }
+    }, 0);
     
     // 尝试恢复光标位置
     try {

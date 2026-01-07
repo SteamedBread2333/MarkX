@@ -407,6 +407,27 @@ function initLanguageSwitcher() {
 }
 
 /**
+ * 更新页面 title 和 meta 标签
+ * 根据当前语言动态更新内容
+ */
+function updatePageMeta() {
+    // 更新 title
+    document.title = t('meta.title');
+    
+    // 更新 meta description
+    const metaDescription = document.querySelector('meta[name="description"]');
+    if (metaDescription) {
+        metaDescription.setAttribute('content', t('meta.description'));
+    }
+    
+    // 更新 meta keywords
+    const metaKeywords = document.querySelector('meta[name="keywords"]');
+    if (metaKeywords) {
+        metaKeywords.setAttribute('content', t('meta.keywords'));
+    }
+}
+
+/**
  * 更新所有 UI 文本
  */
 function updateUITexts() {
@@ -454,6 +475,9 @@ function updateUITexts() {
             el.setAttribute('placeholder', translated);
         }
     });
+    
+    // 更新页面 title 和 meta 标签
+    updatePageMeta();
     
     // 更新版本号显示（将时间戳转换为可读格式）
     if (elements.versionDisplay && window.APP_VERSION) {
@@ -698,7 +722,17 @@ function setupEditorChangeListener() {
     if (aceEditor) {
         // 直接监听编辑器变化事件，实时更新统计
         aceEditor.session.on('change', () => {
-            AppState.isDirty = true;
+            // 检查是否为程序性更新（如语言切换、文件打开等）
+            // 如果是程序性更新，不设置 isDirty，并确保重置标志
+            if (aceEditor._isProgrammaticUpdate) {
+                // 重置标志和 isDirty
+                aceEditor._isProgrammaticUpdate = false;
+                AppState.isDirty = false;
+            } else {
+                // 只有真正的用户编辑才设置 isDirty
+                AppState.isDirty = true;
+            }
+            
             // 实时更新统计信息
             const content = aceEditor.getValue();
             updateStats(content);
