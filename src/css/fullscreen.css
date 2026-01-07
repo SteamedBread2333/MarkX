@@ -1,0 +1,49 @@
+/* ==================== 全屏模式样式 ==================== */
+
+/* 全屏模式下的布局调整 */
+:fullscreen,
+:-webkit-full-screen,
+:-moz-full-screen,
+:-ms-fullscreen {
+    overflow: hidden;
+}
+
+body.fullscreen-mode {
+    overflow: hidden;
+}
+
+body.fullscreen-mode .toolbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+}
+
+body.fullscreen-mode .main-content {
+    position: fixed;
+    top: var(--toolbar-height);
+    left: 0;
+    right: 0;
+    bottom: var(--statusbar-height);
+    height: calc(100vh - var(--toolbar-height) - var(--statusbar-height));
+    width: 100vw;
+}
+
+body.fullscreen-mode .editor-container,
+body.fullscreen-mode .preview-container {
+    height: 100%;
+}
+
+body.fullscreen-mode .statusbar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+}
+
+/* 全屏模式下隐藏 GitHub 角标 */
+body.fullscreen-mode .github-corner {
+    display: none;
+}

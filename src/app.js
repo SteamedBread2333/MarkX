@@ -27,6 +27,7 @@ import { renderMarkdown } from './renderer/markdown.js';
 // ==================== 导入 UI 模块 ====================
 import { toggleTheme, initTheme } from './ui/theme.js';
 import { toggleLayout } from './ui/layout.js';
+import { initFullscreen, toggleFullscreen } from './ui/fullscreen.js';
 import { initScrollSync } from './ui/scroll-sync.js';
 
 // ==================== 导入文件操作模块 ====================
@@ -88,6 +89,13 @@ function handleKeyboard(event) {
             insertText('[', '](https://example.com)', '链接文本');
             return false;
         }
+    }
+    
+    // F11 全屏切换
+    if (event.key === 'F11') {
+        event.preventDefault();
+        toggleFullscreen();
+        return false;
     }
 }
 
@@ -687,6 +695,9 @@ async function initApp() {
         
         // 初始化主题
         initTheme();
+        
+        // 初始化全屏功能
+        initFullscreen();
         
         // 初始化 Mermaid
         initMermaid();

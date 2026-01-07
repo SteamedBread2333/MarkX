@@ -195,6 +195,9 @@
         <symbol id="icon-fullscreen" viewBox="0 0 24 24">
             <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
         </symbol>
+        <symbol id="icon-fullscreen-exit" viewBox="0 0 24 24">
+            <path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </symbol>
         <symbol id="icon-zoom-in" viewBox="0 0 24 24">
             <circle cx="11" cy="11" r="8" fill="none" stroke="currentColor" stroke-width="2"/>
             <path d="m21 21-4.35-4.35" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -367,6 +370,11 @@
             <!-- 视图切换 -->
             <button class="toolbar-btn" id="layoutBtn" data-i18n-title="ui.toolbar.layout">
                 <svg class="icon"><use href="#icon-layout"></use></svg>
+            </button>
+            
+            <!-- 全屏模式 -->
+            <button class="toolbar-btn" id="fullscreenBtn" data-i18n-title="ui.toolbar.fullscreen">
+                <svg class="icon"><use href="#icon-fullscreen"></use></svg>
             </button>
             
             <!-- 主题切换 -->
