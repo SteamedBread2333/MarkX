@@ -5,15 +5,15 @@
     top: 0;
     right: 0;
     z-index: 201;
-    width: 80px;
-    height: 80px;
+    width: 50px;
+    height: 50px;
     overflow: hidden;
     pointer-events: none; /* 默认禁用点击，只在特定区域启用 */
     transition: all var(--transition-normal);
     text-decoration: none;
 }
 
-/* 创建一个小的可点击区域，只在右上角三角形内（约 55x55px） */
+/* 创建一个小的可点击区域，只在右上角三角形内 */
 .github-corner::before {
     content: '';
     position: absolute;
@@ -21,8 +21,8 @@
     right: 0;
     width: 0;
     height: 0;
-    border-left: 55px solid transparent;
-    border-top: 55px solid rgba(0, 0, 0, 0.01);
+    border-left: 40px solid transparent;
+    border-top: 40px solid rgba(0, 0, 0, 0.01);
     pointer-events: auto;
     cursor: pointer;
     z-index: 1;
@@ -40,8 +40,10 @@
     display: block;
     pointer-events: none;
     position: absolute;
-    top: 10px;
-    right: 10px;
+    top: 0;
+    right: 0;
+    width: 32px;
+    height: 32px;
     border: 0;
     filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.2));
     transition: transform var(--transition-normal);
