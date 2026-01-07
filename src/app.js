@@ -6,7 +6,7 @@
 // ==================== 导入核心模块 ====================
 import { AppState } from './core/state.js';
 import { elements } from './core/elements.js';
-import { setStatus } from './core/ui-utils.js';
+import { setStatus, updateStats } from './core/ui-utils.js';
 import { loadDraft, startAutoSave } from './core/draft.js';
 import { initI18n, t, setLanguage, getLanguage } from './core/i18n.js';
 
@@ -231,13 +231,12 @@ function initEventListeners() {
     initHelpModal();
     initTemplateSearch();
     initLanguageSwitcher();
-    initHelpModalContent();
     
     // 文件输入
     elements.fileInput.addEventListener('change', handleFileSelect);
     
-    // 初始化 UI 文本（应用 i18n）
-    updateUITexts();
+    // 注意：updateUITexts() 和 initHelpModalContent() 已在 initApp() 中调用
+    // 这里不需要重复调用，避免语言闪烁
     
     // 监听语言变化事件
     window.addEventListener('languagechange', () => {
@@ -667,10 +666,22 @@ function initOtherEventListeners() {
         });
     }
     
-    // 设置编辑器内容变化监听器
+    // 编辑器变化监听器将在编辑器初始化后设置
+}
+
+/**
+ * 设置编辑器内容变化监听器（在编辑器初始化后调用）
+ */
+function setupEditorChangeListener() {
     const aceEditor = getEditorInstance();
     if (aceEditor) {
-        setEditorChangeListener(() => {
+        // 直接监听编辑器变化事件，实时更新统计
+        aceEditor.session.on('change', () => {
+            AppState.isDirty = true;
+            // 实时更新统计信息
+            const content = aceEditor.getValue();
+            updateStats(content);
+            // 渲染 Markdown
             renderMarkdown();
         });
     }
@@ -709,11 +720,25 @@ async function initApp() {
         // 加载草稿
         loadDraft();
         
-        // 初始渲染
-        await renderMarkdown();
+        // 立即更新 UI 文本，确保使用正确的语言（在绑定事件前）
+        updateUITexts();
         
-        // 绑定事件
+        // 更新帮助文档内容（必须在 updateUITexts() 之后）
+        initHelpModalContent();
+        
+        // 绑定事件（需要在编辑器初始化后）
         initEventListeners();
+        
+        // 设置编辑器内容变化监听器（必须在编辑器初始化后）
+        setupEditorChangeListener();
+        
+        // 初始渲染和统计更新（必须在 updateUITexts() 之后，确保使用正确语言）
+        const editor = getEditorInstance();
+        if (editor) {
+            const initialContent = editor.getValue();
+            updateStats(initialContent);
+        }
+        await renderMarkdown();
         
         // 初始化编辑器右侧拖拽调整大小
         initEditorResize();
