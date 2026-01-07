@@ -10,6 +10,19 @@ import { setStatus } from '../core/ui-utils.js';
 import { t } from '../core/i18n.js';
 
 /**
+ * 等待 Mermaid 加载完成
+ */
+async function waitForMermaid(maxRetries = 10, delay = 100) {
+    for (let i = 0; i < maxRetries; i++) {
+        if (mermaid && typeof mermaid.initialize === 'function' && typeof mermaid.render === 'function') {
+            return true;
+        }
+        await new Promise(resolve => setTimeout(resolve, delay));
+    }
+    return false;
+}
+
+/**
  * 渲染所有 Mermaid 图表
  */
 export async function renderMermaidCharts() {
@@ -17,8 +30,36 @@ export async function renderMermaidCharts() {
     
     if (mermaidElements.length === 0) return;
     
+    // 等待 Mermaid 加载完成（版本更新后可能需要等待）
+    const mermaidReady = await waitForMermaid();
+    if (!mermaidReady) {
+        console.error('Mermaid 未正确加载，等待超时');
+        mermaidElements.forEach(element => {
+            element.innerHTML = `
+                <div class="mermaid-error">
+                    <div class="mermaid-error-title">${t('messages.mermaidRenderFailed')}</div>
+                    <div>Mermaid 库未正确加载，请刷新页面重试</div>
+                </div>
+            `;
+        });
+        return;
+    }
+    
     // 重新初始化 Mermaid（以应用主题）
-    initMermaid();
+    try {
+        initMermaid();
+    } catch (error) {
+        console.error('Mermaid 初始化失败:', error);
+        mermaidElements.forEach(element => {
+            element.innerHTML = `
+                <div class="mermaid-error">
+                    <div class="mermaid-error-title">${t('messages.mermaidRenderFailed')}</div>
+                    <div>${escapeHtml(error.message)}</div>
+                </div>
+            `;
+        });
+        return;
+    }
     
     // 渲染每个图表
     for (let i = 0; i < mermaidElements.length; i++) {
@@ -46,11 +87,26 @@ export async function renderMermaidCharts() {
         }
         
         try {
-            // 生成唯一 ID
-            const id = `mermaid-${Date.now()}-${i}`;
+            // 确保代码不为空
+            if (!code || !code.trim()) {
+                throw new Error('Mermaid 代码为空');
+            }
             
-            // 渲染图表
-            const { svg } = await mermaid.render(id, code);
+            // 生成唯一 ID（使用更可靠的 ID 生成方式）
+            const id = `mermaid-${Date.now()}-${Math.random().toString(36).substr(2, 9)}-${i}`;
+            
+            // 确保 Mermaid render 方法可用
+            if (!mermaid.render || typeof mermaid.render !== 'function') {
+                throw new Error('Mermaid render 方法不可用');
+            }
+            
+            // 渲染图表（添加超时保护）
+            const renderPromise = mermaid.render(id, code);
+            const timeoutPromise = new Promise((_, reject) => 
+                setTimeout(() => reject(new Error('Mermaid 渲染超时')), 30000)
+            );
+            
+            const { svg } = await Promise.race([renderPromise, timeoutPromise]);
             
             // 创建容器包装 SVG 和导出按钮
             const wrapper = document.createElement('div');
