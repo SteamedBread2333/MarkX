@@ -168,6 +168,19 @@
     color: var(--text-primary);
     min-width: 28px;
     text-align: center;
+    line-height: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* 统一上下箭头字符的大小 */
+.help-shortcut-keys kbd.arrow-key {
+    font-size: 14px;
+    width: 28px;
+    padding: 4px 0;
+    font-variant: normal;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 }
 
 .help-shortcut-keys.large kbd {
