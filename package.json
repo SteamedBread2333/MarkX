@@ -21,7 +21,11 @@
   },
   "scripts": {
     "start": "python3 -m http.server 8000 || python -m http.server 8000 || php -S localhost:8000 || npx http-server -p 8000",
-    "dev": "npm start"
+    "dev": "npm start",
+    "version:patch": "bash -c 'VERSION=$(node -p \"require(\\\"./package.json\\\").version.split(\\\".\\\").map((v,i)=>i===2?parseInt(v)+1:v).join(\\\".\\\")\"); ./update-version.sh $VERSION'",
+    "version:minor": "bash -c 'VERSION=$(node -p \"require(\\\"./package.json\\\").version.split(\\\".\\\").map((v,i)=>i===1?parseInt(v)+1:v).map((v,i)=>i===2?0:v).join(\\\".\\\")\"); ./update-version.sh $VERSION'",
+    "version:major": "bash -c 'VERSION=$(node -p \"require(\\\"./package.json\\\").version.split(\\\".\\\").map((v,i)=>i===0?parseInt(v)+1:v).map((v,i)=>i>0?0:v).join(\\\".\\\")\"); ./update-version.sh $VERSION'",
+    "version:auto": "./update-version-auto.sh"
   },
   "devDependencies": {},
   "dependencies": {}

@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
   pages: write
   id-token: write
 
@@ -23,6 +23,58 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Generate version from timestamp
+        id: version
+        run: |
+          VERSION=$(date +"%Y.%m.%d.%H%M%S")
+          BUILD_TIME=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "build_time=$BUILD_TIME" >> $GITHUB_OUTPUT
+          echo "🔄 自动生成版本号: $VERSION"
+          echo "📅 构建时间: $BUILD_TIME"
+      
+      - name: Update version in index.html
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          BUILD_TIME="${{ steps.version.outputs.build_time }}"
+          
+          # 更新 APP_VERSION
+          sed -i "s/window.APP_VERSION = '[^']*'/window.APP_VERSION = '$VERSION'/g" index.html
+          
+          # 更新 APP_BUILD_TIME
+          sed -i "s/window.APP_BUILD_TIME = '[^']*'/window.APP_BUILD_TIME = '$BUILD_TIME'/g" index.html
+          
+          # 更新 CSS 版本号查询参数
+          sed -i "s/href=\"src\/css\/styles.css?v=[^\"]*\"/href=\"src\/css\/styles.css?v=$VERSION\"/g" index.html
+          
+          # 更新 JS 版本号查询参数
+          sed -i "s/src=\"src\/app.js?v=[^\"]*\"/src=\"src\/app.js?v=$VERSION\"/g" index.html
+          
+          echo "✅ 已更新 index.html 中的版本号"
+      
+      - name: Update version in package.json
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          npm version $VERSION --no-git-tag-version
+          echo "✅ 已更新 package.json 中的版本号"
+      
+      - name: Commit version changes
+        run: |
+          git config --local user.email "rzh881004@icloud.com"
+          git config --local user.name "SteamedBread2333"
+          git add index.html package.json
+          
+          # 检查是否有更改需要提交
+          if git diff --staged --quiet; then
+            echo "ℹ️ 没有版本号更改，跳过提交"
+          else
+            git commit -m "chore: auto bump version to ${{ steps.version.outputs.version }} [skip ci]"
+            git push
+            echo "✅ 版本号已更新并提交: ${{ steps.version.outputs.version }}"
+          fi
       
       - name: Setup Pages
         uses: actions/configure-pages@v4
