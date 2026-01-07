@@ -33,11 +33,8 @@ export function initI18n() {
     if (savedLanguage && translations[savedLanguage]) {
         currentLanguage = savedLanguage;
     } else {
-        // 检测浏览器语言
-        const browserLang = navigator.language.split('-')[0];
-        if (translations[browserLang]) {
-            currentLanguage = browserLang;
-        }
+        // 如果没有保存的语言，使用默认语言（英文）
+        currentLanguage = DEFAULT_LANGUAGE;
     }
     
     // 应用语言

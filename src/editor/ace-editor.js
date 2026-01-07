@@ -739,8 +739,15 @@ function getLanguageKeywords(language) {
     return keywordsMap[normalizedLang] || [];
 }
 
+// 注意：已移除 getAceModeForLanguage 函数
+// Ace Editor 不支持部分文档使用不同语法高亮模式
+// 切换整个文档的模式会导致 Markdown 文本被错误高亮
+// 因此保持整个文档为 Markdown 模式，代码块内的语法高亮由 Markdown 模式本身处理
+
 /**
  * 切换到指定语言的模式（用于代码块内的自动完成）
+ * 注意：不切换语法高亮模式，保持整个文档为 Markdown 模式
+ * Ace Editor 不支持部分文档使用不同语法高亮，切换模式会导致整个文档都被切换
  */
 function switchToLanguageMode(editor, language) {
     if (!editor || !language) return;
@@ -752,17 +759,21 @@ function switchToLanguageMode(editor, language) {
     
     try {
         const langTools = editor._langTools;
-        if (!langTools) return;
         
-        // 创建语言特定的自动完成器
-        const languageCompleter = createLanguageCompleter(language);
+        // 只切换自动完成器，不切换语法高亮模式
+        // 保持整个文档为 Markdown 模式，避免整个文档被错误高亮
+        if (langTools) {
+            // 创建语言特定的自动完成器
+            const languageCompleter = createLanguageCompleter(language);
+            
+            // 在代码块内（有语言）时，只使用语言特定的自动完成器，不包含 Markdown 补全
+            const completers = [
+                languageCompleter            // 语言关键字补全
+            ];
+            
+            langTools.setCompleters(completers);
+        }
         
-        // 在代码块内（有语言）时，只使用语言特定的自动完成器，不包含 Markdown 补全
-        const completers = [
-            languageCompleter            // 语言关键字补全
-        ];
-        
-        langTools.setCompleters(completers);
         editor._currentLanguageMode = language;
         
     } catch (error) {
@@ -780,14 +791,18 @@ function switchToMarkdownMode(editor) {
     
     try {
         const langTools = editor._langTools;
-        if (!langTools) return;
-        
-        // 重新创建 Markdown 自动完成器（以支持语言切换）
-        const markdownCompleter = createMarkdownCompleter();
-        editor._markdownCompleter = markdownCompleter;
         
         // 恢复 Markdown 自动完成器
-        langTools.setCompleters([markdownCompleter]);
+        // 注意：不切换语法高亮模式，保持整个文档为 Markdown 模式
+        if (langTools) {
+            // 重新创建 Markdown 自动完成器（以支持语言切换）
+            const markdownCompleter = createMarkdownCompleter();
+            editor._markdownCompleter = markdownCompleter;
+            
+            // 恢复 Markdown 自动完成器
+            langTools.setCompleters([markdownCompleter]);
+        }
+        
         editor._currentLanguageMode = 'markdown';
     } catch (error) {
         console.warn('切换回 Markdown 模式失败:', error);
