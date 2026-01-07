@@ -14,32 +14,85 @@
     
     <!-- 版本号 - 每次发布新版本时更新此版本号 -->
     <script>
-        window.APP_VERSION = '2026.01.07.052239';
-        window.APP_BUILD_TIME = '2026-01-07T05:22:39Z';
-        
-        // 检查版本并强制刷新（不添加查询参数，因为 HTML 不会被缓存）
         (function() {
-            const storedVersion = localStorage.getItem('markx_version');
-            const storedBuildTime = localStorage.getItem('markx_build_time');
+            'use strict';
             
-            if (storedVersion && storedVersion !== window.APP_VERSION) {
-                // 版本不匹配，清除所有缓存并刷新
-                console.log('🔄 检测到新版本 ' + window.APP_VERSION + '，正在更新...');
+            // 版本配置
+            const VERSION_CONFIG = {
+                version: '2026.01.07.052239',
+                buildTime: '2026-01-07T05:22:39Z',
+                storageKey: {
+                    version: 'markx_version',
+                    buildTime: 'markx_build_time'
+                }
+            };
+            
+            // 暴露到全局
+            window.APP_VERSION = VERSION_CONFIG.version;
+            window.APP_BUILD_TIME = VERSION_CONFIG.buildTime;
+            
+            /**
+             * 卸载所有 Service Worker
+             */
+            function unregisterServiceWorkers() {
+                return new Promise(function(resolve) {
+                    if (!('serviceWorker' in navigator)) {
+                        resolve();
+                        return;
+                    }
+                    
+                    navigator.serviceWorker.getRegistrations()
+                        .then(function(registrations) {
+                            const unregisterPromises = registrations.map(function(registration) {
+                                return registration.unregister();
+                            });
+                            Promise.all(unregisterPromises).then(resolve).catch(resolve);
+                        })
+                        .catch(resolve);
+                });
+            }
+            
+            /**
+             * 清除所有缓存和存储
+             */
+            function clearAllCache() {
                 localStorage.clear();
                 sessionStorage.clear();
-                // 直接刷新页面，不添加查询参数（HTML 不会被缓存）
-                window.location.reload(true);
-            } else if (storedBuildTime && storedBuildTime !== window.APP_BUILD_TIME) {
-                // 构建时间不匹配，刷新
-                console.log('🔄 检测到新构建，正在更新...');
-                // 直接刷新页面，不添加查询参数（HTML 不会被缓存）
-                window.location.reload(true);
-            } else {
-                // 保存当前版本和构建时间
-                localStorage.setItem('markx_version', window.APP_VERSION);
-                localStorage.setItem('markx_build_time', window.APP_BUILD_TIME);
-                console.log('✅ 当前版本: ' + window.APP_VERSION);
             }
+            
+            /**
+             * 强制刷新页面
+             */
+            function forceReload() {
+                window.location.reload();
+            }
+            
+            /**
+             * 检查并处理版本更新
+             */
+            function checkVersionUpdate() {
+                const storedVersion = localStorage.getItem(VERSION_CONFIG.storageKey.version);
+                const storedBuildTime = localStorage.getItem(VERSION_CONFIG.storageKey.buildTime);
+                
+                const versionChanged = storedVersion && storedVersion !== VERSION_CONFIG.version;
+                const buildTimeChanged = storedBuildTime && storedBuildTime !== VERSION_CONFIG.buildTime;
+                
+                if (versionChanged || buildTimeChanged) {
+                    console.log('🔄 检测到新版本 ' + VERSION_CONFIG.version + '，正在更新...');
+                    
+                    clearAllCache();
+                    unregisterServiceWorkers().then(forceReload);
+                    return;
+                }
+                
+                // 保存当前版本信息
+                localStorage.setItem(VERSION_CONFIG.storageKey.version, VERSION_CONFIG.version);
+                localStorage.setItem(VERSION_CONFIG.storageKey.buildTime, VERSION_CONFIG.buildTime);
+                console.log('✅ 当前版本: ' + VERSION_CONFIG.version);
+            }
+            
+            // 执行版本检查
+            checkVersionUpdate();
         })();
     </script>
     
