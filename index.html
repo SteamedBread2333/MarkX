@@ -478,6 +478,9 @@
         </div>
         
         <div class="toolbar-right">
+            <!-- 版本号显示（移动端显示在github徽标和设置图标中间） -->
+            <span id="versionDisplay" class="version-display toolbar-version"></span>
+            
             <!-- 移动端设置按钮 -->
             <button class="toolbar-btn mobile-settings-btn" id="mobileSettingsBtn" data-i18n-title="ui.mobileSettings.title" style="display: none;">
                 <svg class="icon"><use href="#icon-settings"></use></svg>
@@ -710,6 +713,8 @@
         <div class="editor-container" id="editorContainer">
             <!-- CodeMirror 编辑器挂载点 -->
             <div id="editor" class="editor"></div>
+            <!-- 移动端拖拽把手 -->
+            <div class="resize-handle" id="resizeHandle"></div>
             <textarea 
                 id="editorTextarea" 
                 style="display: none;" 
@@ -739,7 +744,6 @@
             <span id="lineCount"></span>
             <span class="statusbar-divider">|</span>
             <span id="readTime"></span>
-            <span id="versionDisplay" class="version-display"></span>
         </div>
     </footer>
 

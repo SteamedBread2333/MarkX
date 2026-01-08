@@ -8,6 +8,7 @@ export const elements = {
     preview: document.getElementById('preview'),
     editorContainer: document.getElementById('editorContainer'),
     previewContainer: document.getElementById('previewContainer'),
+    resizeHandle: document.getElementById('resizeHandle'),
     themeBtn: document.getElementById('themeBtn'),
     layoutBtn: document.getElementById('layoutBtn'),
     newBtn: document.getElementById('newBtn'),

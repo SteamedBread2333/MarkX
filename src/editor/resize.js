@@ -136,6 +136,34 @@ export function initEditorResize() {
         
         if (!isSplitLayout) return;
         
+        // 检查是否点击了拖拽把手
+        if (elements.resizeHandle && elements.resizeHandle.contains(e.target)) {
+            if (vertical) {
+                resizeState.isDragging = true;
+                resizeState.isVertical = true;
+                resizeState.startY = e.clientY;
+                
+                // 获取当前容器高度
+                const editorRect = elements.editorContainer.getBoundingClientRect();
+                const previewRect = elements.previewContainer.getBoundingClientRect();
+                resizeState.startEditorHeight = editorRect.height;
+                resizeState.startPreviewHeight = previewRect.height;
+                
+                // 添加拖拽样式
+                elements.editorContainer.classList.add('dragging');
+                document.body.style.cursor = 'row-resize';
+                document.body.style.userSelect = 'none';
+                
+                // 禁用过渡动画（拖拽时）
+                elements.editorContainer.style.transition = 'none';
+                elements.previewContainer.style.transition = 'none';
+                
+                e.preventDefault();
+                e.stopPropagation();
+                return;
+            }
+        }
+        
         let shouldStartDrag = false;
         
         if (vertical) {
@@ -204,6 +232,33 @@ export function initEditorResize() {
         if (!isSplitLayout) return;
         
         const touch = e.touches[0];
+        
+        // 检查是否触摸了拖拽把手
+        if (elements.resizeHandle && elements.resizeHandle.contains(e.target)) {
+            if (vertical) {
+                resizeState.isDragging = true;
+                resizeState.isVertical = true;
+                resizeState.startY = touch.clientY;
+                
+                // 获取当前容器高度
+                const editorRect = elements.editorContainer.getBoundingClientRect();
+                const previewRect = elements.previewContainer.getBoundingClientRect();
+                resizeState.startEditorHeight = editorRect.height;
+                resizeState.startPreviewHeight = previewRect.height;
+                
+                // 添加拖拽样式
+                elements.editorContainer.classList.add('dragging');
+                document.body.style.userSelect = 'none';
+                
+                // 禁用过渡动画（拖拽时）
+                elements.editorContainer.style.transition = 'none';
+                elements.previewContainer.style.transition = 'none';
+                
+                e.preventDefault();
+                return;
+            }
+        }
+        
         let shouldStartDrag = false;
         
         if (vertical) {

@@ -39,6 +39,11 @@
     cursor: col-resize;
 }
 
+/* 移动端拖拽把手 */
+.resize-handle {
+    display: none;
+}
+
 /* 编辑器容器底部拖拽区域（垂直布局/移动端） */
 @media (max-width: 768px) {
     .editor-container {
@@ -70,6 +75,65 @@
         background: var(--accent-color);
         cursor: row-resize;
         opacity: 0.6;
+    }
+    
+    /* 显示拖拽把手 */
+    .resize-handle {
+        display: flex;
+        position: absolute;
+        right: 8px;
+        bottom: 0px;
+        width: 24px;
+        height: 24px;
+        z-index: 20;
+        cursor: row-resize;
+        touch-action: none;
+        background: rgba(0, 0, 0, 0.3);
+        border-radius: 50%;
+        align-items: center;
+        justify-content: center;
+        transition: background var(--transition-fast), transform var(--transition-fast);
+        transform: translateY(50%);
+    }
+    
+    .resize-handle::before {
+        content: '';
+        width: 16px;
+        height: 2px;
+        background: rgba(0, 0, 0, 0.5);
+        border-radius: 2px;
+        transition: background var(--transition-fast);
+    }
+    
+    .resize-handle:active,
+    .editor-container.dragging .resize-handle {
+        background: rgba(0, 0, 0, 0.5);
+        transform: scale(1.1);
+    }
+    
+    .resize-handle:active::before,
+    .editor-container.dragging .resize-handle::before {
+        background: rgba(0, 0, 0, 0.7);
+    }
+    
+    /* Dark主题：白色半透明 */
+    [data-theme="dark"] .resize-handle {
+        background: rgba(255, 255, 255, 0.3);
+    }
+    
+    [data-theme="dark"] .resize-handle::before {
+        background: rgba(255, 255, 255, 0.5);
+    }
+    
+    [data-theme="dark"] .resize-handle:active,
+    [data-theme="dark"] .editor-container.dragging .resize-handle {
+        background: rgba(255, 255, 255, 0.5);
+        transform: scale(1.1);
+    }
+    
+    [data-theme="dark"] .resize-handle:active::before,
+    [data-theme="dark"] .editor-container.dragging .resize-handle::before {
+        background: rgba(255, 255, 255, 0.7);
     }
 }
 
