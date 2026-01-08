@@ -8,6 +8,15 @@ export default {
             new: '新建',
             open: '打开',
             save: '保存',
+            bold: '加粗',
+            italic: '斜体',
+            heading: '标题',
+            link: '链接',
+            image: '图片',
+            code: '代码',
+            table: '表格',
+            mermaid: 'Mermaid',
+            math: '公式',
             help: '快捷键和帮助',
             layout: '切换布局',
             fullscreen: '切换全屏',
@@ -20,6 +29,16 @@ export default {
             copyMd: '复制 Markdown',
             copyHtml: '复制 HTML',
             clear: '清空内容'
+        },
+        mobileToolbar: {
+            title: '工具栏',
+            close: '关闭',
+            fabLabel: '工具栏菜单',
+            sections: {
+                files: '文件操作',
+                formatting: '格式化',
+                charts: '图表与公式'
+            }
         },
         statusbar: {
             ready: '就绪',

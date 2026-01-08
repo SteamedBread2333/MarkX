@@ -514,6 +514,92 @@
         </div>
     </header>
 
+    <!-- 移动端悬浮按钮和面板 -->
+    <button id="mobileToolbarFab" class="mobile-toolbar-fab" data-i18n-aria-label="ui.mobileToolbar.fabLabel" aria-label="工具栏菜单">
+        <svg class="icon"><use href="#icon-more"></use></svg>
+    </button>
+    
+    <div id="mobileToolbarPanel" class="mobile-toolbar-panel">
+        <div class="mobile-toolbar-panel-header">
+            <span class="mobile-toolbar-panel-title" data-i18n="ui.mobileToolbar.title">工具栏</span>
+            <button id="mobileToolbarClose" class="mobile-toolbar-close" data-i18n-aria-label="ui.mobileToolbar.close" aria-label="关闭">
+                <svg class="icon"><use href="#icon-close"></use></svg>
+            </button>
+        </div>
+        <div class="mobile-toolbar-panel-content">
+            <!-- 文件操作 -->
+            <div class="mobile-toolbar-section">
+                <div class="mobile-toolbar-section-title" data-i18n="ui.mobileToolbar.sections.files">文件操作</div>
+                <div class="mobile-toolbar-buttons">
+                    <button class="mobile-toolbar-btn" id="mobileNewBtn" data-i18n-title="toolbar.newTooltip">
+                        <svg class="icon"><use href="#icon-new"></use></svg>
+                        <span data-i18n="toolbar.new">新建</span>
+                    </button>
+                    <button class="mobile-toolbar-btn" id="mobileOpenBtn" data-i18n-title="toolbar.openTooltip">
+                        <svg class="icon"><use href="#icon-open"></use></svg>
+                        <span data-i18n="toolbar.open">打开</span>
+                    </button>
+                    <button class="mobile-toolbar-btn" id="mobileSaveBtn" data-i18n-title="toolbar.saveTooltip">
+                        <svg class="icon"><use href="#icon-save"></use></svg>
+                        <span data-i18n="toolbar.save">保存</span>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Markdown 格式化工具 -->
+            <div class="mobile-toolbar-section">
+                <div class="mobile-toolbar-section-title" data-i18n="ui.mobileToolbar.sections.formatting">格式化</div>
+                <div class="mobile-toolbar-buttons">
+                    <button class="mobile-toolbar-btn" id="mobileBoldBtn" data-i18n-title="toolbar.boldTooltip">
+                        <svg class="icon"><use href="#icon-bold"></use></svg>
+                        <span data-i18n="toolbar.bold">加粗</span>
+                    </button>
+                    <button class="mobile-toolbar-btn" id="mobileItalicBtn" data-i18n-title="toolbar.italicTooltip">
+                        <svg class="icon"><use href="#icon-italic"></use></svg>
+                        <span data-i18n="toolbar.italic">斜体</span>
+                    </button>
+                    <button class="mobile-toolbar-btn" id="mobileHeadingBtn" data-i18n-title="toolbar.headingTooltip">
+                        <svg class="icon"><use href="#icon-heading"></use></svg>
+                        <span data-i18n="toolbar.heading">标题</span>
+                    </button>
+                    <button class="mobile-toolbar-btn" id="mobileLinkBtn" data-i18n-title="toolbar.linkTooltip">
+                        <svg class="icon"><use href="#icon-link"></use></svg>
+                        <span data-i18n="toolbar.link">链接</span>
+                    </button>
+                    <button class="mobile-toolbar-btn" id="mobileImageBtn" data-i18n-title="toolbar.imageTooltip">
+                        <svg class="icon"><use href="#icon-image"></use></svg>
+                        <span data-i18n="toolbar.image">图片</span>
+                    </button>
+                    <button class="mobile-toolbar-btn" id="mobileCodeBtn" data-i18n-title="toolbar.codeTooltip">
+                        <svg class="icon"><use href="#icon-code"></use></svg>
+                        <span data-i18n="toolbar.code">代码</span>
+                    </button>
+                    <button class="mobile-toolbar-btn" id="mobileTableBtn" data-i18n-title="toolbar.tableTooltip">
+                        <svg class="icon"><use href="#icon-table"></use></svg>
+                        <span data-i18n="toolbar.table">表格</span>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Mermaid 和数学公式 -->
+            <div class="mobile-toolbar-section">
+                <div class="mobile-toolbar-section-title" data-i18n="ui.mobileToolbar.sections.charts">图表与公式</div>
+                <div class="mobile-toolbar-buttons">
+                    <button class="mobile-toolbar-btn" id="mobileMermaidBtn" data-i18n-title="toolbar.mermaidTooltip">
+                        <svg class="icon"><use href="#icon-chart"></use></svg>
+                        <span data-i18n="toolbar.mermaid">Mermaid</span>
+                    </button>
+                    <button class="mobile-toolbar-btn" id="mobileMathBtn" data-i18n-title="toolbar.mathTooltip">
+                        <svg class="icon"><use href="#icon-formula"></use></svg>
+                        <span data-i18n="toolbar.math">公式</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div id="mobileToolbarOverlay" class="mobile-toolbar-overlay"></div>
+
     <!-- 主内容区 -->
     <main class="main-content">
         <!-- 编辑器区域 -->

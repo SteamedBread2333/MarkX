@@ -29,6 +29,7 @@ import { toggleTheme, initTheme } from './ui/theme.js';
 import { toggleLayout } from './ui/layout.js';
 import { initFullscreen, toggleFullscreen } from './ui/fullscreen.js';
 import { initScrollSync } from './ui/scroll-sync.js';
+import { initMobileToolbar } from './ui/mobile-toolbar.js';
 
 // ==================== 导入文件操作模块 ====================
 import { newDocument, openFile, saveFile, handleFileSelect } from './file/operations.js';
@@ -446,9 +447,21 @@ function updateUITexts() {
                 }
             }
             // 检查是否是嵌套键（如 toolbar.newTooltip）
-            const translated = key.startsWith('ui.') || key.startsWith('toolbar.') || key.startsWith('messages.') || key.startsWith('insertText.') || key.startsWith('file.') || key.startsWith('autocomplete.') 
-                ? t(key, params) 
-                : t(`ui.${key}`, params);
+            let translationKey = key;
+            if (key.startsWith('toolbar.') && !key.startsWith('ui.toolbar.')) {
+                // toolbar.newTooltip, toolbar.mermaidTypes.xxx 等保持原样（在根级别）
+                // toolbar.new, toolbar.open 等转换为 ui.toolbar.new（在ui.toolbar下）
+                // 检查是否是 tooltip 或 Types（这些在根级别）
+                if (key.includes('Tooltip') || key.includes('Types') || key.includes('Chart') || key.includes('Formula')) {
+                    translationKey = key; // 保持原样
+                } else {
+                    translationKey = `ui.${key}`; // 转换为 ui.toolbar.xxx
+                }
+            } else if (!key.startsWith('ui.') && !key.startsWith('toolbar.') && !key.startsWith('messages.') && !key.startsWith('insertText.') && !key.startsWith('file.') && !key.startsWith('autocomplete.')) {
+                // 其他键添加 ui. 前缀
+                translationKey = `ui.${key}`;
+            }
+            const translated = t(translationKey, params);
             el.textContent = translated;
         }
     });
@@ -458,9 +471,15 @@ function updateUITexts() {
         const key = el.getAttribute('data-i18n-title');
         if (key) {
             // 检查是否是嵌套键
-            const translated = key.startsWith('ui.') || key.startsWith('toolbar.') || key.startsWith('messages.') || key.startsWith('insertText.') || key.startsWith('file.') || key.startsWith('autocomplete.')
-                ? t(key)
-                : t(`ui.${key}`);
+            let translationKey = key;
+            if (key.startsWith('toolbar.') && !key.startsWith('ui.toolbar.')) {
+                // 将 toolbar.xxx 转换为 ui.toolbar.xxx
+                translationKey = `ui.${key}`;
+            } else if (!key.startsWith('ui.') && !key.startsWith('toolbar.') && !key.startsWith('messages.') && !key.startsWith('insertText.') && !key.startsWith('file.') && !key.startsWith('autocomplete.')) {
+                // 其他键添加 ui. 前缀
+                translationKey = `ui.${key}`;
+            }
+            const translated = t(translationKey);
             el.setAttribute('title', translated);
         }
     });
@@ -469,10 +488,29 @@ function updateUITexts() {
     document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
         const key = el.getAttribute('data-i18n-placeholder');
         if (key) {
-            const translated = key.startsWith('ui.') || key.startsWith('toolbar.') || key.startsWith('messages.') || key.startsWith('insertText.') || key.startsWith('file.') || key.startsWith('autocomplete.')
-                ? t(key)
-                : t(`ui.${key}`);
+            let translationKey = key;
+            if (key.startsWith('toolbar.') && !key.startsWith('ui.toolbar.')) {
+                translationKey = `ui.${key}`;
+            } else if (!key.startsWith('ui.') && !key.startsWith('toolbar.') && !key.startsWith('messages.') && !key.startsWith('insertText.') && !key.startsWith('file.') && !key.startsWith('autocomplete.')) {
+                translationKey = `ui.${key}`;
+            }
+            const translated = t(translationKey);
             el.setAttribute('placeholder', translated);
+        }
+    });
+    
+    // 更新所有带有 data-i18n-aria-label 属性的元素
+    document.querySelectorAll('[data-i18n-aria-label]').forEach(el => {
+        const key = el.getAttribute('data-i18n-aria-label');
+        if (key) {
+            let translationKey = key;
+            if (key.startsWith('toolbar.') && !key.startsWith('ui.toolbar.')) {
+                translationKey = `ui.${key}`;
+            } else if (!key.startsWith('ui.') && !key.startsWith('toolbar.') && !key.startsWith('messages.') && !key.startsWith('insertText.') && !key.startsWith('file.') && !key.startsWith('autocomplete.')) {
+                translationKey = `ui.${key}`;
+            }
+            const translated = t(translationKey);
+            el.setAttribute('aria-label', translated);
         }
     });
     
@@ -768,6 +806,9 @@ async function initApp() {
         
         // 初始化全屏功能
         initFullscreen();
+        
+        // 初始化移动端工具栏
+        initMobileToolbar();
         
         // 初始化 Mermaid
         initMermaid();

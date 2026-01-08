@@ -1,0 +1,270 @@
+/* ==================== 移动端悬浮工具栏 ==================== */
+
+/* 悬浮按钮 */
+.mobile-toolbar-fab {
+    display: none;
+    position: fixed;
+    bottom: 80px;
+    right: 16px;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: var(--accent-color);
+    color: white;
+    border: none;
+    box-shadow: var(--shadow-lg);
+    cursor: pointer;
+    z-index: 300;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--transition-normal);
+    -webkit-tap-highlight-color: transparent;
+}
+
+.mobile-toolbar-fab:hover {
+    transform: scale(1.1);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.3);
+}
+
+.mobile-toolbar-fab:active {
+    transform: scale(0.95);
+}
+
+.mobile-toolbar-fab .icon {
+    width: 24px;
+    height: 24px;
+    color: white;
+}
+
+[data-theme="dark"] .mobile-toolbar-fab {
+    background: var(--accent-color);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+}
+
+/* 遮罩层 */
+.mobile-toolbar-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 299;
+    opacity: 0;
+    transition: opacity var(--transition-normal);
+    backdrop-filter: blur(2px);
+}
+
+.mobile-toolbar-overlay.active {
+    opacity: 1;
+}
+
+/* 悬浮面板 */
+.mobile-toolbar-panel {
+    display: none;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    max-height: 60vh;
+    background: var(--bg-primary);
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+    box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.2);
+    z-index: 301;
+    transform: translateY(100%);
+    transition: transform var(--transition-normal);
+    overflow: hidden;
+    -webkit-overflow-scrolling: touch;
+}
+
+.mobile-toolbar-panel.active {
+    transform: translateY(0);
+}
+
+[data-theme="dark"] .mobile-toolbar-panel {
+    box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.6);
+}
+
+/* 面板头部 */
+.mobile-toolbar-panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--border-color);
+    background: var(--bg-secondary);
+}
+
+.mobile-toolbar-panel-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.mobile-toolbar-close {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: transparent;
+    border: none;
+    color: var(--text-primary);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background var(--transition-fast);
+    -webkit-tap-highlight-color: transparent;
+}
+
+.mobile-toolbar-close:hover {
+    background: var(--bg-hover);
+}
+
+.mobile-toolbar-close .icon {
+    width: 16px;
+    height: 16px;
+}
+
+/* 面板内容 */
+.mobile-toolbar-panel-content {
+    padding: 8px;
+    overflow-y: auto;
+    max-height: calc(60vh - 41px);
+}
+
+/* 分组 */
+.mobile-toolbar-section {
+    margin-bottom: 12px;
+}
+
+.mobile-toolbar-section:last-child {
+    margin-bottom: 0;
+}
+
+.mobile-toolbar-section-title {
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    margin-bottom: 6px;
+    padding: 0 2px;
+}
+
+/* 按钮网格 */
+.mobile-toolbar-buttons {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+}
+
+/* 移动端按钮 */
+.mobile-toolbar-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    padding: 8px 4px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    -webkit-tap-highlight-color: transparent;
+    min-height: 52px;
+}
+
+.mobile-toolbar-btn:hover {
+    background: var(--bg-hover);
+    border-color: var(--accent-color);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-sm);
+}
+
+.mobile-toolbar-btn:active {
+    transform: translateY(0);
+    background: var(--bg-tertiary);
+}
+
+.mobile-toolbar-btn .icon {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+}
+
+.mobile-toolbar-btn span {
+    font-size: 10px;
+    font-weight: 500;
+    text-align: center;
+    line-height: 1.2;
+}
+
+/* 响应式：只在移动端显示 */
+@media (max-width: 480px) {
+    .mobile-toolbar-fab {
+        display: flex;
+    }
+    
+    .mobile-toolbar-overlay.active,
+    .mobile-toolbar-panel.active {
+        display: block;
+    }
+}
+
+/* 下拉菜单 */
+.mobile-toolbar-dropdown {
+    margin-top: 6px;
+    padding: 6px;
+    background: var(--bg-tertiary);
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 4px;
+}
+
+.mobile-toolbar-dropdown-item {
+    padding: 6px;
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+    color: var(--text-primary);
+    font-size: 10px;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    text-align: center;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.mobile-toolbar-dropdown-item:hover {
+    background: var(--bg-hover);
+    border-color: var(--accent-color);
+}
+
+.mobile-toolbar-dropdown-item:active {
+    background: var(--bg-tertiary);
+    transform: scale(0.98);
+}
+
+/* 动画 */
+@keyframes slideUp {
+    from {
+        transform: translateY(100%);
+    }
+    to {
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideDown {
+    from {
+        transform: translateY(0);
+    }
+    to {
+        transform: translateY(100%);
+    }
+}

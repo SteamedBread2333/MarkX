@@ -8,6 +8,15 @@ export default {
             new: 'New',
             open: 'Open',
             save: 'Save',
+            bold: 'Bold',
+            italic: 'Italic',
+            heading: 'Heading',
+            link: 'Link',
+            image: 'Image',
+            code: 'Code',
+            table: 'Table',
+            mermaid: 'Mermaid',
+            math: 'Formula',
             help: 'Shortcuts & Help',
             layout: 'Toggle Layout',
             fullscreen: 'Toggle Fullscreen',
@@ -20,6 +29,16 @@ export default {
             copyMd: 'Copy Markdown',
             copyHtml: 'Copy HTML',
             clear: 'Clear Content'
+        },
+        mobileToolbar: {
+            title: 'Toolbar',
+            close: 'Close',
+            fabLabel: 'Toolbar Menu',
+            sections: {
+                files: 'File Operations',
+                formatting: 'Formatting',
+                charts: 'Charts & Formulas'
+            }
         },
         statusbar: {
             ready: 'Ready',

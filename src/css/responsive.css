@@ -92,9 +92,23 @@
         height: 50px;
     }
     
+    .github-corner::before {
+        border-left-width: 40px;
+        border-top-width: 40px;
+    }
+    
     .github-corner svg {
-        width: 50px;
-        height: 50px;
+        width: 32px;
+        height: 32px;
+        transform: translate(-18px, 6px);
+    }
+    
+    .github-corner:hover svg {
+        transform: translate(-18px, 6px) scale(1.05);
+    }
+    
+    [data-theme="dark"] .github-corner:hover svg {
+        transform: translate(-18px, 6px) scale(1.05);
     }
     
     /* 移动端工具栏右侧padding调整 */
@@ -161,6 +175,26 @@
 @media (max-width: 480px) {
     .toolbar {
         padding: 0 2px;
+        justify-content: space-between;
+    }
+    
+    /* 隐藏左侧操作栏，但保留 logo */
+    .toolbar-left {
+        display: flex;
+        align-items: center;
+        gap: 0;
+    }
+    
+    /* 隐藏左侧的所有操作按钮和分隔符 */
+    .toolbar-left > .toolbar-divider,
+    .toolbar-left > .toolbar-btn,
+    .toolbar-left > .dropdown {
+        display: none;
+    }
+    
+    /* 保留 logo */
+    .toolbar-left > .logo {
+        display: flex;
     }
     
     .toolbar-btn {
@@ -182,12 +216,6 @@
     .logo-icon {
         width: 14px;
         height: 14px;
-    }
-    
-    /* 隐藏一些不常用的工具栏按钮 */
-    .toolbar-left > .toolbar-btn:nth-child(n+5):nth-child(-n+7),
-    .toolbar-left > .dropdown:nth-child(n+8):nth-child(-n+9) {
-        display: none;
     }
     
     /* 状态栏只显示最重要的信息 */
@@ -258,9 +286,23 @@
         height: 40px;
     }
     
+    .github-corner::before {
+        border-left-width: 32px;
+        border-top-width: 32px;
+    }
+    
     .github-corner svg {
-        width: 40px;
-        height: 40px;
+        width: 24px;
+        height: 24px;
+        transform: translate(-16px, 4px);
+    }
+    
+    .github-corner:hover svg {
+        transform: translate(-16px, 4px) scale(1.05);
+    }
+    
+    [data-theme="dark"] .github-corner:hover svg {
+        transform: translate(-16px, 4px) scale(1.05);
     }
     
     .toolbar-right {
