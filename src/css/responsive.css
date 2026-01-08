@@ -197,6 +197,16 @@
         display: flex;
     }
     
+    /* 隐藏右侧桌面端按钮组 */
+    .toolbar-right-desktop {
+        display: none;
+    }
+    
+    /* 显示移动端设置按钮 */
+    .mobile-settings-btn {
+        display: flex !important;
+    }
+    
     .toolbar-btn {
         min-width: 22px;
         height: 22px;

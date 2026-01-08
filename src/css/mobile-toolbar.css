@@ -160,6 +160,11 @@
     gap: 6px;
 }
 
+/* 语言按钮使用2列布局 */
+.mobile-settings-lang-buttons {
+    grid-template-columns: repeat(2, 1fr) !important;
+}
+
 /* 移动端按钮 */
 .mobile-toolbar-btn {
     display: flex;
@@ -203,6 +208,11 @@
     line-height: 1.2;
 }
 
+/* 设置面板样式 */
+.mobile-settings-panel {
+    z-index: 302;
+}
+
 /* 响应式：只在移动端显示 */
 @media (max-width: 480px) {
     .mobile-toolbar-fab {
@@ -211,6 +221,10 @@
     
     .mobile-toolbar-overlay.active,
     .mobile-toolbar-panel.active {
+        display: block;
+    }
+    
+    .mobile-settings-panel.active {
         display: block;
     }
 }

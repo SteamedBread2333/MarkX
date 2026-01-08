@@ -159,4 +159,104 @@ export function initMobileToolbar() {
             });
         }
     });
+    
+    // 初始化移动端设置面板
+    initMobileSettingsPanel();
+}
+
+/**
+ * 初始化移动端设置面板
+ */
+function initMobileSettingsPanel() {
+    const settingsBtn = document.getElementById('mobileSettingsBtn');
+    const settingsPanel = document.getElementById('mobileSettingsPanel');
+    const settingsOverlay = document.getElementById('mobileSettingsOverlay');
+    const settingsCloseBtn = document.getElementById('mobileSettingsClose');
+    
+    if (!settingsBtn || !settingsPanel || !settingsOverlay || !settingsCloseBtn) {
+        return;
+    }
+    
+    // 打开设置面板
+    function openSettingsPanel() {
+        settingsPanel.classList.add('active');
+        settingsOverlay.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
+    
+    // 关闭设置面板
+    function closeSettingsPanel() {
+        settingsPanel.classList.remove('active');
+        settingsOverlay.classList.remove('active');
+        document.body.style.overflow = '';
+    }
+    
+    // 绑定事件
+    settingsBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        openSettingsPanel();
+    });
+    
+    settingsCloseBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        closeSettingsPanel();
+    });
+    
+    settingsOverlay.addEventListener('click', (e) => {
+        e.stopPropagation();
+        closeSettingsPanel();
+    });
+    
+    // 阻止设置面板内容区域的点击事件冒泡
+    settingsPanel.addEventListener('click', (e) => {
+        e.stopPropagation();
+    });
+    
+    // 绑定设置面板按钮事件
+    const settingsButtonMappings = {
+        'mobileLangEnBtn': () => {
+            const langBtn = document.getElementById('langBtn');
+            if (langBtn) {
+                const enBtn = langBtn.parentElement.querySelector('[data-lang="en"]');
+                if (enBtn) enBtn.click();
+            }
+            closeSettingsPanel();
+        },
+        'mobileLangZhBtn': () => {
+            const langBtn = document.getElementById('langBtn');
+            if (langBtn) {
+                const zhBtn = langBtn.parentElement.querySelector('[data-lang="zh"]');
+                if (zhBtn) zhBtn.click();
+            }
+            closeSettingsPanel();
+        },
+        'mobileLayoutBtn': 'layoutBtn',
+        'mobileFullscreenBtn': 'fullscreenBtn',
+        'mobileThemeBtn': 'themeBtn',
+        'mobileHelpBtn': 'helpBtn',
+        'mobileExportPdfBtn': 'exportPdfBtn',
+        'mobileExportHtmlBtn': 'exportHtmlBtn',
+        'mobileCopyMdBtn': 'copyMdBtn',
+        'mobileCopyHtmlBtn': 'copyHtmlBtn',
+        'mobileClearBtn': 'clearBtn'
+    };
+    
+    Object.entries(settingsButtonMappings).forEach(([mobileId, originalIdOrHandler]) => {
+        const mobileBtn = document.getElementById(mobileId);
+        if (!mobileBtn) return;
+        
+        mobileBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            
+            if (typeof originalIdOrHandler === 'function') {
+                originalIdOrHandler();
+            } else {
+                const originalBtn = document.getElementById(originalIdOrHandler);
+                if (originalBtn) {
+                    originalBtn.click();
+                    closeSettingsPanel();
+                }
+            }
+        });
+    });
 }

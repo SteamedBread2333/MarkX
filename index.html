@@ -376,6 +376,10 @@
             <path d="M2 12h20" fill="none" stroke="currentColor" stroke-width="2"/>
             <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" fill="none" stroke="currentColor" stroke-width="2"/>
         </symbol>
+        <symbol id="icon-settings" viewBox="0 0 1026 1024">
+            <path d="M986.746539 424.463427l-42.140974-42.140974a122.147749 122.147749 0 0 1-36.033586-86.114162v-61.073875a122.147749 122.147749 0 0 0-122.147748-122.147748h-61.073875a122.147749 122.147749 0 0 1-86.114162-36.033586L598.316698 36.033586a122.147749 122.147749 0 0 0-172.839065 0l-42.140973 42.140973a122.147749 122.147749 0 0 1-86.114163 36.033586h-61.073874a122.147749 122.147749 0 0 0-122.147749 122.147749v61.073874a122.147749 122.147749 0 0 1-36.033586 86.114163l-42.140973 42.140973a122.147749 122.147749 0 0 0 0 172.839065l42.140973 42.140973a122.147749 122.147749 0 0 1 36.033586 86.114163v61.073874a122.147749 122.147749 0 0 0 122.147749 122.147749h61.073874a122.147749 122.147749 0 0 1 86.114163 36.033585l42.140973 42.140974a122.147749 122.147749 0 0 0 172.839065 0l42.140973-42.140974a122.147749 122.147749 0 0 1 86.114163-36.033585h61.073874a122.147749 122.147749 0 0 0 122.147749-122.147749v-61.073874a122.147749 122.147749 0 0 1 36.033586-86.114163l42.140973-42.140973a122.147749 122.147749 0 0 0-1.221477-174.060542z m-43.362451 129.476613l-42.140973 42.140974a183.221623 183.221623 0 0 0-53.74501 129.476613v61.073874a61.073874 61.073874 0 0 1-61.073874 61.073875h-61.073875a183.221623 183.221623 0 0 0-129.476613 53.745009l-42.140973 42.140974a61.073874 61.073874 0 0 1-86.114163 0L428.531327 900.228908a183.221623 183.221623 0 0 0-129.476613-53.74501h-61.073875a61.073874 61.073874 0 0 1-61.073874-61.073874v-61.073874A183.221623 183.221623 0 0 0 123.161955 596.081014l-42.140973-42.140974a61.073874 61.073874 0 0 1 0-86.114163L123.161955 427.51712a183.221623 183.221623 0 0 0 53.74501-129.476613v-61.073875a61.073874 61.073874 0 0 1 61.073874-61.073874h61.073875A183.221623 183.221623 0 0 0 428.531327 122.147749l42.140973-42.140974a61.073874 61.073874 0 0 1 86.114163 0l40.308757 42.140974a183.221623 183.221623 0 0 0 129.476614 53.745009h61.073874a61.073874 61.073874 0 0 1 61.073875 61.073874v61.073875A183.221623 183.221623 0 0 0 901.243115 427.51712l42.140973 42.140974a61.073874 61.073874 0 0 1 0 86.114162z" fill="currentColor"/>
+            <path d="M511.591796 296.819029a213.75856 213.75856 0 1 0 213.75856 213.75856 213.75856 213.75856 0 0 0-213.75856-213.75856z m0 366.443246a152.684686 152.684686 0 1 1 152.684686-152.684686 152.684686 152.684686 0 0 1-152.684686 152.684686z" fill="currentColor"/>
+        </symbol>
     </svg>
 
     <!-- GitHub 角标 -->
@@ -465,50 +469,58 @@
         </div>
         
         <div class="toolbar-right">
-            <!-- 语言切换 -->
-            <div class="dropdown">
-                <button class="toolbar-btn" id="langBtn" title="Language / 语言">
-                    <svg class="icon"><use href="#icon-language"></use></svg>
-                </button>
-                <div class="dropdown-content dropdown-right" id="langDropdown">
-                    <button class="dropdown-item" data-lang="en">English</button>
-                    <button class="dropdown-item" data-lang="zh">中文</button>
+            <!-- 移动端设置按钮 -->
+            <button class="toolbar-btn mobile-settings-btn" id="mobileSettingsBtn" data-i18n-title="ui.mobileSettings.title" style="display: none;">
+                <svg class="icon"><use href="#icon-settings"></use></svg>
+            </button>
+            
+            <!-- 桌面端右侧按钮组 -->
+            <div class="toolbar-right-desktop">
+                <!-- 语言切换 -->
+                <div class="dropdown">
+                    <button class="toolbar-btn" id="langBtn" title="Language / 语言">
+                        <svg class="icon"><use href="#icon-language"></use></svg>
+                    </button>
+                    <div class="dropdown-content dropdown-right" id="langDropdown">
+                        <button class="dropdown-item" data-lang="en">English</button>
+                        <button class="dropdown-item" data-lang="zh">中文</button>
+                    </div>
                 </div>
-            </div>
-            
-            <!-- 帮助文档 -->
-            <button class="toolbar-btn" id="helpBtn" data-i18n-title="ui.toolbar.help">
-                <svg class="icon"><use href="#icon-help"></use></svg>
-            </button>
-            
-            <!-- 视图切换 -->
-            <button class="toolbar-btn" id="layoutBtn" data-i18n-title="ui.toolbar.layout">
-                <svg class="icon"><use href="#icon-layout"></use></svg>
-            </button>
-            
-            <!-- 全屏模式 -->
-            <button class="toolbar-btn" id="fullscreenBtn" data-i18n-title="ui.toolbar.fullscreen">
-                <svg class="icon"><use href="#icon-fullscreen"></use></svg>
-            </button>
-            
-            <!-- 主题切换 -->
-            <button class="toolbar-btn" id="themeBtn" data-i18n-title="ui.toolbar.theme">
-                <svg class="icon"><use href="#icon-theme-dark"></use></svg>
-            </button>
-            
-            <!-- 更多选项 -->
-            <div class="dropdown">
-                <button class="toolbar-btn" data-i18n-title="ui.toolbar.more">
-                    <svg class="icon"><use href="#icon-more"></use></svg>
+                
+                <!-- 帮助文档 -->
+                <button class="toolbar-btn" id="helpBtn" data-i18n-title="ui.toolbar.help">
+                    <svg class="icon"><use href="#icon-help"></use></svg>
                 </button>
-                <div class="dropdown-content dropdown-right">
-                    <button class="dropdown-item" id="exportPdfDefaultBtn" data-i18n="ui.toolbar.exportPdfDefault"></button>
-                    <button class="dropdown-item" id="exportPdfFullPageBtn" data-i18n="ui.toolbar.exportPdfFullPage"></button>
-                    <button class="dropdown-item" id="exportPdfBtn" data-i18n="ui.toolbar.exportPdfSmart"></button>
-                    <button class="dropdown-item" id="exportHtmlBtn" data-i18n="ui.toolbar.exportHtml"></button>
-                    <button class="dropdown-item" id="copyMdBtn" data-i18n="ui.toolbar.copyMd"></button>
-                    <button class="dropdown-item" id="copyHtmlBtn" data-i18n="ui.toolbar.copyHtml"></button>
-                    <button class="dropdown-item" id="clearBtn" data-i18n="ui.toolbar.clear"></button>
+                
+                <!-- 视图切换 -->
+                <button class="toolbar-btn" id="layoutBtn" data-i18n-title="ui.toolbar.layout">
+                    <svg class="icon"><use href="#icon-layout"></use></svg>
+                </button>
+                
+                <!-- 全屏模式 -->
+                <button class="toolbar-btn" id="fullscreenBtn" data-i18n-title="ui.toolbar.fullscreen">
+                    <svg class="icon"><use href="#icon-fullscreen"></use></svg>
+                </button>
+                
+                <!-- 主题切换 -->
+                <button class="toolbar-btn" id="themeBtn" data-i18n-title="ui.toolbar.theme">
+                    <svg class="icon"><use href="#icon-theme-dark"></use></svg>
+                </button>
+                
+                <!-- 更多选项 -->
+                <div class="dropdown">
+                    <button class="toolbar-btn" data-i18n-title="ui.toolbar.more">
+                        <svg class="icon"><use href="#icon-more"></use></svg>
+                    </button>
+                    <div class="dropdown-content dropdown-right">
+                        <button class="dropdown-item" id="exportPdfDefaultBtn" data-i18n="ui.toolbar.exportPdfDefault"></button>
+                        <button class="dropdown-item" id="exportPdfFullPageBtn" data-i18n="ui.toolbar.exportPdfFullPage"></button>
+                        <button class="dropdown-item" id="exportPdfBtn" data-i18n="ui.toolbar.exportPdfSmart"></button>
+                        <button class="dropdown-item" id="exportHtmlBtn" data-i18n="ui.toolbar.exportHtml"></button>
+                        <button class="dropdown-item" id="copyMdBtn" data-i18n="ui.toolbar.copyMd"></button>
+                        <button class="dropdown-item" id="copyHtmlBtn" data-i18n="ui.toolbar.copyHtml"></button>
+                        <button class="dropdown-item" id="clearBtn" data-i18n="ui.toolbar.clear"></button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -599,6 +611,89 @@
     </div>
     
     <div id="mobileToolbarOverlay" class="mobile-toolbar-overlay"></div>
+    
+    <!-- 移动端设置面板 -->
+    <div id="mobileSettingsPanel" class="mobile-toolbar-panel mobile-settings-panel">
+        <div class="mobile-toolbar-panel-header">
+            <span class="mobile-toolbar-panel-title" data-i18n="ui.mobileSettings.title">设置</span>
+            <button id="mobileSettingsClose" class="mobile-toolbar-close" data-i18n-aria-label="ui.mobileToolbar.close" aria-label="关闭">
+                <svg class="icon"><use href="#icon-close"></use></svg>
+            </button>
+        </div>
+        <div class="mobile-toolbar-panel-content">
+            <!-- 语言切换 -->
+            <div class="mobile-toolbar-section">
+                <div class="mobile-toolbar-section-title" data-i18n="ui.mobileSettings.sections.language">语言</div>
+                <div class="mobile-toolbar-buttons mobile-settings-lang-buttons">
+                    <button class="mobile-toolbar-btn" id="mobileLangEnBtn">
+                        <span>English</span>
+                    </button>
+                    <button class="mobile-toolbar-btn" id="mobileLangZhBtn">
+                        <span>中文</span>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- 视图和显示 -->
+            <div class="mobile-toolbar-section">
+                <div class="mobile-toolbar-section-title" data-i18n="ui.mobileSettings.sections.view">视图</div>
+                <div class="mobile-toolbar-buttons">
+                    <button class="mobile-toolbar-btn" id="mobileLayoutBtn" data-i18n-title="ui.toolbar.layout">
+                        <svg class="icon"><use href="#icon-layout"></use></svg>
+                        <span data-i18n="ui.toolbar.layout">布局</span>
+                    </button>
+                    <button class="mobile-toolbar-btn" id="mobileFullscreenBtn" data-i18n-title="ui.toolbar.fullscreen">
+                        <svg class="icon"><use href="#icon-fullscreen"></use></svg>
+                        <span data-i18n="ui.toolbar.fullscreen">全屏</span>
+                    </button>
+                    <button class="mobile-toolbar-btn" id="mobileThemeBtn" data-i18n-title="ui.toolbar.theme">
+                        <svg class="icon"><use href="#icon-theme-dark"></use></svg>
+                        <span data-i18n="ui.toolbar.theme">主题</span>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- 帮助和导出 -->
+            <div class="mobile-toolbar-section">
+                <div class="mobile-toolbar-section-title" data-i18n="ui.mobileSettings.sections.actions">操作</div>
+                <div class="mobile-toolbar-buttons">
+                    <button class="mobile-toolbar-btn" id="mobileHelpBtn" data-i18n-title="ui.toolbar.help">
+                        <svg class="icon"><use href="#icon-help"></use></svg>
+                        <span data-i18n="ui.toolbar.help">帮助</span>
+                    </button>
+                    <button class="mobile-toolbar-btn" id="mobileExportPdfBtn" data-i18n-title="toolbar.exportPdfSmart">
+                        <svg class="icon"><use href="#icon-download"></use></svg>
+                        <span data-i18n="ui.toolbar.exportPdfSmart">导出PDF</span>
+                    </button>
+                    <button class="mobile-toolbar-btn" id="mobileExportHtmlBtn" data-i18n-title="ui.toolbar.exportHtml">
+                        <svg class="icon"><use href="#icon-download"></use></svg>
+                        <span data-i18n="ui.toolbar.exportHtml">导出HTML</span>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- 更多选项 -->
+            <div class="mobile-toolbar-section">
+                <div class="mobile-toolbar-section-title" data-i18n="ui.mobileSettings.sections.more">更多</div>
+                <div class="mobile-toolbar-buttons">
+                    <button class="mobile-toolbar-btn" id="mobileCopyMdBtn" data-i18n-title="ui.toolbar.copyMd">
+                        <svg class="icon"><use href="#icon-code"></use></svg>
+                        <span data-i18n="ui.toolbar.copyMd">复制MD</span>
+                    </button>
+                    <button class="mobile-toolbar-btn" id="mobileCopyHtmlBtn" data-i18n-title="ui.toolbar.copyHtml">
+                        <svg class="icon"><use href="#icon-code"></use></svg>
+                        <span data-i18n="ui.toolbar.copyHtml">复制HTML</span>
+                    </button>
+                    <button class="mobile-toolbar-btn" id="mobileClearBtn" data-i18n-title="ui.toolbar.clear">
+                        <svg class="icon"><use href="#icon-close"></use></svg>
+                        <span data-i18n="ui.toolbar.clear">清空</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div id="mobileSettingsOverlay" class="mobile-toolbar-overlay"></div>
 
     <!-- 主内容区 -->
     <main class="main-content">

@@ -40,6 +40,15 @@ export default {
                 charts: 'Charts & Formulas'
             }
         },
+        mobileSettings: {
+            title: 'Settings',
+            sections: {
+                language: 'Language',
+                view: 'View',
+                actions: 'Actions',
+                more: 'More'
+            }
+        },
         statusbar: {
             ready: 'Ready',
             characters: '{{count}} characters',

@@ -40,6 +40,15 @@ export default {
                 charts: '图表与公式'
             }
         },
+        mobileSettings: {
+            title: '设置',
+            sections: {
+                language: '语言',
+                view: '视图',
+                actions: '操作',
+                more: '更多'
+            }
+        },
         statusbar: {
             ready: '就绪',
             characters: '{{count}} 字符',
