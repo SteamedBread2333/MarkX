@@ -232,6 +232,13 @@
         height: 12px;
     }
     
+    /* 移动端设置按钮图标放大1.5倍 */
+    .toolbar-btn.mobile-settings-btn .icon,
+    .toolbar-btn.mobile-settings-btn svg.icon {
+        width: 18px !important;
+        height: 18px !important;
+    }
+    
     .logo {
         font-size: 12px;
     }
