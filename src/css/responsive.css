@@ -63,7 +63,8 @@
     
     .editor-container,
     .preview-container {
-        height: 50vh;
+        flex: 1 1 50%;
+        min-height: 150px;
         border-right: none;
     }
     
@@ -71,9 +72,20 @@
         border-bottom: 1px solid var(--border-color);
     }
     
-    body.layout-editor-only .editor-container,
+    body.layout-editor-only .editor-container {
+        flex: 1 1 100%;
+    }
+    
+    body.layout-editor-only .preview-container {
+        display: none;
+    }
+    
     body.layout-preview-only .preview-container {
-        height: 100%;
+        flex: 1 1 100%;
+    }
+    
+    body.layout-preview-only .editor-container {
+        display: none;
     }
     
     .editor,

@@ -12,7 +12,7 @@
     position: relative;
 }
 
-/* 编辑器容器右侧拖拽区域 */
+/* 编辑器容器右侧拖拽区域（水平布局） */
 .editor-container::after {
     content: '';
     position: absolute;
@@ -37,6 +37,67 @@
 .editor-container.dragging::after {
     background: var(--accent-color);
     cursor: col-resize;
+}
+
+/* 编辑器容器底部拖拽区域（垂直布局/移动端） */
+@media (max-width: 768px) {
+    .editor-container {
+        border-right: none;
+    }
+    
+    .editor-container::after {
+        right: auto;
+        bottom: -8px;
+        top: auto;
+        left: 0;
+        width: 100%;
+        height: 16px;
+        cursor: row-resize;
+        touch-action: none;
+    }
+    
+    .editor-container:hover::after,
+    .editor-container:active::after {
+        background: rgba(9, 105, 218, 0.15);
+    }
+    
+    [data-theme="dark"] .editor-container:hover::after,
+    [data-theme="dark"] .editor-container:active::after {
+        background: rgba(47, 129, 247, 0.25);
+    }
+    
+    .editor-container.dragging::after {
+        background: var(--accent-color);
+        cursor: row-resize;
+        opacity: 0.6;
+    }
+}
+
+/* 垂直布局时的底部拖拽区域 */
+body.layout-vertical .editor-container {
+    border-right: none;
+}
+
+body.layout-vertical .editor-container::after {
+    right: auto;
+    bottom: -4px;
+    top: auto;
+    left: 0;
+    width: 100%;
+    height: 8px;
+    cursor: row-resize;
+}
+
+body.layout-vertical .editor-container:hover::after {
+    background: rgba(9, 105, 218, 0.1);
+}
+
+[data-theme="dark"] body.layout-vertical .editor-container:hover::after {
+    background: rgba(47, 129, 247, 0.2);
+}
+
+body.layout-vertical .editor-container.dragging::after {
+    cursor: row-resize;
 }
 
 .editor {
