@@ -6,39 +6,106 @@
     position: fixed;
     bottom: 80px;
     right: 16px;
-    width: 56px;
-    height: 56px;
+    width: 48px;
+    height: 48px;
     border-radius: 50%;
-    background: var(--accent-color);
-    color: white;
-    border: none;
-    box-shadow: var(--shadow-lg);
+    background: #24292f;
+    color: #ffffff;
+    border: 2px solid #24292f;
+    box-shadow: none;
     cursor: pointer;
     z-index: 300;
     align-items: center;
     justify-content: center;
     transition: all var(--transition-normal);
     -webkit-tap-highlight-color: transparent;
+    overflow: hidden;
+}
+
+@media (max-width: 480px) {
+    .mobile-toolbar-fab {
+        width: 40px;
+        height: 40px;
+        bottom: 70px;
+        right: 12px;
+    }
+}
+
+/* 添加光晕效果 */
+.mobile-toolbar-fab::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.1);
+    transform: translate(-50%, -50%);
+    transition: width 0.4s ease, height 0.4s ease;
+    opacity: 0.5;
+}
+
+.mobile-toolbar-fab:hover::before {
+    width: 100%;
+    height: 100%;
 }
 
 .mobile-toolbar-fab:hover {
-    transform: scale(1.1);
-    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.3);
+    transform: scale(1.05) translateY(-2px);
+    background: #1a1d21;
+    border-color: #1a1d21;
 }
 
 .mobile-toolbar-fab:active {
-    transform: scale(0.95);
+    transform: scale(0.98) translateY(0);
+    background: #0f1114;
+    border-color: #0f1114;
 }
 
 .mobile-toolbar-fab .icon {
-    width: 24px;
-    height: 24px;
-    color: white;
+    width: 18px;
+    height: 18px;
+    color: #ffffff;
+    position: relative;
+    z-index: 1;
+    transition: transform var(--transition-fast);
 }
 
+@media (max-width: 480px) {
+    .mobile-toolbar-fab .icon {
+        width: 16px;
+        height: 16px;
+    }
+}
+
+.mobile-toolbar-fab:hover .icon {
+    transform: rotate(90deg);
+}
+
+/* 暗色主题：按钮为白色 */
 [data-theme="dark"] .mobile-toolbar-fab {
-    background: var(--accent-color);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+    background: #ffffff;
+    border-color: #ffffff;
+    color: #24292f;
+}
+
+[data-theme="dark"] .mobile-toolbar-fab::before {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+[data-theme="dark"] .mobile-toolbar-fab:hover {
+    background: #f6f8fa;
+    border-color: #f6f8fa;
+}
+
+[data-theme="dark"] .mobile-toolbar-fab:active {
+    background: #e8eaed;
+    border-color: #e8eaed;
+}
+
+[data-theme="dark"] .mobile-toolbar-fab .icon {
+    color: #24292f;
 }
 
 /* 遮罩层 */
