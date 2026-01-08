@@ -234,6 +234,8 @@ function initMobileSettingsPanel() {
         'mobileFullscreenBtn': 'fullscreenBtn',
         'mobileThemeBtn': 'themeBtn',
         'mobileHelpBtn': 'helpBtn',
+        'mobileExportPdfDefaultBtn': 'exportPdfDefaultBtn',
+        'mobileExportPdfFullPageBtn': 'exportPdfFullPageBtn',
         'mobileExportPdfBtn': 'exportPdfBtn',
         'mobileExportHtmlBtn': 'exportHtmlBtn',
         'mobileCopyMdBtn': 'copyMdBtn',
