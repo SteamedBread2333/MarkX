@@ -23,12 +23,41 @@ async function waitForMermaid(maxRetries = 10, delay = 100) {
 }
 
 /**
+ * 等待容器有有效尺寸（移动端可能需要更多时间）
+ */
+async function waitForContainerSize(container, maxRetries = 20, delay = 100) {
+    const isMobile = window.innerWidth <= 768;
+    const maxWait = isMobile ? maxRetries * 2 : maxRetries; // 移动端等待更长时间
+    
+    for (let i = 0; i < maxWait; i++) {
+        const rect = container.getBoundingClientRect();
+        // 检查容器是否有有效尺寸（宽度和高度都大于0）
+        if (rect.width > 0 && rect.height > 0) {
+            return true;
+        }
+        await new Promise(resolve => setTimeout(resolve, delay));
+    }
+    
+    // 即使超时也返回 true，让 Mermaid 尝试渲染（可能容器是隐藏的）
+    console.warn('容器尺寸检测超时，但继续尝试渲染 Mermaid');
+    return true;
+}
+
+/**
  * 渲染所有 Mermaid 图表
  */
 export async function renderMermaidCharts() {
     const mermaidElements = elements.preview.querySelectorAll('.mermaid');
     
     if (mermaidElements.length === 0) return;
+    
+    // 移动端：等待容器有有效尺寸（首次加载时可能需要更多时间）
+    const isMobile = window.innerWidth <= 768;
+    if (isMobile) {
+        await waitForContainerSize(elements.preview);
+        // 额外等待，确保移动端布局完全稳定
+        await new Promise(resolve => setTimeout(resolve, 200));
+    }
     
     // 等待 Mermaid 加载完成（版本更新后可能需要等待）
     const mermaidReady = await waitForMermaid();
@@ -86,18 +115,82 @@ export async function renderMermaidCharts() {
             }
         }
         
-        try {
+        // 移动端首次加载时，使用重试机制
+        const isMobile = window.innerWidth <= 768;
+        const maxRetries = isMobile ? 2 : 1;
+        let renderSuccess = false;
+        let lastError = null;
+        
+        for (let retry = 0; retry < maxRetries && !renderSuccess; retry++) {
+            try {
+                if (retry > 0) {
+                    // 重试前等待更长时间
+                    await new Promise(resolve => setTimeout(resolve, 300));
+                    // 重新检查容器尺寸
+                    await waitForContainerSize(elements.preview, 10, 50);
+                }
+                
+                await renderSingleMermaidChart(element, code, i);
+                renderSuccess = true;
+            } catch (error) {
+                lastError = error;
+                console.warn(`Mermaid 渲染失败 (尝试 ${retry + 1}/${maxRetries}):`, error);
+                if (retry < maxRetries - 1) {
+                    // 不是最后一次重试，继续
+                    continue;
+                }
+            }
+        }
+        
+        // 如果所有重试都失败，显示错误
+        if (!renderSuccess && lastError) {
+            element.innerHTML = `
+                <div class="mermaid-error">
+                    <div class="mermaid-error-title">${t('messages.mermaidRenderFailed')}</div>
+                    <div>${escapeHtml(lastError.message)}</div>
+                    <pre><code>${escapeHtml(code)}</code></pre>
+                </div>
+            `;
+        }
+    }
+}
+
+/**
+ * 渲染单个 Mermaid 图表
+ */
+async function renderSingleMermaidChart(element, code, index) {
+    try {
             // 确保代码不为空
             if (!code || !code.trim()) {
                 throw new Error('Mermaid 代码为空');
             }
             
             // 生成唯一 ID（使用更可靠的 ID 生成方式）
-            const id = `mermaid-${Date.now()}-${Math.random().toString(36).substr(2, 9)}-${i}`;
+            const id = `mermaid-${Date.now()}-${Math.random().toString(36).substr(2, 9)}-${index}`;
             
             // 确保 Mermaid render 方法可用
             if (!mermaid.render || typeof mermaid.render !== 'function') {
                 throw new Error('Mermaid render 方法不可用');
+            }
+            
+            // 移动端：确保元素可见且有尺寸
+            const isMobile = window.innerWidth <= 768;
+            if (isMobile) {
+                // 确保元素可见
+                element.style.visibility = 'visible';
+                element.style.display = 'block';
+                
+                // 等待元素有有效尺寸
+                await waitForContainerSize(element, 10, 50);
+                
+                // 如果元素仍然没有尺寸，设置最小尺寸
+                const rect = element.getBoundingClientRect();
+                if (rect.width === 0 || rect.height === 0) {
+                    element.style.minWidth = '100%';
+                    element.style.minHeight = '200px';
+                    // 再次等待
+                    await new Promise(resolve => setTimeout(resolve, 100));
+                }
             }
             
             // 渲染图表（添加超时保护）
@@ -134,16 +227,9 @@ export async function renderMermaidCharts() {
             bindMermaidExportEvents(wrapper, id);
             
         } catch (error) {
-            console.error('Mermaid 渲染错误:', error);
-            element.innerHTML = `
-                <div class="mermaid-error">
-                    <div class="mermaid-error-title">${t('messages.mermaidRenderFailed')}</div>
-                    <div>${escapeHtml(error.message)}</div>
-                    <pre><code>${escapeHtml(code)}</code></pre>
-                </div>
-            `;
+            // 重新抛出错误，让调用者处理重试逻辑
+            throw error;
         }
-    }
 }
 
 /**
