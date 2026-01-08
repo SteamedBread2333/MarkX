@@ -330,6 +330,11 @@
         opacity: 0.7;
         white-space: nowrap;
     }
+    
+    /* 隐藏移动端布局切换按钮 */
+    #mobileLayoutBtn {
+        display: none !important;
+    }
 }
 
 /* ==================== 打印样式 ==================== */
