@@ -37,6 +37,11 @@
     margin-right: 8px; /* 额外的右边距，增加与GitHub角标的距离 */
 }
 
+/* 桌面端隐藏移动端 GitHub 徽标 */
+.github-corner-mobile {
+    display: none;
+}
+
 /* 桌面端右侧按钮组保持水平排列 */
 .toolbar-right-desktop {
     display: flex;

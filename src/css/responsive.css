@@ -86,34 +86,39 @@
         opacity: 1;
     }
     
-    /* GitHub 角标缩小 */
+    /* 移动端隐藏右上角 GitHub 角标 */
     .github-corner {
-        width: 50px;
-        height: 50px;
+        display: none !important;
     }
     
-    .github-corner::before {
-        border-left-width: 40px;
-        border-top-width: 40px;
+    /* 移动端工具栏中的 GitHub 徽标 */
+    .github-corner-mobile {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 20px;
+        height: 20px;
+        margin-left: 16px;
+        color: var(--text-primary);
+        opacity: 0.8;
+        transition: all var(--transition-normal);
+        flex-shrink: 0;
     }
     
-    .github-corner svg {
-        width: 32px;
-        height: 32px;
-        transform: translate(-18px, 6px);
+    .github-corner-mobile:hover {
+        opacity: 1;
+        transform: scale(1.1);
     }
     
-    .github-corner:hover svg {
-        transform: translate(-18px, 6px) scale(1.05);
-    }
-    
-    [data-theme="dark"] .github-corner:hover svg {
-        transform: translate(-18px, 6px) scale(1.05);
+    .github-corner-mobile svg {
+        width: 20px;
+        height: 20px;
+        fill: currentColor;
     }
     
     /* 移动端工具栏右侧padding调整 */
     .toolbar-right {
-        padding-right: 50px;
+        padding-right: 0;
     }
     
     /* 状态栏移动端优化 */
@@ -290,33 +295,20 @@
         display: none;
     }
     
-    /* GitHub 角标进一步缩小 */
-    .github-corner {
-        width: 40px;
-        height: 40px;
+    /* 小屏幕下 GitHub 徽标样式 */
+    .github-corner-mobile {
+        width: 18px;
+        height: 18px;
+        margin-left: 16px;
     }
     
-    .github-corner::before {
-        border-left-width: 32px;
-        border-top-width: 32px;
-    }
-    
-    .github-corner svg {
-        width: 24px;
-        height: 24px;
-        transform: translate(-16px, 4px);
-    }
-    
-    .github-corner:hover svg {
-        transform: translate(-16px, 4px) scale(1.05);
-    }
-    
-    [data-theme="dark"] .github-corner:hover svg {
-        transform: translate(-16px, 4px) scale(1.05);
+    .github-corner-mobile svg {
+        width: 18px;
+        height: 18px;
     }
     
     .toolbar-right {
-        padding-right: 40px;
+        padding-right: 0;
     }
 }
 
