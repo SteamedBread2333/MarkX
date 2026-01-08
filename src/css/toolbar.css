@@ -28,6 +28,7 @@
     gap: var(--spacing-sm);
     flex-wrap: nowrap;
     min-width: 0;
+    flex-shrink: 0;
 }
 
 /* 确保工具栏右侧有足够空间，不被GitHub角标遮挡 */

@@ -2,7 +2,40 @@
 
 @media (max-width: 768px) {
     .toolbar {
-        padding: 0 var(--spacing-sm);
+        padding: 0 var(--spacing-xs);
+        overflow-x: auto;
+        overflow-y: hidden;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none; /* Firefox */
+        -ms-overflow-style: none; /* IE and Edge */
+        justify-content: flex-start;
+    }
+    
+    .toolbar::-webkit-scrollbar {
+        display: none; /* Chrome, Safari, Opera */
+    }
+    
+    .toolbar-left,
+    .toolbar-right {
+        flex-shrink: 0;
+        gap: var(--spacing-xs);
+    }
+    
+    /* 确保工具栏左右两侧可以连续排列 */
+    .toolbar-left {
+        margin-right: var(--spacing-xs);
+    }
+    
+    .toolbar-btn {
+        min-width: 24px;
+        height: 24px;
+        padding: 2px;
+    }
+    
+    .toolbar-btn .icon,
+    .toolbar-btn svg.icon {
+        width: 14px;
+        height: 14px;
     }
     
     .toolbar-btn .text {
@@ -14,7 +47,13 @@
     }
     
     .logo {
-        font-size: 16px;
+        font-size: 14px;
+        margin-right: var(--spacing-xs);
+    }
+    
+    .logo-icon {
+        width: 16px;
+        height: 16px;
     }
     
     /* 移动端默认单栏布局 */
@@ -49,28 +88,183 @@
     
     /* GitHub 角标缩小 */
     .github-corner {
-        width: 60px;
-        height: 60px;
+        width: 50px;
+        height: 50px;
     }
     
     .github-corner svg {
-        width: 60px;
-        height: 60px;
+        width: 50px;
+        height: 50px;
     }
     
     /* 移动端工具栏右侧padding调整 */
     .toolbar-right {
-        padding-right: 30px;
+        padding-right: 50px;
     }
-}
-
-@media (max-width: 480px) {
-    .statusbar-right span:not(#charCount):not(#readTime) {
-        display: none;
+    
+    /* 状态栏移动端优化 */
+    .statusbar {
+        padding: 0 var(--spacing-xs);
+        font-size: 11px;
+        flex-wrap: wrap;
+        min-height: var(--statusbar-height);
+        height: auto;
+    }
+    
+    .statusbar-left,
+    .statusbar-right {
+        flex-wrap: wrap;
+        gap: var(--spacing-xs);
+        min-width: 0;
+    }
+    
+    .statusbar-left {
+        flex: 1;
+        min-width: 0;
+    }
+    
+    .statusbar-right {
+        flex-shrink: 0;
     }
     
     .statusbar-divider {
         display: none;
+    }
+    
+    /* 移动端 autocomplete-hint 样式优化 */
+    .autocomplete-hint {
+        font-size: 10px !important;
+        margin-left: var(--spacing-xs) !important;
+        white-space: normal;
+        word-break: break-word;
+        line-height: 1.2;
+        flex-shrink: 1;
+        min-width: 0;
+        max-width: 100%;
+    }
+    
+    /* 确保 autocomplete-hint 在移动端可见且紧凑 */
+    .autocomplete-hint-active {
+        display: inline !important;
+        opacity: 1 !important;
+        max-width: 100%;
+    }
+    
+    .autocomplete-hint-active kbd {
+        font-size: 9px !important;
+        padding: 1px 3px !important;
+        display: inline-block;
+        margin: 0 1px;
+    }
+}
+
+@media (max-width: 480px) {
+    .toolbar {
+        padding: 0 2px;
+    }
+    
+    .toolbar-btn {
+        min-width: 22px;
+        height: 22px;
+        padding: 1px;
+    }
+    
+    .toolbar-btn .icon,
+    .toolbar-btn svg.icon {
+        width: 12px;
+        height: 12px;
+    }
+    
+    .logo {
+        font-size: 12px;
+    }
+    
+    .logo-icon {
+        width: 14px;
+        height: 14px;
+    }
+    
+    /* 隐藏一些不常用的工具栏按钮 */
+    .toolbar-left > .toolbar-btn:nth-child(n+5):nth-child(-n+7),
+    .toolbar-left > .dropdown:nth-child(n+8):nth-child(-n+9) {
+        display: none;
+    }
+    
+    /* 状态栏只显示最重要的信息 */
+    .statusbar {
+        font-size: 10px;
+        padding: 2px var(--spacing-xs);
+    }
+    
+    .statusbar-right span:not(#charCount):not(#readTime) {
+        display: none;
+    }
+    
+    .statusbar-right {
+        gap: var(--spacing-xs);
+    }
+    
+    .statusbar-left {
+        overflow: visible;
+        max-width: 100%;
+        flex-wrap: wrap;
+        flex: 1 1 auto;
+        min-width: 0;
+    }
+    
+    /* 小屏幕下 statusMessage 和 autocomplete-hint 可以换行显示 */
+    #statusMessage {
+        flex-shrink: 0;
+        white-space: nowrap;
+    }
+    
+    /* autocomplete-hint 在移动端紧凑显示，可以换行 */
+    .autocomplete-hint {
+        display: inline !important;
+        margin-left: var(--spacing-xs) !important;
+        margin-top: 0 !important;
+        font-size: 9px !important;
+        line-height: 1.3;
+        white-space: normal;
+        word-break: break-word;
+        flex-shrink: 1;
+        min-width: 0;
+    }
+    
+    .autocomplete-hint-active {
+        display: inline !important;
+        opacity: 1 !important;
+    }
+    
+    .autocomplete-hint-active kbd {
+        font-size: 8px !important;
+        padding: 1px 2px !important;
+        display: inline-block;
+        margin: 0 1px;
+    }
+    
+    /* 确保状态栏在显示 autocomplete-hint 时紧凑显示 */
+    .statusbar-left {
+        line-height: 1.2;
+    }
+    
+    .statusbar-divider {
+        display: none;
+    }
+    
+    /* GitHub 角标进一步缩小 */
+    .github-corner {
+        width: 40px;
+        height: 40px;
+    }
+    
+    .github-corner svg {
+        width: 40px;
+        height: 40px;
+    }
+    
+    .toolbar-right {
+        padding-right: 40px;
     }
 }
 
