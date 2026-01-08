@@ -171,8 +171,10 @@
 }
 
 .mobile-toolbar-close {
-    width: 24px;
-    height: 24px;
+    min-width: 44px;
+    min-height: 44px;
+    width: 44px;
+    height: 44px;
     border-radius: 50%;
     background: transparent;
     border: none;
@@ -183,6 +185,8 @@
     justify-content: center;
     transition: background var(--transition-fast);
     -webkit-tap-highlight-color: transparent;
+    padding: 0;
+    margin: -10px -10px -10px 0;
 }
 
 .mobile-toolbar-close:hover {

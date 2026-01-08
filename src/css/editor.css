@@ -108,7 +108,7 @@
     .resize-handle:active,
     .editor-container.dragging .resize-handle {
         background: rgba(0, 0, 0, 0.5);
-        transform: scale(1.1);
+        transform: translateY(50%);
     }
     
     .resize-handle:active::before,
@@ -128,7 +128,7 @@
     [data-theme="dark"] .resize-handle:active,
     [data-theme="dark"] .editor-container.dragging .resize-handle {
         background: rgba(255, 255, 255, 0.5);
-        transform: scale(1.1);
+        transform: translateY(50%);
     }
     
     [data-theme="dark"] .resize-handle:active::before,
