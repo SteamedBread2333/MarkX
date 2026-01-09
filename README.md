@@ -239,7 +239,7 @@ Mass-energy equation: $E = mc^2$, Pythagorean theorem: $a^2 + b^2 = c^2$
 ```
 
 **Block Formula** (wrap with double `$$`, standalone line):
-
+```markdown
 Quadratic formula:
 
 $$
@@ -253,14 +253,6 @@ $$
 a & b \\
 c & d
 \end{bmatrix}
-$$
-
-Code example:
-```markdown
-Quadratic formula:
-
-$$
-x = \frac{-b \pm \sqrt{b^2 - 4ac}}{2a}
 $$
 ```
 
