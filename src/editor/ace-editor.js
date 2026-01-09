@@ -336,9 +336,9 @@ function checkIfInsideBlock(session, pos) {
                 if (codeBlockLanguage === 'echarts') {
                     codeBlockLanguage = 'javascript';
                 }
-                // katex 块使用 LaTeX 自动完成
+                // katex 块使用 katex 自动完成
                 if (codeBlockLanguage === 'katex') {
-                    codeBlockLanguage = 'latex';
+                    codeBlockLanguage = 'katex';
                 }
             }
         } else if (trimmedLine.startsWith('~~~')) {
@@ -370,9 +370,9 @@ function checkIfInsideBlock(session, pos) {
                 if (codeBlockLanguage === 'echarts') {
                     codeBlockLanguage = 'javascript';
                 }
-                // katex 块使用 LaTeX 自动完成
+                // katex 块使用 katex 自动完成
                 if (codeBlockLanguage === 'katex') {
-                    codeBlockLanguage = 'latex';
+                    codeBlockLanguage = 'katex';
                 }
             }
         }
@@ -565,7 +565,7 @@ function setupAutocompletion(editor) {
                         // 如果是 echarts 块，传递原始语言信息
                         // 如果是 katex 块，传递原始语言信息
                         const languageToUse = blockInfo.originalLanguage === 'echarts' ? 'echarts' 
-                            : blockInfo.originalLanguage === 'katex' ? 'latex'
+                            : blockInfo.originalLanguage === 'katex' ? 'katex'
                             : blockInfo.language;
                         switchToLanguageMode(editor, languageToUse, blockInfo.originalLanguage);
                         editor.setOptions({
@@ -748,10 +748,10 @@ function createLanguageCompleter(language, originalLanguage = null) {
                 languageKeywords = [...languageKeywords, ...echartsKeywords];
             }
             
-            // 如果是 LaTeX/katex 块，添加 LaTeX 特定的关键字和模板
-            if (originalLanguage === 'katex' || language === 'latex' || language === 'katex') {
-                const latexKeywords = getLaTeXKeywords();
-                languageKeywords = [...languageKeywords, ...latexKeywords];
+            // 如果是 katex 块，添加 katex 特定的关键字和模板
+            if (originalLanguage === 'katex' || language === 'katex') {
+                const katexKeywords = getKaTeXKeywords();
+                languageKeywords = [...languageKeywords, ...katexKeywords];
             }
             
             if (!languageKeywords || languageKeywords.length === 0) {
@@ -817,7 +817,6 @@ function getLanguageKeywords(language) {
         'php': ['<?php', '?>', 'function', 'class', 'if', 'else', 'for', 'while', 'return', 'echo', 'print', 'array', 'isset', 'empty', 'include', 'require', 'public', 'private', 'protected', 'static'],
         'bash': ['if', 'then', 'else', 'fi', 'for', 'while', 'do', 'done', 'case', 'esac', 'function', 'return', 'echo', 'export', 'read', 'cd', 'ls', 'pwd', 'mkdir', 'rm', 'cp', 'mv'],
         'sh': ['if', 'then', 'else', 'fi', 'for', 'while', 'do', 'done', 'case', 'esac', 'function', 'return', 'echo', 'export', 'read', 'cd', 'ls', 'pwd', 'mkdir', 'rm', 'cp', 'mv'],
-        'latex': ['frac', 'sqrt', 'sum', 'int', 'prod', 'lim', 'sin', 'cos', 'tan', 'log', 'ln', 'exp', 'vec', 'hat', 'bar', 'dot', 'ddot', 'partial', 'nabla', 'infty', 'alpha', 'beta', 'gamma', 'delta', 'epsilon', 'theta', 'lambda', 'mu', 'pi', 'sigma', 'phi', 'omega'],
         'katex': ['frac', 'sqrt', 'sum', 'int', 'prod', 'lim', 'sin', 'cos', 'tan', 'log', 'ln', 'exp', 'vec', 'hat', 'bar', 'dot', 'ddot', 'partial', 'nabla', 'infty', 'alpha', 'beta', 'gamma', 'delta', 'epsilon', 'theta', 'lambda', 'mu', 'pi', 'sigma', 'phi', 'omega'],
     };
     
@@ -825,61 +824,61 @@ function getLanguageKeywords(language) {
 }
 
 /**
- * 获取 LaTeX/KaTeX 特定的关键字和数学公式模板
+ * 获取 KaTeX 特定的关键字和数学公式模板
  */
-function getLaTeXKeywords() {
+function getKaTeXKeywords() {
     return [
         // 基础数学符号
-        { name: '\\frac', value: '\\frac{${1:a}}{${2:b}}', score: 1000, meta: 'LaTeX Command' },
-        { name: '\\sqrt', value: '\\sqrt{${1:x}}', score: 1000, meta: 'LaTeX Command' },
-        { name: '\\sqrt[n]', value: '\\sqrt[${1:n}]{${2:x}}', score: 950, meta: 'LaTeX Command' },
-        { name: '\\sum', value: '\\sum_{${1:i=1}}^{${2:n}} ${3:a_i}', score: 1000, meta: 'LaTeX Command' },
-        { name: '\\prod', value: '\\prod_{${1:i=1}}^{${2:n}} ${3:a_i}', score: 1000, meta: 'LaTeX Command' },
-        { name: '\\int', value: '\\int_{${1:a}}^{${2:b}} ${3:f(x)} dx', score: 1000, meta: 'LaTeX Command' },
-        { name: '\\iint', value: '\\iint_{${1:D}} ${2:f(x,y)} dxdy', score: 950, meta: 'LaTeX Command' },
-        { name: '\\iiint', value: '\\iiint_{${1:V}} ${2:f(x,y,z)} dV', score: 950, meta: 'LaTeX Command' },
-        { name: '\\oint', value: '\\oint_{${1:C}} ${2:f(z)} dz', score: 950, meta: 'LaTeX Command' },
-        { name: '\\lim', value: '\\lim_{${1:x} \\to ${2:\\infty}} ${3:f(x)}', score: 1000, meta: 'LaTeX Command' },
+        { name: '\\frac', value: '\\frac{${1:a}}{${2:b}}', score: 1000, meta: 'KaTeX Command' },
+        { name: '\\sqrt', value: '\\sqrt{${1:x}}', score: 1000, meta: 'KaTeX Command' },
+        { name: '\\sqrt[n]', value: '\\sqrt[${1:n}]{${2:x}}', score: 950, meta: 'KaTeX Command' },
+        { name: '\\sum', value: '\\sum_{${1:i=1}}^{${2:n}} ${3:a_i}', score: 1000, meta: 'KaTeX Command' },
+        { name: '\\prod', value: '\\prod_{${1:i=1}}^{${2:n}} ${3:a_i}', score: 1000, meta: 'KaTeX Command' },
+        { name: '\\int', value: '\\int_{${1:a}}^{${2:b}} ${3:f(x)} dx', score: 1000, meta: 'KaTeX Command' },
+        { name: '\\iint', value: '\\iint_{${1:D}} ${2:f(x,y)} dxdy', score: 950, meta: 'KaTeX Command' },
+        { name: '\\iiint', value: '\\iiint_{${1:V}} ${2:f(x,y,z)} dV', score: 950, meta: 'KaTeX Command' },
+        { name: '\\oint', value: '\\oint_{${1:C}} ${2:f(z)} dz', score: 950, meta: 'KaTeX Command' },
+        { name: '\\lim', value: '\\lim_{${1:x} \\to ${2:\\infty}} ${3:f(x)}', score: 1000, meta: 'KaTeX Command' },
         
         // 微积分
-        { name: '\\frac{d}{dx}', value: '\\frac{d}{d${1:x}}${2:f}', score: 1000, meta: 'LaTeX Command' },
-        { name: '\\frac{d^2}{dx^2}', value: '\\frac{d^2}{d${1:x}^2}${2:f}', score: 950, meta: 'LaTeX Command' },
-        { name: '\\partial', value: '\\frac{\\partial ${1:f}}{\\partial ${2:x}}', score: 1000, meta: 'LaTeX Command' },
-        { name: '\\nabla', value: '\\nabla ${1:f}', score: 950, meta: 'LaTeX Command' },
+        { name: '\\frac{d}{dx}', value: '\\frac{d}{d${1:x}}${2:f}', score: 1000, meta: 'KaTeX Command' },
+        { name: '\\frac{d^2}{dx^2}', value: '\\frac{d^2}{d${1:x}^2}${2:f}', score: 950, meta: 'KaTeX Command' },
+        { name: '\\partial', value: '\\frac{\\partial ${1:f}}{\\partial ${2:x}}', score: 1000, meta: 'KaTeX Command' },
+        { name: '\\nabla', value: '\\nabla ${1:f}', score: 950, meta: 'KaTeX Command' },
         
         // 三角函数
-        { name: '\\sin', value: '\\sin(${1:x})', score: 1000, meta: 'LaTeX Function' },
-        { name: '\\cos', value: '\\cos(${1:x})', score: 1000, meta: 'LaTeX Function' },
-        { name: '\\tan', value: '\\tan(${1:x})', score: 1000, meta: 'LaTeX Function' },
-        { name: '\\cot', value: '\\cot(${1:x})', score: 950, meta: 'LaTeX Function' },
-        { name: '\\sec', value: '\\sec(${1:x})', score: 950, meta: 'LaTeX Function' },
-        { name: '\\csc', value: '\\csc(${1:x})', score: 950, meta: 'LaTeX Function' },
-        { name: '\\arcsin', value: '\\arcsin(${1:x})', score: 950, meta: 'LaTeX Function' },
-        { name: '\\arccos', value: '\\arccos(${1:x})', score: 950, meta: 'LaTeX Function' },
-        { name: '\\arctan', value: '\\arctan(${1:x})', score: 950, meta: 'LaTeX Function' },
+        { name: '\\sin', value: '\\sin(${1:x})', score: 1000, meta: 'KaTeX Function' },
+        { name: '\\cos', value: '\\cos(${1:x})', score: 1000, meta: 'KaTeX Function' },
+        { name: '\\tan', value: '\\tan(${1:x})', score: 1000, meta: 'KaTeX Function' },
+        { name: '\\cot', value: '\\cot(${1:x})', score: 950, meta: 'KaTeX Function' },
+        { name: '\\sec', value: '\\sec(${1:x})', score: 950, meta: 'KaTeX Function' },
+        { name: '\\csc', value: '\\csc(${1:x})', score: 950, meta: 'KaTeX Function' },
+        { name: '\\arcsin', value: '\\arcsin(${1:x})', score: 950, meta: 'KaTeX Function' },
+        { name: '\\arccos', value: '\\arccos(${1:x})', score: 950, meta: 'KaTeX Function' },
+        { name: '\\arctan', value: '\\arctan(${1:x})', score: 950, meta: 'KaTeX Function' },
         
         // 对数函数
-        { name: '\\log', value: '\\log(${1:x})', score: 1000, meta: 'LaTeX Function' },
-        { name: '\\ln', value: '\\ln(${1:x})', score: 1000, meta: 'LaTeX Function' },
-        { name: '\\exp', value: '\\exp(${1:x})', score: 1000, meta: 'LaTeX Function' },
+        { name: '\\log', value: '\\log(${1:x})', score: 1000, meta: 'KaTeX Function' },
+        { name: '\\ln', value: '\\ln(${1:x})', score: 1000, meta: 'KaTeX Function' },
+        { name: '\\exp', value: '\\exp(${1:x})', score: 1000, meta: 'KaTeX Function' },
         
         // 矩阵和环境
-        { name: '\\begin{bmatrix}', value: '\\begin{bmatrix}\n${1:a} & ${2:b} \\\\\n${3:c} & ${4:d}\n\\end{bmatrix}', score: 1000, meta: 'LaTeX Environment' },
-        { name: '\\begin{pmatrix}', value: '\\begin{pmatrix}\n${1:a} & ${2:b} \\\\\n${3:c} & ${4:d}\n\\end{pmatrix}', score: 1000, meta: 'LaTeX Environment' },
-        { name: '\\begin{vmatrix}', value: '\\begin{vmatrix}\n${1:a} & ${2:b} \\\\\n${3:c} & ${4:d}\n\\end{vmatrix}', score: 1000, meta: 'LaTeX Environment' },
-        { name: '\\begin{align}', value: '\\begin{align}\n${1:x} &= ${2:y} \\\\\n&= ${3:z}\n\\end{align}', score: 1000, meta: 'LaTeX Environment' },
-        { name: '\\begin{cases}', value: '\\begin{cases}\n${1:x} & \\text{if } ${2:condition} \\\\\n${3:y} & \\text{otherwise}\n\\end{cases}', score: 1000, meta: 'LaTeX Environment' },
-        { name: '\\begin{aligned}', value: '\\begin{aligned}\n${1:x} &= ${2:y} \\\\\n&= ${3:z}\n\\end{aligned}', score: 1000, meta: 'LaTeX Environment' },
+        { name: '\\begin{bmatrix}', value: '\\begin{bmatrix}\n${1:a} & ${2:b} \\\\\n${3:c} & ${4:d}\n\\end{bmatrix}', score: 1000, meta: 'KaTeX Environment' },
+        { name: '\\begin{pmatrix}', value: '\\begin{pmatrix}\n${1:a} & ${2:b} \\\\\n${3:c} & ${4:d}\n\\end{pmatrix}', score: 1000, meta: 'KaTeX Environment' },
+        { name: '\\begin{vmatrix}', value: '\\begin{vmatrix}\n${1:a} & ${2:b} \\\\\n${3:c} & ${4:d}\n\\end{vmatrix}', score: 1000, meta: 'KaTeX Environment' },
+        { name: '\\begin{align}', value: '\\begin{align}\n${1:x} &= ${2:y} \\\\\n&= ${3:z}\n\\end{align}', score: 1000, meta: 'KaTeX Environment' },
+        { name: '\\begin{cases}', value: '\\begin{cases}\n${1:x} & \\text{if } ${2:condition} \\\\\n${3:y} & \\text{otherwise}\n\\end{cases}', score: 1000, meta: 'KaTeX Environment' },
+        { name: '\\begin{aligned}', value: '\\begin{aligned}\n${1:x} &= ${2:y} \\\\\n&= ${3:z}\n\\end{aligned}', score: 1000, meta: 'KaTeX Environment' },
         
         // 向量和符号
-        { name: '\\vec', value: '\\vec{${1:v}}', score: 1000, meta: 'LaTeX Command' },
-        { name: '\\hat', value: '\\hat{${1{x}}}', score: 950, meta: 'LaTeX Command' },
-        { name: '\\bar', value: '\\bar{${1{x}}}', score: 950, meta: 'LaTeX Command' },
-        { name: '\\dot', value: '\\dot{${1{x}}}', score: 950, meta: 'LaTeX Command' },
-        { name: '\\ddot', value: '\\ddot{${1{x}}}', score: 950, meta: 'LaTeX Command' },
-        { name: '\\tilde', value: '\\tilde{${1{x}}}', score: 900, meta: 'LaTeX Command' },
-        { name: '\\overline', value: '\\overline{${1{x}}}', score: 950, meta: 'LaTeX Command' },
-        { name: '\\underline', value: '\\underline{${1{x}}}', score: 950, meta: 'LaTeX Command' },
+        { name: '\\vec', value: '\\vec{${1:v}}', score: 1000, meta: 'KaTeX Command' },
+        { name: '\\hat', value: '\\hat{${1{x}}}', score: 950, meta: 'KaTeX Command' },
+        { name: '\\bar', value: '\\bar{${1{x}}}', score: 950, meta: 'KaTeX Command' },
+        { name: '\\dot', value: '\\dot{${1{x}}}', score: 950, meta: 'KaTeX Command' },
+        { name: '\\ddot', value: '\\ddot{${1{x}}}', score: 950, meta: 'KaTeX Command' },
+        { name: '\\tilde', value: '\\tilde{${1{x}}}', score: 900, meta: 'KaTeX Command' },
+        { name: '\\overline', value: '\\overline{${1{x}}}', score: 950, meta: 'KaTeX Command' },
+        { name: '\\underline', value: '\\underline{${1{x}}}', score: 950, meta: 'KaTeX Command' },
         
         // 希腊字母
         { name: '\\alpha', value: '\\alpha', score: 1000, meta: 'Greek Letter' },
@@ -978,29 +977,29 @@ function getLaTeXKeywords() {
         { name: '\\gets', value: '\\gets', score: 950, meta: 'Arrow' },
         
         // 文本修饰
-        { name: '\\text', value: '\\text{${1:text}}', score: 1000, meta: 'LaTeX Command' },
-        { name: '\\mathrm', value: '\\mathrm{${1:text}}', score: 950, meta: 'LaTeX Command' },
-        { name: '\\mathbf', value: '\\mathbf{${1:text}}', score: 1000, meta: 'LaTeX Command' },
-        { name: '\\mathit', value: '\\mathit{${1:text}}', score: 950, meta: 'LaTeX Command' },
-        { name: '\\mathsf', value: '\\mathsf{${1:text}}', score: 900, meta: 'LaTeX Command' },
-        { name: '\\mathtt', value: '\\mathtt{${1:text}}', score: 900, meta: 'LaTeX Command' },
-        { name: '\\mathcal', value: '\\mathcal{${1:A}}', score: 950, meta: 'LaTeX Command' },
-        { name: '\\mathbb', value: '\\mathbb{${1:R}}', score: 1000, meta: 'LaTeX Command' },
+        { name: '\\text', value: '\\text{${1:text}}', score: 1000, meta: 'KaTeX Command' },
+        { name: '\\mathrm', value: '\\mathrm{${1:text}}', score: 950, meta: 'KaTeX Command' },
+        { name: '\\mathbf', value: '\\mathbf{${1:text}}', score: 1000, meta: 'KaTeX Command' },
+        { name: '\\mathit', value: '\\mathit{${1:text}}', score: 950, meta: 'KaTeX Command' },
+        { name: '\\mathsf', value: '\\mathsf{${1:text}}', score: 900, meta: 'KaTeX Command' },
+        { name: '\\mathtt', value: '\\mathtt{${1:text}}', score: 900, meta: 'KaTeX Command' },
+        { name: '\\mathcal', value: '\\mathcal{${1:A}}', score: 950, meta: 'KaTeX Command' },
+        { name: '\\mathbb', value: '\\mathbb{${1:R}}', score: 1000, meta: 'KaTeX Command' },
         
         // 括号和分隔符
-        { name: '\\left(', value: '\\left(${1:content}\\right)', score: 1000, meta: 'LaTeX Delimiter' },
-        { name: '\\left[', value: '\\left[${1:content}\\right]', score: 1000, meta: 'LaTeX Delimiter' },
-        { name: '\\left\\{', value: '\\left\\{${1:content}\\right\\}', score: 1000, meta: 'LaTeX Delimiter' },
-        { name: '\\left|', value: '\\left|${1:content}\\right|', score: 1000, meta: 'LaTeX Delimiter' },
-        { name: '\\left\\|', value: '\\left\\|${1:content}\\right\\|', score: 950, meta: 'LaTeX Delimiter' },
-        { name: '\\left\\langle', value: '\\left\\langle${1:content}\\right\\rangle', score: 950, meta: 'LaTeX Delimiter' },
+        { name: '\\left(', value: '\\left(${1:content}\\right)', score: 1000, meta: 'KaTeX Delimiter' },
+        { name: '\\left[', value: '\\left[${1:content}\\right]', score: 1000, meta: 'KaTeX Delimiter' },
+        { name: '\\left\\{', value: '\\left\\{${1:content}\\right\\}', score: 1000, meta: 'KaTeX Delimiter' },
+        { name: '\\left|', value: '\\left|${1:content}\\right|', score: 1000, meta: 'KaTeX Delimiter' },
+        { name: '\\left\\|', value: '\\left\\|${1:content}\\right\\|', score: 950, meta: 'KaTeX Delimiter' },
+        { name: '\\left\\langle', value: '\\left\\langle${1:content}\\right\\rangle', score: 950, meta: 'KaTeX Delimiter' },
         
         // 其他常用命令
-        { name: '\\binom', value: '\\binom{${1:n}}{${2:k}}', score: 1000, meta: 'LaTeX Command' },
-        { name: '\\choose', value: '{${1:n} \\choose ${2:k}}', score: 950, meta: 'LaTeX Command' },
-        { name: '\\prescript', value: '\\prescript{${1:a}}{${2:b}}{${3:C}}', score: 900, meta: 'LaTeX Command' },
-        { name: '\\overset', value: '\\overset{${1:above}}{${2:below}}', score: 950, meta: 'LaTeX Command' },
-        { name: '\\underset', value: '\\underset{${1:below}}{${2:above}}', score: 950, meta: 'LaTeX Command' },
+        { name: '\\binom', value: '\\binom{${1:n}}{${2:k}}', score: 1000, meta: 'KaTeX Command' },
+        { name: '\\choose', value: '{${1:n} \\choose ${2:k}}', score: 950, meta: 'KaTeX Command' },
+        { name: '\\prescript', value: '\\prescript{${1:a}}{${2:b}}{${3:C}}', score: 900, meta: 'KaTeX Command' },
+        { name: '\\overset', value: '\\overset{${1:above}}{${2:below}}', score: 950, meta: 'KaTeX Command' },
+        { name: '\\underset', value: '\\underset{${1:below}}{${2:above}}', score: 950, meta: 'KaTeX Command' },
     ];
 }
 

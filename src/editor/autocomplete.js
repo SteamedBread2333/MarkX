@@ -97,9 +97,9 @@ function checkIfInsideBlock(session, pos) {
                 if (codeBlockLanguage === 'echarts') {
                     codeBlockLanguage = 'javascript';
                 }
-                // katex 块使用 LaTeX 自动完成
+                // katex 块使用 katex 自动完成
                 if (codeBlockLanguage === 'katex') {
-                    codeBlockLanguage = 'latex';
+                    codeBlockLanguage = 'katex';
                 }
             }
         } else if (trimmedLine.startsWith('~~~')) {
@@ -131,9 +131,9 @@ function checkIfInsideBlock(session, pos) {
                 if (codeBlockLanguage === 'echarts') {
                     codeBlockLanguage = 'javascript';
                 }
-                // katex 块使用 LaTeX 自动完成
+                // katex 块使用 katex 自动完成
                 if (codeBlockLanguage === 'katex') {
-                    codeBlockLanguage = 'latex';
+                    codeBlockLanguage = 'katex';
                 }
             }
         }
