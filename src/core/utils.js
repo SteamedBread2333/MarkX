@@ -144,15 +144,22 @@ export function processMathInHTML(html) {
     
     // 现在在非代码块区域处理数学公式
     // 先处理块级公式 $$...$$
+    // 注意：需要处理 Marked 的 breaks 选项可能插入的 <br> 标签
     const blockMathRegex = /\$\$([\s\S]*?)\$\$/g;
     const blockMatches = [];
     let match;
     
     while ((match = blockMathRegex.exec(processedHTML)) !== null) {
+        // 清理公式中的 <br> 和 <br/> 标签，将它们转换为换行符
+        // 这样可以避免 Marked 的 breaks 选项在公式中插入的 <br> 标签影响渲染
+        // 对于块级公式，保留换行符以便 KaTeX 正确处理多行公式
+        let formula = match[1].trim();
+        formula = formula.replace(/<br\s*\/?>/gi, '\n');
+        
         blockMatches.push({
             start: match.index,
             end: match.index + match[0].length,
-            formula: match[1].trim(),
+            formula: formula,
             original: match[0]
         });
     }
@@ -185,10 +192,15 @@ export function processMathInHTML(html) {
             continue;
         }
         
+        // 清理公式中的 <br> 和 <br/> 标签，将它们转换为空格
+        // 行内公式不应该包含换行，所以转换为空格
+        let formula = match[1].trim();
+        formula = formula.replace(/<br\s*\/?>/gi, ' ').replace(/\s+/g, ' ').trim();
+        
         inlineMatches.push({
             start: match.index,
             end: match.index + match[0].length,
-            formula: match[1].trim(),
+            formula: formula,
             original: match[0]
         });
     }
