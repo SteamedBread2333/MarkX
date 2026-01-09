@@ -46,14 +46,22 @@ function findPageBreaks(elements, containerRect, pageHeightPx, scale = 2) {
         const isSvgWrapper = element.matches('.mermaid-wrapper, .mermaid-content') ||
             element.closest('.mermaid-wrapper, .mermaid-content');
         
+        // ECharts 包装器（包括转换后的图片）
+        const isEChartsWrapper = element.matches('.echarts-wrapper, .echarts-content, .echarts') ||
+            element.closest('.echarts-wrapper, .echarts-content, .echarts') ||
+            element.hasAttribute('data-echarts-chart') ||
+            element.hasAttribute('data-echarts-content') ||
+            element.hasAttribute('data-echarts-image') ||
+            (element.matches('img') && element.closest('.echarts-wrapper, .echarts-content'));
+        
         // 其他不应该被分割的元素
         const shouldAvoidBreak = element.matches('table, h1, h2, h3, h4, h5, h6, blockquote');
         
         // 文字元素：包含文本内容的块级或行内元素（排除已检测的特殊块）
-        const isTextElement = !isMathBlock && !isCodeBlock && !isSvg && !isSvgWrapper && !shouldAvoidBreak &&
+        const isTextElement = !isMathBlock && !isCodeBlock && !isSvg && !isSvgWrapper && !isEChartsWrapper && !shouldAvoidBreak &&
             (element.matches('p, li, span, strong, em, a, code:not(pre code), b, i, u, mark, del, ins') ||
             (element.textContent && element.textContent.trim().length > 0 && 
-             !element.matches('pre, table, svg, .mermaid-wrapper, .mermaid-content, .katex-display, .katex-block, h1, h2, h3, h4, h5, h6, blockquote')));
+             !element.matches('pre, table, svg, .mermaid-wrapper, .mermaid-content, .echarts-wrapper, .echarts-content, .katex-display, .katex-block, h1, h2, h3, h4, h5, h6, blockquote')));
         
         // 计算当前页剩余空间
         const currentPageBottom = currentPageTop + pageHeightPx;
@@ -83,8 +91,8 @@ function findPageBreaks(elements, containerRect, pageHeightPx, scale = 2) {
                         }
                     }
                 }
-            } else if (isSvg || isSvgWrapper || isCodeBlock || isMathBlock) {
-                // Mermaid 图表、代码块、数学公式块：只要可能被截断就提前分页
+            } else if (isSvg || isSvgWrapper || isEChartsWrapper || isCodeBlock || isMathBlock) {
+                // Mermaid 图表、ECharts 图表、代码块、数学公式块：只要可能被截断就提前分页
                 // 在元素之前分页，避免跨页截断
                 if (elementTop > currentPageTop) {
                     breaks.push(elementTop * scale);
@@ -92,9 +100,19 @@ function findPageBreaks(elements, containerRect, pageHeightPx, scale = 2) {
                 }
                 
                 // 如果元素仍然超过新页底部，继续分页（元素超过一页高度的情况）
-                while (elementBottom > currentPageTop + pageHeightPx) {
-                    breaks.push((currentPageTop + pageHeightPx) * scale);
-                    currentPageTop += pageHeightPx;
+                // 但要注意：对于 ECharts 图表，即使超过一页高度，也要保持完整，不能截断
+                if (isEChartsWrapper) {
+                    // ECharts 图表：如果超过一页，让它完整显示在新页，即使需要多页
+                    while (elementBottom > currentPageTop + pageHeightPx) {
+                        breaks.push((currentPageTop + pageHeightPx) * scale);
+                        currentPageTop += pageHeightPx;
+                    }
+                } else {
+                    // 其他元素：如果超过一页高度，继续分页
+                    while (elementBottom > currentPageTop + pageHeightPx) {
+                        breaks.push((currentPageTop + pageHeightPx) * scale);
+                        currentPageTop += pageHeightPx;
+                    }
                 }
             } else if (shouldAvoidBreak) {
                 // 不应该被分割的元素：在它之前分页
@@ -148,7 +166,7 @@ export async function exportPDF() {
         const previewClone = elements.preview.cloneNode(true);
         
         // 移除导出工具栏
-        const toolbars = previewClone.querySelectorAll('.mermaid-export-toolbar');
+        const toolbars = previewClone.querySelectorAll('.mermaid-export-toolbar, .echarts-export-toolbar');
         toolbars.forEach(toolbar => toolbar.remove());
         
         // 确保标题中的空格被保留
@@ -177,6 +195,48 @@ export async function exportPDF() {
                 heading.innerHTML = newHTML;
             }
         });
+        
+        // 处理 ECharts 图表：将 Canvas 转换为图片
+        const echartsWrappers = previewClone.querySelectorAll('.echarts-wrapper');
+        const originalEchartsWrappers = elements.preview.querySelectorAll('.echarts-wrapper');
+        
+        for (let i = 0; i < echartsWrappers.length; i++) {
+            const wrapper = echartsWrappers[i];
+            const originalWrapper = originalEchartsWrappers[i];
+            
+            if (!originalWrapper) continue;
+            
+            // 查找原始图表实例
+            const originalChart = originalWrapper._chart;
+            if (!originalChart) continue;
+            
+            // 获取图表容器的 Canvas
+            const chartDom = originalChart.getDom();
+            if (!chartDom) continue;
+            
+            const canvas = chartDom.querySelector('canvas');
+            if (!canvas) continue;
+            
+            // 将 Canvas 转换为图片
+            try {
+                const dataURL = canvas.toDataURL('image/png');
+                const img = document.createElement('img');
+                img.src = dataURL;
+                img.style.width = '100%';
+                img.style.height = 'auto';
+                img.style.display = 'block';
+                
+                // 替换 wrapper 内容
+                wrapper.innerHTML = '';
+                wrapper.className = 'echarts-wrapper';
+                const contentDiv = document.createElement('div');
+                contentDiv.className = 'echarts-content';
+                contentDiv.appendChild(img);
+                wrapper.appendChild(contentDiv);
+            } catch (error) {
+                console.error('ECharts 图表转换失败:', error);
+            }
+        }
         
         // 确保Mermaid SVG被正确包含并保持原始尺寸
         const mermaidWrappers = previewClone.querySelectorAll('.mermaid-wrapper');
@@ -299,9 +359,13 @@ export async function exportPDF() {
             #pdf-export-wrapper .mermaid-wrapper { margin: 24px 0; page-break-inside: avoid; break-inside: avoid; overflow: visible; }
             #pdf-export-wrapper .mermaid { page-break-inside: avoid; break-inside: avoid; overflow: visible; text-align: center; margin: 24px 0; padding: 0; background: #f6f8fa; border-radius: 8px; }
             #pdf-export-wrapper .mermaid-content { padding: 16px; overflow: visible; }
-            #pdf-export-wrapper .mermaid-content svg { display: block !important; max-width: 100% !important; width: auto !important; height: auto !important; visibility: visible !important; opacity: 1 !important; margin: 0 auto; }
-            #pdf-export-wrapper .mermaid-content svg * { visibility: visible !important; opacity: 1 !important; }
-            #pdf-export-wrapper .katex { font-size: 1.05em; color: #24292f; }
+        #pdf-export-wrapper .mermaid-content svg { display: block !important; max-width: 100% !important; width: auto !important; height: auto !important; visibility: visible !important; opacity: 1 !important; margin: 0 auto; }
+        #pdf-export-wrapper .mermaid-content svg * { visibility: visible !important; opacity: 1 !important; }
+        #pdf-export-wrapper .echarts-wrapper { margin: 24px 0; page-break-inside: avoid; break-inside: avoid; overflow: visible; }
+        #pdf-export-wrapper .echarts { page-break-inside: avoid; break-inside: avoid; overflow: visible; text-align: center; margin: 24px 0; padding: 0; background: #f6f8fa; border-radius: 8px; }
+        #pdf-export-wrapper .echarts-content { padding: 16px; overflow: visible; }
+        #pdf-export-wrapper .echarts-content img { display: block !important; max-width: 100% !important; width: auto !important; height: auto !important; visibility: visible !important; opacity: 1 !important; margin: 0 auto; }
+        #pdf-export-wrapper .katex { font-size: 1.05em; color: #24292f; }
             #pdf-export-wrapper .katex-display { margin: 1.5em 0 !important; padding: 1.2em; background: #f6f8fa; border-radius: 8px; border-left: 4px solid #0969da; overflow: visible; text-align: center; }
             #pdf-export-wrapper .hljs { background: #f6f8fa; color: #24292f; }
         `;
@@ -528,7 +592,7 @@ export async function exportPDF() {
                 return false;
             }
             
-            const isChildOfSpecialElement = el.closest('pre, .katex-display, .katex-block, .mermaid-wrapper, .mermaid-content, .mermaid');
+            const isChildOfSpecialElement = el.closest('pre, .katex-display, .katex-block, .mermaid-wrapper, .mermaid-content, .mermaid, .echarts-wrapper, .echarts-content, .echarts');
             if (isChildOfSpecialElement && isChildOfSpecialElement !== el) {
                 return false;
             }
@@ -604,12 +668,12 @@ export async function exportPDF() {
 /**
  * 准备 PDF 导出容器（公共函数）
  */
-function preparePDFContainer() {
+async function preparePDFContainer() {
     // 克隆预览区内容（深度克隆，包括SVG）
     const previewClone = elements.preview.cloneNode(true);
     
     // 移除导出工具栏
-    const toolbars = previewClone.querySelectorAll('.mermaid-export-toolbar');
+    const toolbars = previewClone.querySelectorAll('.mermaid-export-toolbar, .echarts-export-toolbar');
     toolbars.forEach(toolbar => toolbar.remove());
     
     // 确保标题中的空格被保留
@@ -638,6 +702,89 @@ function preparePDFContainer() {
             heading.innerHTML = newHTML;
         }
     });
+    
+    // 处理 ECharts 图表：将 Canvas 转换为图片
+    const echartsWrappers = previewClone.querySelectorAll('.echarts-wrapper');
+    const originalEchartsWrappers = elements.preview.querySelectorAll('.echarts-wrapper');
+    
+    for (let i = 0; i < echartsWrappers.length; i++) {
+        const wrapper = echartsWrappers[i];
+        const originalWrapper = originalEchartsWrappers[i];
+        
+        if (!originalWrapper) {
+            console.warn('找不到原始 ECharts wrapper，索引:', i);
+            continue;
+        }
+        
+        // 查找原始图表实例（优先从 wrapper 获取，如果没有则从父元素获取）
+        let originalChart = originalWrapper._chart;
+        if (!originalChart) {
+            // 尝试从父元素 .echarts 获取
+            const parentEcharts = originalWrapper.closest('.echarts');
+            if (parentEcharts && parentEcharts._chart) {
+                originalChart = parentEcharts._chart;
+            }
+        }
+        
+        if (!originalChart) {
+            console.warn('找不到 ECharts 图表实例，索引:', i);
+            continue;
+        }
+        
+        // 获取图表容器的 Canvas
+        let chartDom;
+        try {
+            chartDom = originalChart.getDom();
+        } catch (error) {
+            console.error('获取 ECharts DOM 失败:', error);
+            continue;
+        }
+        
+        if (!chartDom) {
+            console.warn('ECharts DOM 为空，索引:', i);
+            continue;
+        }
+        
+        const canvas = chartDom.querySelector('canvas');
+        if (!canvas) {
+            console.warn('找不到 ECharts Canvas，索引:', i);
+            continue;
+        }
+        
+        // 将 Canvas 转换为图片
+        try {
+            // 确保图表已完全渲染
+            originalChart.resize();
+            await new Promise(resolve => setTimeout(resolve, 100));
+            
+            const dataURL = canvas.toDataURL('image/png', 1.0);
+            if (!dataURL || dataURL === 'data:,') {
+                console.warn('Canvas 转换为图片失败，数据为空，索引:', i);
+                continue;
+            }
+            
+            const img = document.createElement('img');
+            img.src = dataURL;
+            img.style.width = '100%';
+            img.style.height = 'auto';
+            img.style.display = 'block';
+            img.style.maxWidth = '100%';
+            
+            // 替换 wrapper 内容
+            wrapper.innerHTML = '';
+            wrapper.className = 'echarts-wrapper';
+            wrapper.setAttribute('data-echarts-chart', 'true'); // 添加标记，方便识别
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'echarts-content';
+            contentDiv.style.padding = '16px';
+            contentDiv.setAttribute('data-echarts-content', 'true'); // 添加标记
+            img.setAttribute('data-echarts-image', 'true'); // 添加标记
+            contentDiv.appendChild(img);
+            wrapper.appendChild(contentDiv);
+        } catch (error) {
+            console.error('ECharts 图表转换失败，索引:', i, error);
+        }
+    }
     
     // 确保Mermaid SVG被正确包含并保持原始尺寸
     const mermaidWrappers = previewClone.querySelectorAll('.mermaid-wrapper');
@@ -762,6 +909,10 @@ function preparePDFContainer() {
         #pdf-export-wrapper .mermaid-content { padding: 16px; overflow: visible; }
         #pdf-export-wrapper .mermaid-content svg { display: block !important; max-width: 100% !important; width: auto !important; height: auto !important; visibility: visible !important; opacity: 1 !important; margin: 0 auto; }
         #pdf-export-wrapper .mermaid-content svg * { visibility: visible !important; opacity: 1 !important; }
+        #pdf-export-wrapper .echarts-wrapper { margin: 24px 0; page-break-inside: avoid; break-inside: avoid; overflow: visible; }
+        #pdf-export-wrapper .echarts { page-break-inside: avoid; break-inside: avoid; overflow: visible; text-align: center; margin: 24px 0; padding: 0; background: #f6f8fa; border-radius: 8px; }
+        #pdf-export-wrapper .echarts-content { padding: 16px; overflow: visible; }
+        #pdf-export-wrapper .echarts-content img { display: block !important; max-width: 100% !important; width: auto !important; height: auto !important; visibility: visible !important; opacity: 1 !important; margin: 0 auto; }
         #pdf-export-wrapper .katex { font-size: 1.05em; color: #24292f; }
         #pdf-export-wrapper .katex-display { margin: 1.5em 0 !important; padding: 1.2em; background: #f6f8fa; border-radius: 8px; border-left: 4px solid #0969da; overflow: visible; text-align: center; }
         #pdf-export-wrapper .hljs { background: #f6f8fa; color: #24292f; }
@@ -837,7 +988,7 @@ export async function exportPDFDefault() {
     setStatus(t('messages.generatingPdfDefault'));
     
     try {
-        const { pdfContainer, contentWrapper } = preparePDFContainer();
+        const { pdfContainer, contentWrapper } = await preparePDFContainer();
         
         // 等待内容渲染
         await waitForContentRender(pdfContainer);
@@ -1014,7 +1165,7 @@ export async function exportPDFFullPage() {
     setStatus(t('messages.generatingPdfFullPage'));
     
     try {
-        const { pdfContainer, contentWrapper } = preparePDFContainer();
+        const { pdfContainer, contentWrapper } = await preparePDFContainer();
         
         // 等待内容渲染
         await waitForContentRender(pdfContainer);

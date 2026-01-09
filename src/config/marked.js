@@ -9,13 +9,18 @@ import { escapeHtml, generateHeadingId } from '../core/utils.js';
 // 创建自定义渲染器
 const renderer = new marked.Renderer();
 
-// 自定义代码块渲染 - 处理 Mermaid
+// 自定义代码块渲染 - 处理 Mermaid 和 ECharts
 renderer.code = function(code, language) {
     const lang = language || '';
     
     // 检测 Mermaid 代码块
     if (lang === 'mermaid' || lang === 'mmd') {
         return `<div class="mermaid">${code}</div>`;
+    }
+    
+    // 检测 ECharts 代码块
+    if (lang === 'echarts') {
+        return `<div class="echarts" data-echarts-code="${escapeHtml(code)}"></div>`;
     }
     
     // 其他代码使用 highlight.js 高亮

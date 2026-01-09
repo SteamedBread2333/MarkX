@@ -11,6 +11,7 @@
 @import './preview.css';
 @import './markdown.css';
 @import './mermaid.css';
+@import './echarts.css';
 @import './katex.css';
 @import './components.css';
 @import './statusbar.css';

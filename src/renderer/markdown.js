@@ -9,6 +9,7 @@ import { escapeHtml } from '../core/utils.js';
 import { setStatus, updateStats } from '../core/ui-utils.js';
 import { getEditorContent } from '../editor/ace-editor.js';
 import { renderMermaidCharts } from './mermaid.js';
+import { renderEChartsCharts } from './echarts.js';
 import { t } from '../core/i18n.js';
 
 /**
@@ -83,6 +84,9 @@ export async function renderMarkdown() {
         
         // 渲染 Mermaid 图表
         await renderMermaidCharts();
+        
+        // 渲染 ECharts 图表
+        await renderEChartsCharts();
         
         // 更新统计信息
         updateStats(markdown);

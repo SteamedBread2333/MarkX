@@ -1,0 +1,146 @@
+/* ==================== ECharts 图表样式 ==================== */
+
+/* ECharts 图表容器 */
+.echarts {
+    text-align: center;
+    margin: 24px 0;
+    padding: 0;
+    background: var(--bg-secondary);
+    border-radius: 8px;
+    position: relative;
+    min-height: 400px;
+}
+
+/* ECharts 包装器 */
+.echarts-wrapper {
+    position: relative !important;
+    width: 100%;
+    display: block;
+}
+
+/* ECharts 内容区 */
+.echarts-content {
+    padding: 16px;
+    position: relative;
+    min-height: 400px;
+}
+
+.echarts-content > div {
+    width: 100% !important;
+    height: 400px !important;
+}
+
+/* ECharts 导出工具栏 */
+.echarts-export-toolbar {
+    position: absolute !important;
+    top: 8px !important;
+    right: 8px !important;
+    bottom: auto !important;
+    left: auto !important;
+    display: flex !important;
+    flex-direction: row !important;
+    gap: var(--spacing-xs);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity var(--transition-fast);
+    z-index: 100 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: none !important;
+    background: transparent !important;
+    justify-content: flex-end !important;
+    align-items: flex-start !important;
+    width: auto !important;
+    height: auto !important;
+}
+
+.echarts-wrapper:hover .echarts-export-toolbar,
+.echarts-export-toolbar:hover {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+/* ECharts 导出按钮 */
+.echarts-export-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.echarts-export-btn:hover {
+    background: var(--bg-hover);
+    border-color: var(--border-hover);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.echarts-export-btn:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.echarts-export-btn svg {
+    width: 16px;
+    height: 16px;
+}
+
+/* ECharts 错误提示 */
+.echarts-error {
+    padding: 24px;
+    text-align: center;
+    color: var(--text-secondary);
+    background: var(--bg-secondary);
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+}
+
+.echarts-error-title {
+    font-weight: 600;
+    font-size: 16px;
+    margin-bottom: 8px;
+    color: var(--text-primary);
+}
+
+.echarts-error pre {
+    margin-top: 16px;
+    padding: 12px;
+    background: var(--bg-primary);
+    border-radius: 4px;
+    text-align: left;
+    overflow-x: auto;
+    font-size: 12px;
+}
+
+.echarts-error code {
+    font-family: var(--font-mono);
+    color: var(--text-primary);
+}
+
+/* 响应式调整 */
+@media (max-width: 768px) {
+    .echarts {
+        margin: 16px 0;
+    }
+    
+    .echarts-content {
+        padding: 12px;
+    }
+    
+    .echarts-content > div {
+        height: 300px !important;
+    }
+    
+    .echarts {
+        min-height: 300px;
+    }
+}
