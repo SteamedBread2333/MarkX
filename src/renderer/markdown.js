@@ -19,45 +19,13 @@ export async function renderMarkdown() {
     let markdown = getEditorContent();
     
     try {
-        // 预处理：保护数学公式不被 Markdown 解析器破坏
-        const mathBlocks = [];
-        let processedMarkdown = markdown;
-        
-        // 1. 先提取并保护块级公式 $$...$$（包括多行）
-        processedMarkdown = processedMarkdown.replace(/\$\$([\s\S]+?)\$\$/g, (match, formula) => {
-            const index = mathBlocks.length;
-            mathBlocks.push({ type: 'display', formula: formula.trim() });
-            return `MATH_BLOCK_PLACEHOLDER_${index}`;
-        });
-        
-        // 2. 提取并保护行内公式 $...$（单行，不包含换行）
-        processedMarkdown = processedMarkdown.replace(/\$([^\$\n]+?)\$/g, (match, formula) => {
-            const index = mathBlocks.length;
-            mathBlocks.push({ type: 'inline', formula: formula.trim() });
-            return `MATH_INLINE_PLACEHOLDER_${index}`;
-        });
-        
         // 使用 Marked 解析 Markdown
-        let html = marked.parse(processedMarkdown);
-        
-        // 还原数学公式占位符（在 DOMPurify 之前）
-        mathBlocks.forEach((mathBlock, index) => {
-            const placeholder = mathBlock.type === 'display' 
-                ? `MATH_BLOCK_PLACEHOLDER_${index}`
-                : `MATH_INLINE_PLACEHOLDER_${index}`;
-            
-            if (mathBlock.type === 'display') {
-                // 块级公式用 div 包裹，确保独立成行
-                html = html.replace(placeholder, `<div class="katex-block">$$${mathBlock.formula}$$</div>`);
-            } else {
-                // 行内公式直接替换
-                html = html.replace(placeholder, `$${mathBlock.formula}$`);
-            }
-        });
+        // 数学公式通过 ```katex 代码块处理，在 marked.js 的 renderer.code 中实现
+        let html = marked.parse(markdown);
         
         // 使用 DOMPurify 清理 HTML（防止 XSS）
         html = DOMPurify.sanitize(html, {
-            ADD_TAGS: ['iframe', 'div'], 
+            ADD_TAGS: ['iframe', 'div', 'span'], 
             ADD_ATTR: ['allow', 'allowfullscreen', 'frameborder', 'scrolling', 'class'],
         });
         
@@ -65,17 +33,43 @@ export async function renderMarkdown() {
         elements.preview.innerHTML = html;
         
         // 渲染数学公式 (KaTeX)
-        if (window.renderMathInElement) {
+        // 只渲染 .katex-block 和 .katex-inline 容器中的公式
+        if (window.katex) {
             try {
-                renderMathInElement(elements.preview, {
-                    delimiters: [
-                        {left: '$$', right: '$$', display: true},   // 块级公式
-                        {left: '$', right: '$', display: false},    // 行内公式
-                        {left: '\\[', right: '\\]', display: true}, // 备用块级
-                        {left: '\\(', right: '\\)', display: false} // 备用行内
-                    ],
-                    throwOnError: false,
-                    errorColor: '#cc0000'
+                // 渲染块级公式
+                const mathBlocks = elements.preview.querySelectorAll('.katex-block');
+                mathBlocks.forEach(block => {
+                    const formula = block.textContent.trim();
+                    if (formula) {
+                        try {
+                            window.katex.render(formula, block, {
+                                displayMode: true,
+                                throwOnError: false,
+                                errorColor: '#cc0000'
+                            });
+                        } catch (error) {
+                            console.warn('KaTeX 渲染失败:', error);
+                            block.innerHTML = `<span class="katex-error">${escapeHtml(formula)}</span>`;
+                        }
+                    }
+                });
+                
+                // 渲染行内公式
+                const mathInlines = elements.preview.querySelectorAll('.katex-inline');
+                mathInlines.forEach(inline => {
+                    const formula = inline.textContent.trim();
+                    if (formula) {
+                        try {
+                            window.katex.render(formula, inline, {
+                                displayMode: false,
+                                throwOnError: false,
+                                errorColor: '#cc0000'
+                            });
+                        } catch (error) {
+                            console.warn('KaTeX 渲染失败:', error);
+                            inline.innerHTML = `<span class="katex-error">${escapeHtml(formula)}</span>`;
+                        }
+                    }
                 });
             } catch (error) {
                 console.warn('KaTeX 渲染失败:', error);

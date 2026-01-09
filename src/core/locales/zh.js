@@ -92,10 +92,19 @@ graph TD
 
 点击工具栏的「公式」按钮快速插入模板！
 
-**行内公式**：质能方程 $E = mc^2$，勾股定理 $a^2 + b^2 = c^2$
+**行内公式**（使用 \`$...$\`）：
 
-**块级公式**：
+\`\`\`katex
+$E = mc^2$
+\`\`\`
 
+\`\`\`katex
+$a^2 + b^2 = c^2$
+\`\`\`
+
+**块级公式**（使用 \`$$...$$\`）：
+
+\`\`\`katex
 $$
 x = \\frac{-b \\pm \\sqrt{b^2 - 4ac}}{2a}
 $$
@@ -103,6 +112,17 @@ $$
 $$
 \\sum_{i=1}^{n} i = \\frac{n(n+1)}{2}
 $$
+\`\`\`
+
+**混合使用**（在同一个 \` \`\`\`katex \` 代码块中混合行内和块级公式）：
+
+\`\`\`katex
+$E = mc^2$ 是质能方程。
+
+$$
+x = \\frac{-b \\pm \\sqrt{b^2 - 4ac}}{2a}
+$$
+\`\`\`
 
 ---
 
@@ -240,8 +260,8 @@ $$
                         'mermaid-pie': '饼图',
                         'mermaid-gitgraph': 'Git 分支图',
                         'mermaid-er': 'ER 图（实体关系图）',
-                        'math-inline': '行内公式（$...$）',
-                        'math-block': '块级公式（$$...$$）',
+                        'math-inline': '行内公式（```katex）',
+                        'math-block': '块级公式（```katex）',
                         'math-fraction': '分数',
                         'math-sqrt': '平方根',
                         'math-sum': '求和符号',
@@ -553,14 +573,14 @@ $$
             state: '状态图'
         },
         mathTypes: {
-            inline: '行内公式 $x$',
-            block: '块级公式 $$x$$',
-            fraction: '分数 $\\frac{a}{b}$',
-            sqrt: '根号 $\\sqrt{x}$',
-            sum: '求和 $\\sum$',
-            integral: '积分 $\\int$',
-            limit: '极限 $\\lim$',
-            matrix: '矩阵'
+            inline: '行内公式 (```katex)',
+            block: '块级公式 (```katex)',
+            fraction: '分数 (```katex)',
+            sqrt: '根号 (```katex)',
+            sum: '求和 (```katex)',
+            integral: '积分 (```katex)',
+            limit: '极限 (```katex)',
+            matrix: '矩阵 (```katex)'
         }
     },
     messages: {

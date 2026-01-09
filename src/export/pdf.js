@@ -33,9 +33,9 @@ function findPageBreaks(elements, containerRect, pageHeightPx, scale = 2) {
         // 判断元素类型（按优先级顺序检测）
         // 先检测特殊块，避免被误判为文字元素
         
-        // 数学块：检测 .katex-block（占位符）、.katex-display（KaTeX 渲染后），以及包含 .katex-display 的父元素
-        const isMathBlock = element.matches('.katex-display, .katex-block') || 
-            element.closest('.katex-display, .katex-block') ||
+        // 数学块：检测 .katex-block（块级公式）、.katex-inline（行内公式）、.katex-display（KaTeX 渲染后）
+        const isMathBlock = element.matches('.katex-display, .katex-block, .katex-inline') || 
+            element.closest('.katex-display, .katex-block, .katex-inline') ||
             (element.classList && element.classList.contains('katex') && element.querySelector('.katex-display'));
         
         // 代码块（使用 closest 确保子元素也能被识别）
@@ -61,7 +61,7 @@ function findPageBreaks(elements, containerRect, pageHeightPx, scale = 2) {
         const isTextElement = !isMathBlock && !isCodeBlock && !isSvg && !isSvgWrapper && !isEChartsWrapper && !shouldAvoidBreak &&
             (element.matches('p, li, span, strong, em, a, code:not(pre code), b, i, u, mark, del, ins') ||
             (element.textContent && element.textContent.trim().length > 0 && 
-             !element.matches('pre, table, svg, .mermaid-wrapper, .mermaid-content, .echarts-wrapper, .echarts-content, .katex-display, .katex-block, h1, h2, h3, h4, h5, h6, blockquote')));
+             !element.matches('pre, table, svg, .mermaid-wrapper, .mermaid-content, .echarts-wrapper, .echarts-content, .katex-display, .katex-block, .katex-inline, h1, h2, h3, h4, h5, h6, blockquote')));
         
         // 计算当前页剩余空间
         const currentPageBottom = currentPageTop + pageHeightPx;
@@ -592,7 +592,7 @@ export async function exportPDF() {
                 return false;
             }
             
-            const isChildOfSpecialElement = el.closest('pre, .katex-display, .katex-block, .mermaid-wrapper, .mermaid-content, .mermaid, .echarts-wrapper, .echarts-content, .echarts');
+            const isChildOfSpecialElement = el.closest('pre, .katex-display, .katex-block, .katex-inline, .mermaid-wrapper, .mermaid-content, .mermaid, .echarts-wrapper, .echarts-content, .echarts');
             if (isChildOfSpecialElement && isChildOfSpecialElement !== el) {
                 return false;
             }

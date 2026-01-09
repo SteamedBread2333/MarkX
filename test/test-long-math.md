@@ -11,6 +11,7 @@
 
 ## 线性代数公式块测试
 
+```katex
 $$
 \begin{aligned}
 \mathbf{A} \mathbf{x} &= \mathbf{b} \\
@@ -59,9 +60,11 @@ y_1 & y_2 & y_3
 \end{bmatrix}
 \end{aligned}
 $$
+```
 
 ## 微积分公式块测试
 
+```katex
 $$
 \begin{aligned}
 \frac{d}{dx}[f(x) + g(x)] &= f'(x) + g'(x) \\
@@ -98,9 +101,11 @@ F_x & F_y & F_z
 \end{vmatrix}
 \end{aligned}
 $$
+```
 
 ## 概率论与统计学公式块测试
 
+```katex
 $$
 \begin{aligned}
 P(A \cup B) &= P(A) + P(B) - P(A \cap B) \\
@@ -143,9 +148,11 @@ p\text{-value} &= P(|Z| \geq |z_{\text{test}}|) \\
 \text{Reject } H_0 \text{ if } p\text{-value} < \alpha
 \end{aligned}
 $$
+```
 
 ## 复变函数公式块测试
 
+```katex
 $$
 \begin{aligned}
 z &= x + iy = r(\cos \theta + i \sin \theta) = re^{i\theta} \\
@@ -176,9 +183,11 @@ f(z) &= \sum_{n=-\infty}^{\infty} a_n (z - z_0)^n \\
 a_n &= \frac{1}{2\pi i} \oint_C \frac{f(\zeta)}{(\zeta - z_0)^{n+1}} \, d\zeta
 \end{aligned}
 $$
+```
 
 ## 偏微分方程公式块测试
 
+```katex
 $$
 \begin{aligned}
 \frac{\partial u}{\partial t} &= k \frac{\partial^2 u}{\partial x^2} \quad \text{(Heat equation)} \\
@@ -203,6 +212,7 @@ a_n &= \frac{1}{\pi R^n} \int_0^{2\pi} f(\theta) \cos(n\theta) \, d\theta \\
 b_n &= \frac{1}{\pi R^n} \int_0^{2\pi} f(\theta) \sin(n\theta) \, d\theta
 \end{aligned}
 $$
+```
 
 ## 测试总结
 

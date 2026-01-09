@@ -55,8 +55,8 @@ Powerful math formula rendering engine:
 
 <div align="left">
 
-- ✅ **Inline Formulas** - `$E=mc^2$` for seamless integration
-- ✅ **Block Formulas** - `$$\int_0^\infty$$` for complex equations
+- ✅ **Math Formulas** - Use ` ```katex ` code blocks for formulas
+- ✅ **Inline & Block** - Automatically detects formula type based on length
 - ✅ **Rich Symbols** - Integrals, summations, matrices, and more
 - ✅ **Real-time Rendering** - Display formulas as you type
 - ✅ **LaTeX Syntax** - Standard mathematical typesetting
@@ -233,21 +233,41 @@ Use the `echarts` code block to create interactive charts. The code supports bot
 
 **Method 2: Manual Input**
 
-**Inline Formula** (wrap with single `$`):
-```markdown
-Mass-energy equation: $E = mc^2$, Pythagorean theorem: $a^2 + b^2 = c^2$
+**Math Formulas** (use ` ```katex ` code blocks):
+````markdown
+The ` ```katex ` code block is a wrapper. All math syntax (`$...$` for inline, `$$...$$` for block) goes inside it.
+
+Inline formula using `$...$`:
+
+```katex
+$E = mc^2$
 ```
 
-**Block Formula** (wrap with double `$$`, standalone line):
-```markdown
-Quadratic formula:
+Block formula using `$$...$$`:
 
+```katex
+$$
+x = \frac{-b \pm \sqrt{b^2 - 4ac}}{2a}
+$$
+```
+
+Multiple formulas in one block:
+
+```katex
 $$
 x = \frac{-b \pm \sqrt{b^2 - 4ac}}{2a}
 $$
 
+$E = mc^2$ is the mass-energy equivalence.
+
+$$
+\sum_{i=1}^{n} i = \frac{n(n+1)}{2}
+$$
+```
+
 Matrix example:
 
+```katex
 $$
 \begin{bmatrix}
 a & b \\
@@ -255,20 +275,62 @@ c & d
 \end{bmatrix}
 $$
 ```
+````
 
 **💡 Important Notes**:
-- Block formula `$$` symbols must be on separate lines
-- Formula content can span multiple lines
-- Ensure blank lines before and after for correct rendering
+- Use ` ```katex ` code blocks as a wrapper for math formulas
+- Inside ` ```katex ` blocks, use standard LaTeX syntax:
+  - `$...$` for inline formulas
+  - `$$...$$` for block formulas
+- Only top-level ` ```katex ` blocks are parsed (nested ones in code blocks are ignored)
+- You can mix inline and block formulas in the same ` ```katex ` block
 
 **Common Examples**:
-```markdown
-- Fraction: $\frac{a}{b}$
-- Root: $\sqrt{x}$ or $\sqrt[3]{x}$
-- Sum: $\sum_{i=1}^{n} i$
-- Integral: $\int_{0}^{\infty} e^{-x}dx$
-- Limit: $\lim_{x \to \infty} \frac{1}{x} = 0$
+````markdown
+- Inline fraction:
+
+```katex
+$\frac{a}{b}$
 ```
+
+- Block root:
+
+```katex
+$$
+\sqrt{x}
+$$
+```
+
+or
+
+```katex
+$$
+\sqrt[3]{x}
+$$
+```
+
+- Inline sum:
+
+```katex
+$\sum_{i=1}^{n} i$
+```
+
+- Block integral:
+
+```katex
+$$
+\int_{0}^{\infty} e^{-x}dx
+$$
+```
+
+- Block limit:
+
+```katex
+$$
+\lim_{x \to \infty} \frac{1}{x} = 0
+$$
+```
+````
 
 ---
 

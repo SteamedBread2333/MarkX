@@ -106,14 +106,15 @@ stateDiagram-v2
 
 /**
  * 数学公式模板
+ * 使用 ```katex 代码块格式，内部使用 $...$ (行内) 和 $$...$$ (块级) 格式
  */
 export const mathTemplates = {
-    inline: ' $x$ ',
-    block: '\n$$\nx\n$$\n\n',
-    fraction: '$\\frac{a}{b}$ ',
-    sqrt: '$\\sqrt{x}$ ',
-    sum: '$\\sum_{i=1}^{n} a_i$ ',
-    integral: '$\\int_{a}^{b} f(x)dx$ ',
-    limit: '$\\lim_{x \\to \\infty} f(x)$ ',
-    matrix: '\n$$\n\\begin{bmatrix}\na & b \\\\\nc & d\n\\end{bmatrix}\n$$\n\n'
+    inline: '```katex\n$x$\n```\n',
+    block: '```katex\n$$\nx\n$$\n```\n\n',
+    fraction: '```katex\n$\\frac{a}{b}$\n```\n',
+    sqrt: '```katex\n$\\sqrt{x}$\n```\n',
+    sum: '```katex\n$\\sum_{i=1}^{n} a_i$\n```\n',
+    integral: '```katex\n$\\int_{a}^{b} f(x)dx$\n```\n',
+    limit: '```katex\n$\\lim_{x \\to \\infty} f(x)$\n```\n',
+    matrix: '```katex\n$$\n\\begin{bmatrix}\na & b \\\\\nc & d\n\\end{bmatrix}\n$$\n```\n\n'
 };

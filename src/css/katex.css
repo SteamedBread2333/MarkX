@@ -6,6 +6,13 @@
     color: var(--text-primary);
 }
 
+/* 行内公式容器 */
+.katex-inline {
+    display: inline-block;
+    margin: 0 0.2em;
+    vertical-align: baseline;
+}
+
 /* 块级公式容器 */
 .katex-block {
     margin: 1.5em 0;
