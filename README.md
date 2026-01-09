@@ -285,23 +285,9 @@ $$
 - Only top-level ` ```katex ` blocks are parsed (nested ones in code blocks are ignored)
 - You can mix inline and block formulas in the same ` ```katex ` block
 
-**Common Examples**:
+**More Examples**:
 ````markdown
-- Inline fraction:
-
-```katex
-$\frac{a}{b}$
-```
-
-- Block root:
-
-```katex
-$$
-\sqrt{x}
-$$
-```
-
-or
+- Nth root:
 
 ```katex
 $$
@@ -309,13 +295,7 @@ $$
 $$
 ```
 
-- Inline sum:
-
-```katex
-$\sum_{i=1}^{n} i$
-```
-
-- Block integral:
+- Integral:
 
 ```katex
 $$
@@ -323,7 +303,7 @@ $$
 $$
 ```
 
-- Block limit:
+- Limit:
 
 ```katex
 $$
