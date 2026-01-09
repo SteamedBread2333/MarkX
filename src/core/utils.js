@@ -149,10 +149,49 @@ export function processMathInHTML(html) {
     
     // 首先，处理被 <p> 标签包裹的公式块
     // 查找形如 <p>$$...$$</p> 的模式，并临时移除 <p> 标签以便后续匹配
+    // 注意：这必须在提取HTML标签之前进行，否则<p>标签已经被占位符替换了
     processedHTML = processedHTML.replace(/<p>\s*\$\$([\s\S]*?)\$\$\s*<\/p>/gi, (match, formula) => {
         // 清理公式中的 <br> 标签
         const cleanedFormula = formula.replace(/<br\s*\/?>/gi, '\n');
         return `$$${cleanedFormula}$$`;
+    });
+    
+    // 提取并保护所有HTML标签（包括自闭合标签和成对标签），避免解析HTML内的$和$$
+    // 这样可以确保HTML标签内的$符号不会被误匹配为数学公式
+    // 注意：这必须在处理被<p>标签包裹的公式块之后进行
+    const htmlTagPlaceholders = [];
+    let htmlTagIndex = 0;
+    
+    // 匹配所有HTML标签（包括自闭合标签和成对标签）
+    // 这个正则会匹配：<tag>...</tag>、<tag/>、<tag />、<tag attr="value">等
+    const htmlTagRegex = /<[^>]+>/g;
+    let htmlTagMatch;
+    const htmlTagMatches = [];
+    
+    while ((htmlTagMatch = htmlTagRegex.exec(processedHTML)) !== null) {
+        // 跳过代码块占位符（它们可能包含<和>）
+        if (htmlTagMatch[0].includes('<!--MARKX_CODE_')) {
+            continue;
+        }
+        
+        htmlTagMatches.push({
+            start: htmlTagMatch.index,
+            end: htmlTagMatch.index + htmlTagMatch[0].length,
+            content: htmlTagMatch[0]
+        });
+    }
+    
+    // 从后往前替换HTML标签为占位符
+    htmlTagMatches.sort((a, b) => b.start - a.start);
+    htmlTagMatches.forEach(tag => {
+        const placeholder = `<!--MARKX_HTML_TAG_${htmlTagIndex++}-->`;
+        htmlTagPlaceholders.push({
+            placeholder: placeholder,
+            content: tag.content
+        });
+        processedHTML = processedHTML.substring(0, tag.start) + 
+                        placeholder + 
+                        processedHTML.substring(tag.end);
     });
     
     // 现在匹配所有块级公式（包括处理后的和原本就没有 <p> 标签的）
@@ -166,6 +205,11 @@ export function processMathInHTML(html) {
     while ((match = blockMathRegex.exec(processedHTML)) !== null) {
         // 跳过代码块占位符
         if (match[0].includes('<!--MARKX_CODE_')) {
+            continue;
+        }
+        
+        // 跳过HTML标签占位符（HTML标签内的$不应该被解析）
+        if (match[0].includes('<!--MARKX_HTML_TAG_')) {
             continue;
         }
         
@@ -286,6 +330,11 @@ export function processMathInHTML(html) {
     while ((match = inlineMathRegex.exec(processedHTML)) !== null) {
         // 跳过代码块占位符
         if (match[0].includes('<!--MARKX_CODE_')) {
+            continue;
+        }
+        
+        // 跳过HTML标签占位符（HTML标签内的$不应该被解析）
+        if (match[0].includes('<!--MARKX_HTML_TAG_')) {
             continue;
         }
         
@@ -459,6 +508,11 @@ export function processMathInHTML(html) {
     
     // 恢复代码块
     codeBlocks.forEach(item => {
+        processedHTML = processedHTML.split(item.placeholder).join(item.content);
+    });
+    
+    // 恢复HTML标签占位符（最后恢复，确保所有处理都已完成）
+    htmlTagPlaceholders.forEach(item => {
         processedHTML = processedHTML.split(item.placeholder).join(item.content);
     });
     
