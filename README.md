@@ -14,53 +14,55 @@
 
 ## ✨ Core Features
 
-<table>
-<tr>
-<td width="33%">
-
 ### 📊 Mermaid Diagrams
 
-Perfect integration with Mermaid.js:
+Perfect integration with Mermaid.js for professional diagramming:
 
-- ✅ **Flowcharts** - Visualize processes
-- ✅ **Sequence Diagrams** - Show interactions
-- ✅ **Gantt Charts** - Project management
-- ✅ **Class Diagrams** - UML relationships
-- ✅ **State Diagrams** - State machines
-- ✅ **Export Tools** - SVG/PNG export & fullscreen
+<div align="left">
 
-</td>
-<td width="33%">
+- ✅ **Flowcharts** - Visualize business processes and workflows
+- ✅ **Sequence Diagrams** - Show interaction sequences between components
+- ✅ **Gantt Charts** - Project progress management and timeline visualization
+- ✅ **Class Diagrams** - UML class relationship diagrams
+- ✅ **State Diagrams** - State machine visualization
+- ✅ **Export Tools** - One-click SVG/PNG export & fullscreen viewer with zoom & drag
+
+</div>
+
+---
 
 ### 📈 ECharts Charts
 
-Powerful data visualization with ECharts:
+Powerful data visualization with Apache ECharts:
 
-- ✅ **Bar Charts** - Column & bar visualizations
-- ✅ **Line Charts** - Trend analysis
-- ✅ **Pie Charts** - Proportional data
-- ✅ **Scatter Plots** - Correlation analysis
-- ✅ **Custom Charts** - Full ECharts API support
-- ✅ **JavaScript Syntax** - Code highlighting & autocomplete
-- ✅ **Export Support** - HTML/PDF export with images
+<div align="left">
 
-</td>
-<td width="33%">
+- ✅ **Bar Charts** - Column & bar visualizations for data comparison
+- ✅ **Line Charts** - Trend analysis and time series data
+- ✅ **Pie Charts** - Proportional data and distribution visualization
+- ✅ **Scatter Plots** - Correlation analysis and multi-dimensional data
+- ✅ **Custom Charts** - Full ECharts API support for any chart type
+- ✅ **JavaScript Syntax** - Code highlighting & autocomplete for better editing
+- ✅ **Export Support** - SVG/PNG export & HTML/PDF export with embedded images
 
-### 🧮 KaTeX Math
+</div>
 
-Powerful math formula rendering:
+---
 
-- ✅ **Inline Formulas** - `$E=mc^2$` 
-- ✅ **Block Formulas** - `$$\int_0^\infty$$`
-- ✅ **Rich Symbols** - Integrals, summations, matrices
-- ✅ **Real-time Rendering** - Display as you type
-- ✅ **LaTeX Syntax** - Standard typesetting
-- ✅ **Quick Insert** - Built-in templates
+### 🧮 KaTeX Math Formulas
 
-</td>
-</tr>
-</table>
+Powerful math formula rendering engine:
+
+<div align="left">
+
+- ✅ **Inline Formulas** - `$E=mc^2$` for seamless integration
+- ✅ **Block Formulas** - `$$\int_0^\infty$$` for complex equations
+- ✅ **Rich Symbols** - Integrals, summations, matrices, and more
+- ✅ **Real-time Rendering** - Display formulas as you type
+- ✅ **LaTeX Syntax** - Standard mathematical typesetting
+- ✅ **Quick Insert** - Built-in templates for common formulas
+
+</div>
 
 ### 🎯 More Features
 
