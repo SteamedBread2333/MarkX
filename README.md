@@ -1,5 +1,5 @@
 <div align="center">
-    <h3>Professional Markdown + Mermaid + KaTeX Editor</h3>
+    <h3>Professional Markdown + Mermaid + ECharts + KaTeX Editor</h3>
     <p>Modern · Ready-to-use · Powerful</p>
 </div>
 <div align="center">
@@ -16,32 +16,47 @@
 
 <table>
 <tr>
-<td width="50%">
+<td width="33%">
 
-### 📊 Mermaid Diagram Support
+### 📊 Mermaid Diagrams
 
-Perfect integration with Mermaid.js, supporting various professional diagrams:
+Perfect integration with Mermaid.js:
 
-- ✅ **Flowcharts** - Visualize business processes
-- ✅ **Sequence Diagrams** - Show interaction sequences
-- ✅ **Gantt Charts** - Project progress management
-- ✅ **Class Diagrams** - UML class relationship diagrams
-- ✅ **State Diagrams** - State machine visualization
-- ✅ **One-click Export** - Hover over any diagram to export as SVG (vector, scalable) or PNG (high-res 2x), plus fullscreen view with zoom & drag
+- ✅ **Flowcharts** - Visualize processes
+- ✅ **Sequence Diagrams** - Show interactions
+- ✅ **Gantt Charts** - Project management
+- ✅ **Class Diagrams** - UML relationships
+- ✅ **State Diagrams** - State machines
+- ✅ **Export Tools** - SVG/PNG export & fullscreen
 
 </td>
-<td width="50%">
+<td width="33%">
 
-### 🧮 KaTeX Math Formulas
+### 📈 ECharts Charts
 
-Powerful math formula rendering engine:
+Powerful data visualization with ECharts:
+
+- ✅ **Bar Charts** - Column & bar visualizations
+- ✅ **Line Charts** - Trend analysis
+- ✅ **Pie Charts** - Proportional data
+- ✅ **Scatter Plots** - Correlation analysis
+- ✅ **Custom Charts** - Full ECharts API support
+- ✅ **JavaScript Syntax** - Code highlighting & autocomplete
+- ✅ **Export Support** - HTML/PDF export with images
+
+</td>
+<td width="33%">
+
+### 🧮 KaTeX Math
+
+Powerful math formula rendering:
 
 - ✅ **Inline Formulas** - `$E=mc^2$` 
 - ✅ **Block Formulas** - `$$\int_0^\infty$$`
-- ✅ **Rich Symbols** - Integrals, summations, matrices, etc.
+- ✅ **Rich Symbols** - Integrals, summations, matrices
 - ✅ **Real-time Rendering** - Display as you type
-- ✅ **LaTeX Syntax** - Standard mathematical typesetting
-- ✅ **Quick Insert** - Built-in common templates
+- ✅ **LaTeX Syntax** - Standard typesetting
+- ✅ **Quick Insert** - Built-in templates
 
 </td>
 </tr>
@@ -163,6 +178,50 @@ graph TD
 
 ---
 
+#### 📈 Insert ECharts Charts
+
+**Method: Manual Input**
+
+Use the `echarts` code block to create interactive charts. The code supports both JSON format and JavaScript object literals:
+
+````markdown
+```echarts
+{
+  "title": {
+    "text": "Monthly Sales",
+    "left": "center"
+  },
+  "xAxis": {
+    "type": "category",
+    "data": ["Jan", "Feb", "Mar", "Apr", "May", "Jun"]
+  },
+  "yAxis": {
+    "type": "value"
+  },
+  "series": [{
+    "type": "bar",
+    "data": [120, 200, 150, 80, 70, 110]
+  }]
+}
+```
+````
+
+**💡 Features**:
+- **JavaScript Syntax Highlighting** - ECharts blocks use JavaScript syntax highlighting for better code editing
+- **JSON or JavaScript** - Supports both JSON format and JavaScript object literals
+- **Full ECharts API** - Complete support for all ECharts chart types and options
+- **Export Support** - Charts are automatically converted to images when exporting HTML/PDF
+- **Theme Support** - Automatically adapts to light/dark theme
+
+**Common Chart Types**:
+- Bar Charts (`"type": "bar"`)
+- Line Charts (`"type": "line"`)
+- Pie Charts (`"type": "pie"`)
+- Scatter Plots (`"type": "scatter"`)
+- And many more...
+
+---
+
 #### 🧮 Insert Math Formulas
 
 **Method 1: Using Toolbar**
@@ -262,6 +321,53 @@ function hello() {
 
 ---
 
+## 🎨 Diagram & Chart Examples
+
+### 📊 ECharts Examples
+
+#### Bar Chart
+````markdown
+```echarts
+{
+  "title": { "text": "Monthly Sales", "left": "center" },
+  "xAxis": { "type": "category", "data": ["Jan", "Feb", "Mar", "Apr", "May", "Jun"] },
+  "yAxis": { "type": "value" },
+  "series": [{ "type": "bar", "data": [120, 200, 150, 80, 70, 110] }]
+}
+```
+````
+
+#### Line Chart
+````markdown
+```echarts
+{
+  "title": { "text": "User Growth Trend", "left": "center" },
+  "xAxis": { "type": "category", "data": ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"] },
+  "yAxis": { "type": "value" },
+  "series": [{ "type": "line", "smooth": true, "data": [120, 132, 101, 134, 90, 230, 210] }]
+}
+```
+````
+
+#### Pie Chart
+````markdown
+```echarts
+{
+  "title": { "text": "Market Share", "left": "center" },
+  "series": [{
+    "type": "pie",
+    "data": [
+      { "value": 335, "name": "Product A" },
+      { "value": 310, "name": "Product B" },
+      { "value": 234, "name": "Product C" }
+    ]
+  }]
+}
+```
+````
+
+---
+
 ## 🎨 Mermaid Diagram Examples
 
 ### Flowchart
@@ -328,6 +434,8 @@ classDiagram
 ### Core Libraries
 - **[Marked.js](https://marked.js.org/)** `v11.1.1` - Markdown parsing
 - **[Mermaid.js](https://mermaid.js.org/)** `v10.6.1` - Diagram rendering
+- **[ECharts](https://echarts.apache.org/)** `v5.4.3` - Data visualization charts
+- **[KaTeX](https://katex.org/)** - Math formula rendering
 - **[DOMPurify](https://github.com/cure53/DOMPurify)** `v3.0.8` - XSS protection
 - **[Highlight.js](https://highlightjs.org/)** `v11.9.0` - Code highlighting
 
