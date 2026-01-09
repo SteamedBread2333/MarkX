@@ -10,7 +10,7 @@ import { t } from '../core/i18n.js';
 /**
  * 导出 HTML
  */
-export function exportHTML() {
+export async function exportHTML() {
     // 克隆预览区内容，避免修改原始 DOM
     const previewClone = elements.preview.cloneNode(true);
     
@@ -21,8 +21,88 @@ export function exportHTML() {
     });
     
     // 移除导出工具栏（导出的 HTML 不需要这些按钮）
-    const toolbars = previewClone.querySelectorAll('.mermaid-export-toolbar');
+    const toolbars = previewClone.querySelectorAll('.mermaid-export-toolbar, .echarts-export-toolbar');
     toolbars.forEach(toolbar => toolbar.remove());
+    
+    // 处理 ECharts 图表：将 Canvas 转换为图片
+    const echartsWrappers = previewClone.querySelectorAll('.echarts-wrapper');
+    const originalEchartsWrappers = elements.preview.querySelectorAll('.echarts-wrapper');
+    
+    for (let i = 0; i < echartsWrappers.length; i++) {
+        const wrapper = echartsWrappers[i];
+        const originalWrapper = originalEchartsWrappers[i];
+        
+        if (!originalWrapper) {
+            console.warn('找不到原始 ECharts wrapper，索引:', i);
+            continue;
+        }
+        
+        // 查找原始图表实例（优先从 wrapper 获取，如果没有则从父元素获取）
+        let originalChart = originalWrapper._chart;
+        if (!originalChart) {
+            // 尝试从父元素 .echarts 获取
+            const parentEcharts = originalWrapper.closest('.echarts');
+            if (parentEcharts && parentEcharts._chart) {
+                originalChart = parentEcharts._chart;
+            }
+        }
+        
+        if (!originalChart) {
+            console.warn('找不到 ECharts 图表实例，索引:', i);
+            continue;
+        }
+        
+        // 获取图表容器的 Canvas
+        let chartDom;
+        try {
+            chartDom = originalChart.getDom();
+        } catch (error) {
+            console.error('获取 ECharts DOM 失败:', error);
+            continue;
+        }
+        
+        if (!chartDom) {
+            console.warn('ECharts DOM 为空，索引:', i);
+            continue;
+        }
+        
+        const canvas = chartDom.querySelector('canvas');
+        if (!canvas) {
+            console.warn('找不到 ECharts Canvas，索引:', i);
+            continue;
+        }
+        
+        // 将 Canvas 转换为图片
+        try {
+            // 确保图表已完全渲染
+            originalChart.resize();
+            await new Promise(resolve => setTimeout(resolve, 100));
+            
+            const dataURL = canvas.toDataURL('image/png', 1.0);
+            if (!dataURL || dataURL === 'data:,') {
+                console.warn('Canvas 转换为图片失败，数据为空，索引:', i);
+                continue;
+            }
+            
+            const img = document.createElement('img');
+            img.src = dataURL;
+            img.style.width = '100%';
+            img.style.height = 'auto';
+            img.style.display = 'block';
+            img.style.maxWidth = '100%';
+            
+            // 替换 wrapper 内容
+            wrapper.innerHTML = '';
+            wrapper.className = 'echarts-wrapper';
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'echarts-content';
+            contentDiv.style.padding = '16px';
+            contentDiv.appendChild(img);
+            wrapper.appendChild(contentDiv);
+        } catch (error) {
+            console.error('ECharts 图表转换失败，索引:', i, error);
+        }
+    }
     
     const html = `<!DOCTYPE html>
 <html lang="zh-CN">
@@ -49,13 +129,16 @@ export function exportHTML() {
         .mermaid-wrapper { margin: 24px 0; }
         .mermaid-content { padding: 16px; }
         .mermaid-content svg { display: block; }
+        .echarts-wrapper { margin: 24px 0; }
+        .echarts-content { padding: 16px; }
+        .echarts-content img { display: block; width: 100%; height: auto; max-width: 100%; }
     </style>
 </head>
 <body>
     <div class="markdown-body">
         ${previewClone.innerHTML}
     </div>
-    <!-- 不需要 Mermaid 脚本，因为 SVG 已经渲染好了 -->
+    <!-- 不需要 Mermaid 和 ECharts 脚本，因为 SVG 和图片已经渲染好了 -->
 </body>
 </html>`;
     

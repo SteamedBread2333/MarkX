@@ -85,6 +85,10 @@ function checkIfInsideBlock(session, pos) {
                 // 提取语言：```language 或 ```language:title
                 const match = trimmedLine.match(/^```(\w+)/);
                 codeBlockLanguage = match ? match[1].toLowerCase() : null;
+                // echarts 块使用 JavaScript 语法高亮
+                if (codeBlockLanguage === 'echarts') {
+                    codeBlockLanguage = 'javascript';
+                }
             }
         } else if (trimmedLine.startsWith('~~~')) {
             if (inCodeBlock && codeBlockMarker === '~~~') {
@@ -104,6 +108,10 @@ function checkIfInsideBlock(session, pos) {
                 // 提取语言：~~~language
                 const match = trimmedLine.match(/^~~~(\w+)/);
                 codeBlockLanguage = match ? match[1].toLowerCase() : null;
+                // echarts 块使用 JavaScript 语法高亮
+                if (codeBlockLanguage === 'echarts') {
+                    codeBlockLanguage = 'javascript';
+                }
             }
         }
         
