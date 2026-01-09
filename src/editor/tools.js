@@ -171,69 +171,69 @@ stateDiagram-v2
 
 /**
  * 数学公式模板
- * 使用 ```katex 代码块格式，内部使用 $...$ (行内) 和 $$...$$ (块级) 格式
+ * 使用标准的 $...$ (行内) 和 $$...$$ (块级) 格式
  * 优化：使用更实用的默认值和更好的占位符
  */
 export const mathTemplates = {
     inline: {
-        template: '```katex\n$x$\n```\n',
-        selectStart: 9, // 选中 $x$ 中的 x
-        selectEnd: 10
+        template: '$x$',
+        selectStart: 1, // 选中 $x$ 中的 x
+        selectEnd: 2
     },
     block: {
-        template: '```katex\n$$\nx = y\n$$\n```\n\n',
-        selectStart: 15, // 选中 x = y 中的 x
-        selectEnd: 19
+        template: '$$\nx = y\n$$',
+        selectStart: 4, // 选中 x = y 中的 x
+        selectEnd: 8
     },
     fraction: {
-        template: '```katex\n$\\frac{1}{2}$\n```\n',
-        selectStart: 13, // 选中 \frac{1}{2} 中的 1
-        selectEnd: 14
+        template: '$\\frac{1}{2}$',
+        selectStart: 7, // 选中 \frac{1}{2} 中的 1
+        selectEnd: 8
     },
     sqrt: {
-        template: '```katex\n$\\sqrt{x}$\n```\n',
-        selectStart: 12, // 选中 \sqrt{x} 中的 x
-        selectEnd: 13
+        template: '$\\sqrt{x}$',
+        selectStart: 6, // 选中 \sqrt{x} 中的 x
+        selectEnd: 7
     },
     sum: {
-        template: '```katex\n$\\sum_{i=1}^{n} x_i$\n```\n',
-        selectStart: 7, // 选中整个公式（从 $ 开始）
-        selectEnd: 25
+        template: '$\\sum_{i=1}^{n} x_i$',
+        selectStart: 1, // 选中整个公式（从 $ 开始）
+        selectEnd: 19
     },
     integral: {
-        template: '```katex\n$\\int_{0}^{\\infty} f(x) dx$\n```\n',
-        selectStart: 7, // 选中整个公式（从 $ 开始）
-        selectEnd: 35
+        template: '$\\int_{0}^{\\infty} f(x) dx$',
+        selectStart: 1, // 选中整个公式（从 $ 开始）
+        selectEnd: 29
     },
     limit: {
-        template: '```katex\n$\\lim_{x \\to 0} \\frac{\\sin(x)}{x} = 1$\n```\n',
-        selectStart: 7, // 选中整个公式（从 $ 开始）
-        selectEnd: 45
+        template: '$\\lim_{x \\to 0} \\frac{\\sin(x)}{x} = 1$',
+        selectStart: 1, // 选中整个公式（从 $ 开始）
+        selectEnd: 39
     },
     matrix: {
-        template: '```katex\n$$\n\\begin{bmatrix}\n1 & 2 \\\\\n3 & 4\n\\end{bmatrix}\n$$\n```\n\n',
-        selectStart: 15, // 选中矩阵第一个元素 1
-        selectEnd: 16
+        template: '$$\n\\begin{bmatrix}\n1 & 2 \\\\\n3 & 4\n\\end{bmatrix}\n$$',
+        selectStart: 9, // 选中矩阵第一个元素 1
+        selectEnd: 10
     },
     // 新增常用公式
     equation: {
-        template: '```katex\n$$\n\\begin{align}\nx &= a + b \\\\\ny &= c \\cdot d\n\\end{align}\n$$\n```\n\n',
-        selectStart: 15, // 选中第一个等式的 x
-        selectEnd: 16
+        template: '$$\n\\begin{align}\nx &= a + b \\\\\ny &= c \\cdot d\n\\end{align}\n$$',
+        selectStart: 9, // 选中第一个等式的 x
+        selectEnd: 10
     },
     vector: {
-        template: '```katex\n$\\vec{v} = (x, y, z)$\n```\n',
-        selectStart: 7, // 选中整个公式（从 $ 开始）
-        selectEnd: 25
+        template: '$\\vec{v} = (x, y, z)$',
+        selectStart: 1, // 选中整个公式（从 $ 开始）
+        selectEnd: 19
     },
     derivative: {
-        template: '```katex\n$\\frac{d}{dx}f(x)$\n```\n',
-        selectStart: 17, // 选中 f(x) 中的 f
-        selectEnd: 18
+        template: '$\\frac{d}{dx}f(x)$',
+        selectStart: 11, // 选中 f(x) 中的 f
+        selectEnd: 12
     },
     partial: {
-        template: '```katex\n$\\frac{\\partial f}{\\partial x}$\n```\n',
-        selectStart: 21, // 选中 f
-        selectEnd: 22
+        template: '$\\frac{\\partial f}{\\partial x}$',
+        selectStart: 15, // 选中 f
+        selectEnd: 16
     }
 };

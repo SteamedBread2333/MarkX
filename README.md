@@ -55,7 +55,7 @@ Powerful math formula rendering engine:
 
 <div align="left">
 
-- ✅ **Math Formulas** - Use ` ```katex ` code blocks for formulas
+- ✅ **Math Formulas** - Use `$...$` for inline and `$$...$$` for block formulas
 - ✅ **Inline & Block** - Automatically detects formula type based on length
 - ✅ **Rich Symbols** - Integrals, summations, matrices, and more
 - ✅ **Real-time Rendering** - Display formulas as you type
@@ -233,27 +233,20 @@ Use the `echarts` code block to create interactive charts. The code supports bot
 
 **Method 2: Manual Input**
 
-**Math Formulas** (use ` ```katex ` code blocks):
+**Math Formulas** (use `$...$` for inline and `$$...$$` for block):
 ````markdown
-The ` ```katex ` code block is a wrapper. All math syntax (`$...$` for inline, `$$...$$` for block) goes inside it.
-
 Inline formula using `$...$`:
 
-```katex
 $E = mc^2$
-```
 
 Block formula using `$$...$$`:
 
-```katex
 $$
 x = \frac{-b \pm \sqrt{b^2 - 4ac}}{2a}
 $$
-```
 
-Multiple formulas in one block:
+Multiple formulas:
 
-```katex
 $$
 x = \frac{-b \pm \sqrt{b^2 - 4ac}}{2a}
 $$
@@ -263,53 +256,43 @@ $E = mc^2$ is the mass-energy equivalence.
 $$
 \sum_{i=1}^{n} i = \frac{n(n+1)}{2}
 $$
-```
 
 Matrix example:
 
-```katex
 $$
 \begin{bmatrix}
 a & b \\
 c & d
 \end{bmatrix}
 $$
-```
 ````
 
 **💡 Important Notes**:
-- Use ` ```katex ` code blocks as a wrapper for math formulas
-- Inside ` ```katex ` blocks, use standard LaTeX syntax:
+- Use standard LaTeX syntax:
   - `$...$` for inline formulas
   - `$$...$$` for block formulas
-- Only top-level ` ```katex ` blocks are parsed (nested ones in code blocks are ignored)
-- You can mix inline and block formulas in the same ` ```katex ` block
+- Math formulas inside code blocks (```...```) will NOT be parsed
+- You can mix inline and block formulas freely in your markdown
 
 **More Examples**:
 ````markdown
 - Nth root:
 
-```katex
 $$
 \sqrt[3]{x}
 $$
-```
 
 - Integral:
 
-```katex
 $$
 \int_{0}^{\infty} e^{-x}dx
 $$
-```
 
 - Limit:
 
-```katex
 $$
 \lim_{x \to \infty} \frac{1}{x} = 0
 $$
-```
 ````
 
 ---

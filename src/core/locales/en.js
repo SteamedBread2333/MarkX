@@ -94,17 +94,12 @@ Click the "Formula" button in the toolbar to quickly insert templates!
 
 **Inline formula** (using \`$...$\`):
 
-\`\`\`katex
 $E = mc^2$
-\`\`\`
 
-\`\`\`katex
 $a^2 + b^2 = c^2$
-\`\`\`
 
 **Block formula** (using \`$$...$$\`):
 
-\`\`\`katex
 $$
 x = \\frac{-b \\pm \\sqrt{b^2 - 4ac}}{2a}
 $$
@@ -112,17 +107,14 @@ $$
 $$
 \\sum_{i=1}^{n} i = \\frac{n(n+1)}{2}
 $$
-\`\`\`
 
-**Mixed usage** (inline and block in one \` \`\`\`katex \` block):
+**Mixed usage**:
 
-\`\`\`katex
 $E = mc^2$ is the mass-energy equivalence.
 
 $$
 x = \\frac{-b \\pm \\sqrt{b^2 - 4ac}}{2a}
 $$
-\`\`\`
 
 ---
 
@@ -260,8 +252,8 @@ Try editing the content, and the right side will update in real-time! 🚀`
                         'mermaid-pie': 'Pie Chart',
                         'mermaid-gitgraph': 'Git Branch Diagram',
                         'mermaid-er': 'ER Diagram (Entity Relationship)',
-                        'math-inline': 'Inline Formula (```katex)',
-                        'math-block': 'Block Formula (```katex)',
+                        'math-inline': 'Inline Formula ($...$)',
+                        'math-block': 'Block Formula ($$...$$)',
                         'math-fraction': 'Fraction',
                         'math-sqrt': 'Square Root',
                         'math-sum': 'Summation Symbol',

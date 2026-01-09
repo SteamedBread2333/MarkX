@@ -94,17 +94,12 @@ graph TD
 
 **行内公式**（使用 \`$...$\`）：
 
-\`\`\`katex
 $E = mc^2$
-\`\`\`
 
-\`\`\`katex
 $a^2 + b^2 = c^2$
-\`\`\`
 
 **块级公式**（使用 \`$$...$$\`）：
 
-\`\`\`katex
 $$
 x = \\frac{-b \\pm \\sqrt{b^2 - 4ac}}{2a}
 $$
@@ -112,17 +107,14 @@ $$
 $$
 \\sum_{i=1}^{n} i = \\frac{n(n+1)}{2}
 $$
-\`\`\`
 
-**混合使用**（在同一个 \` \`\`\`katex \` 代码块中混合行内和块级公式）：
+**混合使用**：
 
-\`\`\`katex
 $E = mc^2$ 是质能方程。
 
 $$
 x = \\frac{-b \\pm \\sqrt{b^2 - 4ac}}{2a}
 $$
-\`\`\`
 
 ---
 
@@ -260,8 +252,8 @@ $$
                         'mermaid-pie': '饼图',
                         'mermaid-gitgraph': 'Git 分支图',
                         'mermaid-er': 'ER 图（实体关系图）',
-                        'math-inline': '行内公式（```katex）',
-                        'math-block': '块级公式（```katex）',
+                        'math-inline': '行内公式（$...$）',
+                        'math-block': '块级公式（$$...$$）',
                         'math-fraction': '分数',
                         'math-sqrt': '平方根',
                         'math-sum': '求和符号',

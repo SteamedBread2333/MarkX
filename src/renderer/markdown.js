@@ -5,7 +5,7 @@
 import DOMPurify from 'dompurify';
 import { marked } from '../config/marked.js';
 import { elements } from '../core/elements.js';
-import { escapeHtml } from '../core/utils.js';
+import { escapeHtml, preprocessMathFormulas } from '../core/utils.js';
 import { setStatus, updateStats } from '../core/ui-utils.js';
 import { getEditorContent } from '../editor/ace-editor.js';
 import { renderMermaidCharts } from './mermaid.js';
@@ -19,14 +19,23 @@ export async function renderMarkdown() {
     let markdown = getEditorContent();
     
     try {
+        // 预处理：保护代码块并处理数学公式
+        // 数学公式使用标准的 $...$ (行内) 和 $$...$$ (块级) 格式
+        // 代码块中的数学公式不会被解析
+        const { markdown: processedMarkdown, restore } = preprocessMathFormulas(markdown);
+        
         // 使用 Marked 解析 Markdown
-        // 数学公式通过 ```katex 代码块处理，在 marked.js 的 renderer.code 中实现
-        let html = marked.parse(markdown);
+        let html = marked.parse(processedMarkdown);
+        
+        // 恢复数学公式和代码块占位符为 HTML 容器（在 DOMPurify 之前，避免占位符被清理）
+        // 传入 marked 实例用于重新解析代码块
+        html = restore(html, marked);
         
         // 使用 DOMPurify 清理 HTML（防止 XSS）
+        // 允许 markx-placeholder 标签，用于占位符替换
         html = DOMPurify.sanitize(html, {
-            ADD_TAGS: ['iframe', 'div', 'span'], 
-            ADD_ATTR: ['allow', 'allowfullscreen', 'frameborder', 'scrolling', 'class'],
+            ADD_TAGS: ['iframe', 'div', 'span', 'markx-placeholder'], 
+            ADD_ATTR: ['allow', 'allowfullscreen', 'frameborder', 'scrolling', 'class', 'data-type', 'data-id'],
         });
         
         // 更新预览区
