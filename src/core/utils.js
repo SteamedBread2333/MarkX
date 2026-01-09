@@ -145,16 +145,47 @@ export function processMathInHTML(html) {
     // 现在在非代码块区域处理数学公式
     // 先处理块级公式 $$...$$
     // 注意：需要处理 Marked 的 breaks 选项可能插入的 <br> 标签
+    // 以及 Marked 可能将公式包裹在 <p> 标签中的情况
+    
+    // 首先，处理被 <p> 标签包裹的公式块
+    // 查找形如 <p>$$...$$</p> 的模式，并临时移除 <p> 标签以便后续匹配
+    processedHTML = processedHTML.replace(/<p>\s*\$\$([\s\S]*?)\$\$\s*<\/p>/gi, (match, formula) => {
+        // 清理公式中的 <br> 标签
+        const cleanedFormula = formula.replace(/<br\s*\/?>/gi, '\n');
+        return `$$${cleanedFormula}$$`;
+    });
+    
+    // 现在匹配所有块级公式（包括处理后的和原本就没有 <p> 标签的）
     const blockMathRegex = /\$\$([\s\S]*?)\$\$/g;
     const blockMatches = [];
     let match;
     
+    // 重置正则表达式的 lastIndex，确保从头开始匹配
+    blockMathRegex.lastIndex = 0;
+    
     while ((match = blockMathRegex.exec(processedHTML)) !== null) {
-        // 清理公式中的 <br> 和 <br/> 标签，将它们转换为换行符
-        // 这样可以避免 Marked 的 breaks 选项在公式中插入的 <br> 标签影响渲染
-        // 对于块级公式，保留换行符以便 KaTeX 正确处理多行公式
-        let formula = match[1].trim();
+        // 清理公式中的 HTML 标签和实体
+        let formula = match[1];
+        
+        // 将 <br> 和 <br/> 标签转换为换行符
         formula = formula.replace(/<br\s*\/?>/gi, '\n');
+        
+        // 移除其他 HTML 标签
+        formula = formula.replace(/<[^>]+>/g, '');
+        
+        // 解码常见的 HTML 实体
+        // 注意：&amp; 必须最后解码，否则会干扰其他实体的解码
+        formula = formula
+            .replace(/&lt;/g, '<')
+            .replace(/&gt;/g, '>')
+            .replace(/&quot;/g, '"')
+            .replace(/&#039;/g, "'")
+            .replace(/&#x27;/g, "'")
+            .replace(/&nbsp;/g, ' ')
+            .replace(/&amp;/g, '&');
+        
+        // 清理多余的空白字符，但保留换行符
+        formula = formula.replace(/[ \t]+/g, ' ').trim();
         
         blockMatches.push({
             start: match.index,
@@ -167,7 +198,12 @@ export function processMathInHTML(html) {
     // 从后往前替换块级公式
     blockMatches.sort((a, b) => b.start - a.start);
     blockMatches.forEach(item => {
-        const replacement = `<div class="katex-block">${escapeHtml(item.formula)}</div>`;
+        // 转义公式中的 < 和 > 字符，防止被浏览器解释为 HTML 标签
+        // 其他字符不需要转义，因为公式会被 KaTeX 处理
+        const safeFormula = item.formula
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;');
+        const replacement = `<div class="katex-block">${safeFormula}</div>`;
         processedHTML = processedHTML.substring(0, item.start) + 
                         replacement + 
                         processedHTML.substring(item.end);

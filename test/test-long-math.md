@@ -1,224 +1,510 @@
-# 超长数学公式块测试文档
+# 超长数学公式测试文档
 
-这是一个用于测试 PDF 导出功能的测试文档，包含超长的数学公式块。
+这是一个用于测试 PDF 导出功能的测试文档，包含超长的数学公式。
 
 ## 测试说明
 
-本文档包含多个超长的数学公式块，用于测试：
-- 数学公式块超过一页高度时的截断功能
-- 分页逻辑是否正确处理超长数学公式块
-- 数学公式块应该允许截断（和 Mermaid 一样的分页逻辑）
+本文档包含多个超长的数学公式，用于测试：
+- 数学公式的渲染和显示
+- 超长公式的分行和换行处理
+- PDF 导出时公式的格式保持
+- LaTeX 数学公式的复杂嵌套
 
-## 线性代数公式块测试
+## 1. 多重积分公式
+
+### 三重积分
+
+$$
+\iiint_V f(x, y, z) \, dx \, dy \, dz = \int_{a_1}^{a_2} \int_{b_1(x)}^{b_2(x)} \int_{c_1(x,y)}^{c_2(x,y)} f(x, y, z) \, dz \, dy \, dx
+$$
+
+### 高维积分
+
+$$
+\int_{-\infty}^{\infty} \int_{-\infty}^{\infty} \int_{-\infty}^{\infty} \int_{-\infty}^{\infty} \exp\left(-\frac{x_1^2 + x_2^2 + x_3^2 + x_4^2}{2\sigma^2}\right) \, dx_1 \, dx_2 \, dx_3 \, dx_4 = (2\pi\sigma^2)^2
+$$
+
+## 2. 级数展开公式
+
+### 泰勒级数展开
+
+$$
+f(x) = \sum_{n=0}^{\infty} \frac{f^{(n)}(a)}{n!}(x-a)^n = f(a) + f'(a)(x-a) + \frac{f''(a)}{2!}(x-a)^2 + \frac{f'''(a)}{3!}(x-a)^3 + \cdots + \frac{f^{(n)}(a)}{n!}(x-a)^n + \cdots
+$$
+
+### 傅里叶级数
+
+$$
+f(x) = \frac{a_0}{2} + \sum_{n=1}^{\infty} \left[a_n \cos\left(\frac{2\pi nx}{T}\right) + b_n \sin\left(\frac{2\pi nx}{T}\right)\right]
+$$
+
+其中：
+
+$$
+a_n = \frac{2}{T} \int_{0}^{T} f(x) \cos\left(\frac{2\pi nx}{T}\right) \, dx, \quad b_n = \frac{2}{T} \int_{0}^{T} f(x) \sin\left(\frac{2\pi nx}{T}\right) \, dx
+$$
+
+### 复指数形式的傅里叶级数
+
+$$
+f(x) = \sum_{n=-\infty}^{\infty} c_n e^{i\frac{2\pi nx}{T}}, \quad \text{其中} \quad c_n = \frac{1}{T} \int_{0}^{T} f(x) e^{-i\frac{2\pi nx}{T}} \, dx
+$$
+
+## 3. 矩阵运算公式
+
+### 矩阵行列式
+
+$$
+\det(A) = \sum_{\sigma \in S_n} \operatorname{sgn}(\sigma) \prod_{i=1}^{n} a_{i,\sigma(i)} = \sum_{j=1}^{n} (-1)^{i+j} a_{ij} \det(A_{ij})
+$$
+
+### 矩阵的特征值分解
+
+$$
+A = P \Lambda P^{-1} = \begin{bmatrix} \mathbf{v}_1 & \mathbf{v}_2 & \cdots & \mathbf{v}_n \end{bmatrix} \begin{bmatrix} \lambda_1 & 0 & \cdots & 0 \\ 0 & \lambda_2 & \cdots & 0 \\ \vdots & \vdots & \ddots & \vdots \\ 0 & 0 & \cdots & \lambda_n \end{bmatrix} \begin{bmatrix} \mathbf{v}_1 & \mathbf{v}_2 & \cdots & \mathbf{v}_n \end{bmatrix}^{-1}
+$$
+
+### 矩阵的奇异值分解
+
+$$
+A = U \Sigma V^T = \sum_{i=1}^{r} \sigma_i \mathbf{u}_i \mathbf{v}_i^T = \begin{bmatrix} \mathbf{u}_1 & \mathbf{u}_2 & \cdots & \mathbf{u}_m \end{bmatrix} \begin{bmatrix} \sigma_1 & 0 & \cdots & 0 & 0 \\ 0 & \sigma_2 & \cdots & 0 & 0 \\ \vdots & \vdots & \ddots & \vdots & \vdots \\ 0 & 0 & \cdots & \sigma_r & 0 \\ 0 & 0 & \cdots & 0 & 0 \end{bmatrix} \begin{bmatrix} \mathbf{v}_1^T \\ \mathbf{v}_2^T \\ \vdots \\ \mathbf{v}_n^T \end{bmatrix}
+$$
+
+## 4. 微分方程
+
+### 二阶线性齐次微分方程的通解
+
+$$
+y(x) = C_1 e^{r_1 x} + C_2 e^{r_2 x} = C_1 e^{\frac{-b + \sqrt{b^2 - 4ac}}{2a} x} + C_2 e^{\frac{-b - \sqrt{b^2 - 4ac}}{2a} x}
+$$
+
+### 偏微分方程 - 热传导方程
+
+$$
+\frac{\partial u}{\partial t} = \alpha \nabla^2 u = \alpha \left(\frac{\partial^2 u}{\partial x^2} + \frac{\partial^2 u}{\partial y^2} + \frac{\partial^2 u}{\partial z^2}\right)
+$$
+
+### 波动方程
+
+$$
+\frac{\partial^2 u}{\partial t^2} = c^2 \nabla^2 u = c^2 \left(\frac{\partial^2 u}{\partial x^2} + \frac{\partial^2 u}{\partial y^2} + \frac{\partial^2 u}{\partial z^2}\right)
+$$
+
+## 5. 概率论公式
+
+### 贝叶斯定理
+
+$$
+P(A|B) = \frac{P(B|A) P(A)}{P(B)} = \frac{P(B|A) P(A)}{\sum_{i=1}^{n} P(B|A_i) P(A_i)} = \frac{P(B|A) P(A)}{P(B|A) P(A) + P(B|\neg A) P(\neg A)}
+$$
+
+### 全概率公式
+
+$$
+P(B) = \sum_{i=1}^{n} P(B|A_i) P(A_i) = P(B|A_1) P(A_1) + P(B|A_2) P(A_2) + \cdots + P(B|A_n) P(A_n)
+$$
+
+### 多维正态分布
+
+$$
+f(\mathbf{x}) = \frac{1}{\sqrt{(2\pi)^k |\boldsymbol{\Sigma}|}} \exp\left(-\frac{1}{2}(\mathbf{x} - \boldsymbol{\mu})^T \boldsymbol{\Sigma}^{-1} (\mathbf{x} - \boldsymbol{\mu})\right)
+$$
+
+其中 $\mathbf{x} \in \mathbb{R}^k$，$\boldsymbol{\mu}$ 是均值向量，$\boldsymbol{\Sigma}$ 是协方差矩阵。
+
+## 6. 统计学公式
+
+### 线性回归的最小二乘估计
+
+$$
+\hat{\boldsymbol{\beta}} = (\mathbf{X}^T \mathbf{X})^{-1} \mathbf{X}^T \mathbf{y} = \arg\min_{\boldsymbol{\beta}} \|\mathbf{y} - \mathbf{X}\boldsymbol{\beta}\|^2 = \arg\min_{\boldsymbol{\beta}} \sum_{i=1}^{n} (y_i - \mathbf{x}_i^T \boldsymbol{\beta})^2
+$$
+
+### 协方差矩阵
+
+$$
+\boldsymbol{\Sigma} = \begin{bmatrix} \sigma_{11} & \sigma_{12} & \cdots & \sigma_{1n} \\ \sigma_{21} & \sigma_{22} & \cdots & \sigma_{2n} \\ \vdots & \vdots & \ddots & \vdots \\ \sigma_{n1} & \sigma_{n2} & \cdots & \sigma_{nn} \end{bmatrix}
+$$
+
+其中 $\sigma_{ij} = \operatorname{Cov}(X_i, X_j) = E[(X_i - \mu_i)(X_j - \mu_j)]$。
+
+## 7. 复变函数
+
+### 柯西积分公式
+
+$$
+f(z_0) = \frac{1}{2\pi i} \oint_C \frac{f(z)}{z - z_0} \, dz = \frac{1}{2\pi i} \int_{0}^{2\pi} \frac{f(z_0 + re^{i\theta})}{re^{i\theta}} \cdot ire^{i\theta} \, d\theta
+$$
+
+### 留数定理
+
+$$
+\oint_C f(z) \, dz = 2\pi i \sum_{k=1}^{n} \operatorname{Res}(f, z_k) = 2\pi i \sum_{k=1}^{n} \lim_{z \to z_k} \frac{1}{(m_k - 1)!} \frac{d^{m_k - 1}}{dz^{m_k - 1}} \left[(z - z_k)^{m_k} f(z)\right]
+$$
+
+## 8. 量子力学公式
+
+### 薛定谔方程
+
+$$
+i\hbar \frac{\partial}{\partial t} \Psi(\mathbf{r}, t) = \hat{H} \Psi(\mathbf{r}, t) = \left[-\frac{\hbar^2}{2m} \nabla^2 + V(\mathbf{r}, t)\right] \Psi(\mathbf{r}, t)
+$$
+
+### 时间无关的薛定谔方程
+
+$$
+\hat{H} \psi(\mathbf{r}) = E \psi(\mathbf{r}) \quad \Rightarrow \quad -\frac{\hbar^2}{2m} \nabla^2 \psi(\mathbf{r}) + V(\mathbf{r}) \psi(\mathbf{r}) = E \psi(\mathbf{r})
+$$
+
+### 不确定性原理
+
+$$
+\sigma_x \sigma_p \geq \frac{\hbar}{2}, \quad \sigma_E \sigma_t \geq \frac{\hbar}{2}
+$$
+
+## 9. 电磁学公式
+
+### 麦克斯韦方程组
 
 $$
 \begin{aligned}
-\mathbf{A} \mathbf{x} &= \mathbf{b} \\
-\begin{bmatrix}
-a_{11} & a_{12} & a_{13} & \cdots & a_{1n} \\
-a_{21} & a_{22} & a_{23} & \cdots & a_{2n} \\
-a_{31} & a_{32} & a_{33} & \cdots & a_{3n} \\
-\vdots & \vdots & \vdots & \ddots & \vdots \\
-a_{m1} & a_{m2} & a_{m3} & \cdots & a_{mn}
-\end{bmatrix}
-\begin{bmatrix}
-x_1 \\ x_2 \\ x_3 \\ \vdots \\ x_n
-\end{bmatrix}
-&=
-\begin{bmatrix}
-b_1 \\ b_2 \\ b_3 \\ \vdots \\ b_m
-\end{bmatrix} \\
-\mathbf{x} &= \mathbf{A}^{-1} \mathbf{b} \\
-\det(\mathbf{A}) &= \sum_{\sigma \in S_n} \operatorname{sgn}(\sigma) \prod_{i=1}^{n} a_{i,\sigma(i)} \\
-\mathbf{A}^T &= \begin{bmatrix}
-a_{11} & a_{21} & a_{31} & \cdots & a_{m1} \\
-a_{12} & a_{22} & a_{32} & \cdots & a_{m2} \\
-a_{13} & a_{23} & a_{33} & \cdots & a_{m3} \\
-\vdots & \vdots & \vdots & \ddots & \vdots \\
-a_{1n} & a_{2n} & a_{3n} & \cdots & a_{mn}
-\end{bmatrix} \\
-\mathbf{A} \mathbf{A}^T &= \mathbf{I} \\
-\|\mathbf{x}\|_2 &= \sqrt{\sum_{i=1}^{n} x_i^2} \\
-\|\mathbf{x}\|_1 &= \sum_{i=1}^{n} |x_i| \\
-\|\mathbf{x}\|_\infty &= \max_{1 \leq i \leq n} |x_i| \\
-\mathbf{x} \cdot \mathbf{y} &= \sum_{i=1}^{n} x_i y_i \\
-\mathbf{x} \times \mathbf{y} &= \begin{vmatrix}
-\mathbf{i} & \mathbf{j} & \mathbf{k} \\
-x_1 & x_2 & x_3 \\
-y_1 & y_2 & y_3
-\end{vmatrix} \\
-\operatorname{span}(\mathbf{v}_1, \mathbf{v}_2, \ldots, \mathbf{v}_k) &= \left\{ \sum_{i=1}^{k} c_i \mathbf{v}_i : c_i \in \mathbb{R} \right\} \\
-\dim(\operatorname{span}(\mathbf{v}_1, \mathbf{v}_2, \ldots, \mathbf{v}_k)) &= \operatorname{rank}(\mathbf{A}) \\
-\mathbf{A} = \mathbf{P} \mathbf{D} \mathbf{P}^{-1} \\
-\mathbf{D} &= \begin{bmatrix}
-\lambda_1 & 0 & 0 & \cdots & 0 \\
-0 & \lambda_2 & 0 & \cdots & 0 \\
-0 & 0 & \lambda_3 & \cdots & 0 \\
-\vdots & \vdots & \vdots & \ddots & \vdots \\
-0 & 0 & 0 & \cdots & \lambda_n
-\end{bmatrix}
+\nabla \cdot \mathbf{E} &= \frac{\rho}{\varepsilon_0} \\
+\nabla \cdot \mathbf{B} &= 0 \\
+\nabla \times \mathbf{E} &= -\frac{\partial \mathbf{B}}{\partial t} \\
+\nabla \times \mathbf{B} &= \mu_0 \mathbf{J} + \mu_0 \varepsilon_0 \frac{\partial \mathbf{E}}{\partial t}
 \end{aligned}
 $$
 
-## 微积分公式块测试
+### 洛伦兹力
 
 $$
-\begin{aligned}
-\frac{d}{dx}[f(x) + g(x)] &= f'(x) + g'(x) \\
-\frac{d}{dx}[f(x) \cdot g(x)] &= f'(x) g(x) + f(x) g'(x) \\
-\frac{d}{dx}\left[\frac{f(x)}{g(x)}\right] &= \frac{f'(x) g(x) - f(x) g'(x)}{[g(x)]^2} \\
-\frac{d}{dx}[f(g(x))] &= f'(g(x)) \cdot g'(x) \\
-\int_a^b f(x) \, dx &= F(b) - F(a) \quad \text{where } F'(x) = f(x) \\
-\int u \, dv &= uv - \int v \, du \\
-\int \frac{1}{x} \, dx &= \ln|x| + C \\
-\int e^x \, dx &= e^x + C \\
-\int \sin x \, dx &= -\cos x + C \\
-\int \cos x \, dx &= \sin x + C \\
-\int \tan x \, dx &= -\ln|\cos x| + C \\
-\int \sec^2 x \, dx &= \tan x + C \\
-\int \csc^2 x \, dx &= -\cot x + C \\
-\int \sec x \tan x \, dx &= \sec x + C \\
-\int \csc x \cot x \, dx &= -\csc x + C \\
-\int \frac{1}{\sqrt{1-x^2}} \, dx &= \arcsin x + C \\
-\int \frac{1}{1+x^2} \, dx &= \arctan x + C \\
-\int \frac{1}{x\sqrt{x^2-1}} \, dx &= \operatorname{arcsec} x + C \\
-\lim_{h \to 0} \frac{f(x+h) - f(x)}{h} &= f'(x) \\
-\lim_{x \to a} \frac{f(x) - f(a)}{x - a} &= f'(a) \\
-f''(x) &= \frac{d}{dx}[f'(x)] \\
-f^{(n)}(x) &= \frac{d^n}{dx^n}[f(x)] \\
-\int_a^b \int_{g_1(x)}^{g_2(x)} f(x,y) \, dy \, dx \\
-\int_{\alpha}^{\beta} \int_{h_1(\theta)}^{h_2(\theta)} f(r,\theta) \, r \, dr \, d\theta \\
-\iiint_V f(x,y,z) \, dV \\
-\nabla f &= \left( \frac{\partial f}{\partial x}, \frac{\partial f}{\partial y}, \frac{\partial f}{\partial z} \right) \\
-\nabla \cdot \mathbf{F} &= \frac{\partial F_x}{\partial x} + \frac{\partial F_y}{\partial y} + \frac{\partial F_z}{\partial z} \\
-\nabla \times \mathbf{F} &= \begin{vmatrix}
-\mathbf{i} & \mathbf{j} & \mathbf{k} \\
-\frac{\partial}{\partial x} & \frac{\partial}{\partial y} & \frac{\partial}{\partial z} \\
-F_x & F_y & F_z
-\end{vmatrix}
-\end{aligned}
+\mathbf{F} = q(\mathbf{E} + \mathbf{v} \times \mathbf{B}) = q\mathbf{E} + q(\mathbf{v} \times \mathbf{B}) = q\left[\mathbf{E} + (\mathbf{v} \times \mathbf{B})\right]
 $$
 
-## 概率论与统计学公式块测试
+## 10. 泛函分析
+
+### 变分法 - 欧拉-拉格朗日方程
 
 $$
-\begin{aligned}
-P(A \cup B) &= P(A) + P(B) - P(A \cap B) \\
-P(A \cap B) &= P(A) \cdot P(B|A) = P(B) \cdot P(A|B) \\
-P(A|B) &= \frac{P(A \cap B)}{P(B)} = \frac{P(B|A) \cdot P(A)}{P(B)} \\
-P(\overline{A}) &= 1 - P(A) \\
-P(A_1 \cup A_2 \cup \cdots \cup A_n) &= \sum_{i=1}^{n} P(A_i) - \sum_{1 \leq i < j \leq n} P(A_i \cap A_j) \\
-&\quad + \sum_{1 \leq i < j < k \leq n} P(A_i \cap A_j \cap A_k) - \cdots + (-1)^{n+1} P(A_1 \cap A_2 \cap \cdots \cap A_n) \\
-E[X] &= \sum_{i=1}^{n} x_i P(x_i) = \int_{-\infty}^{\infty} x f(x) \, dx \\
-E[g(X)] &= \sum_{i=1}^{n} g(x_i) P(x_i) = \int_{-\infty}^{\infty} g(x) f(x) \, dx \\
-E[aX + b] &= aE[X] + b \\
-E[X + Y] &= E[X] + E[Y] \\
-E[XY] &= E[X] \cdot E[Y] \quad \text{(if X and Y are independent)} \\
-\operatorname{Var}(X) &= E[(X - E[X])^2] = E[X^2] - (E[X])^2 \\
-\operatorname{Var}(aX + b) &= a^2 \operatorname{Var}(X) \\
-\operatorname{Var}(X + Y) &= \operatorname{Var}(X) + \operatorname{Var}(Y) + 2\operatorname{Cov}(X, Y) \\
-\operatorname{Cov}(X, Y) &= E[(X - E[X])(Y - E[Y])] = E[XY] - E[X]E[Y] \\
-\rho_{X,Y} &= \frac{\operatorname{Cov}(X, Y)}{\sqrt{\operatorname{Var}(X) \operatorname{Var}(Y)}} \\
-f_X(x) &= \int_{-\infty}^{\infty} f_{X,Y}(x, y) \, dy \\
-f_{X|Y}(x|y) &= \frac{f_{X,Y}(x, y)}{f_Y(y)} \\
-F_X(x) &= P(X \leq x) = \int_{-\infty}^{x} f_X(t) \, dt \\
-f_X(x) &= \frac{d}{dx} F_X(x) \\
-P(a \leq X \leq b) &= F_X(b) - F_X(a) = \int_a^b f_X(x) \, dx \\
-\mu &= \frac{1}{n} \sum_{i=1}^{n} x_i \\
-\sigma^2 &= \frac{1}{n} \sum_{i=1}^{n} (x_i - \mu)^2 \\
-s^2 &= \frac{1}{n-1} \sum_{i=1}^{n} (x_i - \bar{x})^2 \\
-\bar{x} &= \frac{1}{n} \sum_{i=1}^{n} x_i \\
-s &= \sqrt{\frac{1}{n-1} \sum_{i=1}^{n} (x_i - \bar{x})^2} \\
-z &= \frac{x - \mu}{\sigma} \\
-t &= \frac{\bar{x} - \mu}{s / \sqrt{n}} \\
-\chi^2 &= \sum_{i=1}^{n} \frac{(O_i - E_i)^2}{E_i} \\
-F &= \frac{s_1^2 / \sigma_1^2}{s_2^2 / \sigma_2^2} \\
-CI_{\mu} &= \bar{x} \pm z_{\alpha/2} \frac{\sigma}{\sqrt{n}} \\
-CI_{\mu} &= \bar{x} \pm t_{\alpha/2, n-1} \frac{s}{\sqrt{n}} \\
-CI_p &= \hat{p} \pm z_{\alpha/2} \sqrt{\frac{\hat{p}(1-\hat{p})}{n}} \\
-H_0: \mu = \mu_0 \quad \text{vs.} \quad H_1: \mu \neq \mu_0 \\
-z_{\text{test}} &= \frac{\bar{x} - \mu_0}{\sigma / \sqrt{n}} \\
-t_{\text{test}} &= \frac{\bar{x} - \mu_0}{s / \sqrt{n}} \\
-p\text{-value} &= P(|Z| \geq |z_{\text{test}}|) \\
-\text{Reject } H_0 \text{ if } p\text{-value} < \alpha
-\end{aligned}
+\frac{\partial L}{\partial q} - \frac{d}{dt} \frac{\partial L}{\partial \dot{q}} = 0 \quad \Rightarrow \quad \frac{\partial L}{\partial q_i} - \frac{d}{dt} \frac{\partial L}{\partial \dot{q}_i} = 0, \quad i = 1, 2, \ldots, n
 $$
 
-## 复变函数公式块测试
+### 泛函的变分
 
 $$
-\begin{aligned}
-z &= x + iy = r(\cos \theta + i \sin \theta) = re^{i\theta} \\
-|z| &= \sqrt{x^2 + y^2} = r \\
-\arg(z) &= \arctan\left(\frac{y}{x}\right) = \theta \\
-\overline{z} &= x - iy = re^{-i\theta} \\
-z_1 + z_2 &= (x_1 + x_2) + i(y_1 + y_2) \\
-z_1 \cdot z_2 &= r_1 r_2 e^{i(\theta_1 + \theta_2)} \\
-\frac{z_1}{z_2} &= \frac{r_1}{r_2} e^{i(\theta_1 - \theta_2)} \\
-z^n &= r^n e^{in\theta} = r^n (\cos n\theta + i \sin n\theta) \\
-\sqrt[n]{z} &= \sqrt[n]{r} e^{i(\theta + 2k\pi)/n}, \quad k = 0, 1, \ldots, n-1 \\
-e^z &= e^x (\cos y + i \sin y) \\
-\sin z &= \frac{e^{iz} - e^{-iz}}{2i} \\
-\cos z &= \frac{e^{iz} + e^{-iz}}{2} \\
-\tan z &= \frac{\sin z}{\cos z} \\
-\sinh z &= \frac{e^z - e^{-z}}{2} \\
-\cosh z &= \frac{e^z + e^{-z}}{2} \\
-\ln z &= \ln r + i(\theta + 2k\pi), \quad k \in \mathbb{Z} \\
-f'(z) &= \lim_{\Delta z \to 0} \frac{f(z + \Delta z) - f(z)}{\Delta z} \\
-\frac{\partial u}{\partial x} &= \frac{\partial v}{\partial y} \quad \text{(Cauchy-Riemann equations)} \\
-\frac{\partial u}{\partial y} &= -\frac{\partial v}{\partial x} \\
-\int_C f(z) \, dz &= \int_a^b f(z(t)) z'(t) \, dt \\
-\oint_C f(z) \, dz &= 2\pi i \sum_{k=1}^{n} \operatorname{Res}(f, z_k) \\
-\operatorname{Res}(f, z_0) &= \frac{1}{(n-1)!} \lim_{z \to z_0} \frac{d^{n-1}}{dz^{n-1}} [(z - z_0)^n f(z)] \\
-f(z) &= \sum_{n=0}^{\infty} a_n (z - z_0)^n \\
-a_n &= \frac{1}{2\pi i} \oint_C \frac{f(\zeta)}{(\zeta - z_0)^{n+1}} \, d\zeta \\
-f(z) &= \sum_{n=-\infty}^{\infty} a_n (z - z_0)^n \\
-a_n &= \frac{1}{2\pi i} \oint_C \frac{f(\zeta)}{(\zeta - z_0)^{n+1}} \, d\zeta
-\end{aligned}
+\delta J[y] = \int_{a}^{b} \left[\frac{\partial F}{\partial y} - \frac{d}{dx} \frac{\partial F}{\partial y'}\right] \delta y \, dx + \left[\frac{\partial F}{\partial y'} \delta y\right]_{a}^{b}
 $$
 
-## 偏微分方程公式块测试
+## 11. 数论公式
+
+### 黎曼 ζ 函数
 
 $$
-\begin{aligned}
-\frac{\partial u}{\partial t} &= k \frac{\partial^2 u}{\partial x^2} \quad \text{(Heat equation)} \\
-\frac{\partial^2 u}{\partial t^2} &= c^2 \frac{\partial^2 u}{\partial x^2} \quad \text{(Wave equation)} \\
-\frac{\partial^2 u}{\partial x^2} + \frac{\partial^2 u}{\partial y^2} &= 0 \quad \text{(Laplace equation)} \\
-\frac{\partial^2 u}{\partial x^2} + \frac{\partial^2 u}{\partial y^2} + \frac{\partial^2 u}{\partial z^2} &= 0 \\
-\nabla^2 u &= \frac{\partial^2 u}{\partial x^2} + \frac{\partial^2 u}{\partial y^2} + \frac{\partial^2 u}{\partial z^2} \\
-\nabla^2 u &= 0 \quad \text{(Laplace equation)} \\
-\nabla^2 u &= f \quad \text{(Poisson equation)} \\
-\frac{\partial u}{\partial t} + \mathbf{v} \cdot \nabla u &= \nu \nabla^2 u \\
-\frac{\partial \mathbf{u}}{\partial t} + (\mathbf{u} \cdot \nabla) \mathbf{u} &= -\frac{1}{\rho} \nabla p + \nu \nabla^2 \mathbf{u} + \mathbf{g} \\
-\nabla \cdot \mathbf{u} &= 0 \\
-u(x,t) &= \sum_{n=1}^{\infty} B_n \sin\left(\frac{n\pi x}{L}\right) e^{-k(n\pi/L)^2 t} \\
-B_n &= \frac{2}{L} \int_0^L f(x) \sin\left(\frac{n\pi x}{L}\right) \, dx \\
-u(x,t) &= \sum_{n=1}^{\infty} \left[A_n \cos\left(\frac{n\pi ct}{L}\right) + B_n \sin\left(\frac{n\pi ct}{L}\right)\right] \sin\left(\frac{n\pi x}{L}\right) \\
-A_n &= \frac{2}{L} \int_0^L f(x) \sin\left(\frac{n\pi x}{L}\right) \, dx \\
-B_n &= \frac{2}{n\pi c} \int_0^L g(x) \sin\left(\frac{n\pi x}{L}\right) \, dx \\
-u(x,y) &= \sum_{n=1}^{\infty} A_n \sinh\left(\frac{n\pi y}{L}\right) \sin\left(\frac{n\pi x}{L}\right) \\
-A_n &= \frac{2}{L \sinh(n\pi H/L)} \int_0^L f(x) \sin\left(\frac{n\pi x}{L}\right) \, dx \\
-u(r,\theta) &= \frac{a_0}{2} + \sum_{n=1}^{\infty} \left[a_n \cos(n\theta) + b_n \sin(n\theta)\right] r^n \\
-a_n &= \frac{1}{\pi R^n} \int_0^{2\pi} f(\theta) \cos(n\theta) \, d\theta \\
-b_n &= \frac{1}{\pi R^n} \int_0^{2\pi} f(\theta) \sin(n\theta) \, d\theta
-\end{aligned}
+\zeta(s) = \sum_{n=1}^{\infty} \frac{1}{n^s} = \prod_{p \text{ prime}} \frac{1}{1 - p^{-s}} = \frac{1}{\Gamma(s)} \int_{0}^{\infty} \frac{x^{s-1}}{e^x - 1} \, dx
 $$
 
-## 测试总结
+### 欧拉乘积公式
 
-本文档包含以下超长数学公式块：
+$$
+\sum_{n=1}^{\infty} \frac{1}{n^s} = \prod_{p \text{ prime}} \left(1 + \frac{1}{p^s} + \frac{1}{p^{2s}} + \frac{1}{p^{3s}} + \cdots\right) = \prod_{p \text{ prime}} \frac{1}{1 - p^{-s}}
+$$
 
-1. **线性代数公式块**：包含矩阵运算、特征值、特征向量、范数等
-2. **微积分公式块**：包含导数、积分、多重积分、向量微积分等
-3. **概率论与统计学公式块**：包含概率、期望、方差、假设检验等
-4. **复变函数公式块**：包含复数运算、解析函数、留数定理等
-5. **偏微分方程公式块**：包含热方程、波动方程、拉普拉斯方程等
+## 12. 组合数学
 
-这些公式块都设计为超过一页 A4 纸的高度，用于测试 PDF 导出时的分页和截断功能。
+### 斯特林数
 
-## 测试要点
+$$
+S(n, k) = \frac{1}{k!} \sum_{j=0}^{k} (-1)^{k-j} \binom{k}{j} j^n = \sum_{j=0}^{k} \frac{(-1)^{k-j} j^n}{j!(k-j)!}
+$$
 
-- ✅ 数学公式块超过一页高度时应该被截断
-- ✅ 分页应该在合适的位置进行
-- ✅ 每个公式块应该能够正确显示在 PDF 中
-- ✅ 数学公式块使用和 Mermaid 一样的分页逻辑（允许截断）
+### 生成函数
+
+$$
+G(x) = \sum_{n=0}^{\infty} a_n x^n = a_0 + a_1 x + a_2 x^2 + a_3 x^3 + \cdots + a_n x^n + \cdots
+$$
+
+## 13. 超长积分公式
+
+### 高斯积分
+
+$$
+\int_{-\infty}^{\infty} e^{-x^2} \, dx = \sqrt{\pi}, \quad \int_{-\infty}^{\infty} e^{-ax^2 + bx + c} \, dx = \sqrt{\frac{\pi}{a}} e^{\frac{b^2}{4a} + c}
+$$
+
+### 费曼路径积分
+
+$$
+\langle x_f, t_f | x_i, t_i \rangle = \int \mathcal{D}[x(t)] \exp\left(\frac{i}{\hbar} \int_{t_i}^{t_f} L(x(t), \dot{x}(t), t) \, dt\right)
+$$
+
+### 多重高斯积分
+
+$$
+\int_{-\infty}^{\infty} \cdots \int_{-\infty}^{\infty} \exp\left(-\frac{1}{2} \sum_{i,j=1}^{n} A_{ij} x_i x_j + \sum_{i=1}^{n} b_i x_i\right) \, dx_1 \cdots dx_n = \sqrt{\frac{(2\pi)^n}{\det(A)}} \exp\left(\frac{1}{2} \mathbf{b}^T A^{-1} \mathbf{b}\right)
+$$
+
+## 14. 超长求和公式
+
+### 多重求和
+
+$$
+\sum_{i_1=1}^{n_1} \sum_{i_2=1}^{n_2} \cdots \sum_{i_k=1}^{n_k} a_{i_1 i_2 \cdots i_k} = \sum_{i_1=1}^{n_1} \left[\sum_{i_2=1}^{n_2} \left[\cdots \left[\sum_{i_k=1}^{n_k} a_{i_1 i_2 \cdots i_k}\right]\right]\right]
+$$
+
+### 二项式定理
+
+$$
+(x + y)^n = \sum_{k=0}^{n} \binom{n}{k} x^{n-k} y^k = \sum_{k=0}^{n} \frac{n!}{k!(n-k)!} x^{n-k} y^k
+$$
+
+### 超几何级数
+
+$$
+{}_2F_1(a, b; c; z) = \sum_{n=0}^{\infty} \frac{(a)_n (b)_n}{(c)_n} \frac{z^n}{n!} = 1 + \frac{ab}{c} \frac{z}{1!} + \frac{a(a+1)b(b+1)}{c(c+1)} \frac{z^2}{2!} + \cdots
+$$
+
+其中 $(a)_n = a(a+1)(a+2) \cdots (a+n-1)$ 是 Pochhammer 符号。
+
+## 15. 超长矩阵公式
+
+### 矩阵的幂级数展开
+
+$$
+e^A = \sum_{n=0}^{\infty} \frac{A^n}{n!} = I + A + \frac{A^2}{2!} + \frac{A^3}{3!} + \cdots + \frac{A^n}{n!} + \cdots
+$$
+
+### 矩阵的对数
+
+$$
+\ln(I + A) = \sum_{n=1}^{\infty} \frac{(-1)^{n+1}}{n} A^n = A - \frac{A^2}{2} + \frac{A^3}{3} - \frac{A^4}{4} + \cdots
+$$
+
+### 矩阵的逆（Neumann 级数）
+
+$$
+(I - A)^{-1} = \sum_{n=0}^{\infty} A^n = I + A + A^2 + A^3 + \cdots, \quad \text{当} \quad \|A\| < 1
+$$
+
+## 16. 超长微分公式
+
+### 链式法则（多变量）
+
+$$
+\frac{\partial f}{\partial x_i} = \sum_{j=1}^{m} \frac{\partial f}{\partial y_j} \frac{\partial y_j}{\partial x_i} = \frac{\partial f}{\partial y_1} \frac{\partial y_1}{\partial x_i} + \frac{\partial f}{\partial y_2} \frac{\partial y_2}{\partial x_i} + \cdots + \frac{\partial f}{\partial y_m} \frac{\partial y_m}{\partial x_i}
+$$
+
+### 高阶偏导数
+
+$$
+\frac{\partial^n f}{\partial x_1^{n_1} \partial x_2^{n_2} \cdots \partial x_k^{n_k}} = \frac{\partial^{n_1 + n_2 + \cdots + n_k} f}{\partial x_1^{n_1} \partial x_2^{n_2} \cdots \partial x_k^{n_k}}
+$$
+
+## 17. 超长极限公式
+
+### L'Hôpital 法则（高阶）
+
+$$
+\lim_{x \to a} \frac{f(x)}{g(x)} = \lim_{x \to a} \frac{f'(x)}{g'(x)} = \lim_{x \to a} \frac{f''(x)}{g''(x)} = \cdots = \lim_{x \to a} \frac{f^{(n)}(x)}{g^{(n)}(x)}
+$$
+
+### 重要极限
+
+$$
+\lim_{n \to \infty} \left(1 + \frac{1}{n}\right)^n = e, \quad \lim_{x \to 0} \frac{\sin x}{x} = 1, \quad \lim_{x \to 0} \frac{e^x - 1}{x} = 1
+$$
+
+## 18. 超长连分数
+
+$$
+x = a_0 + \cfrac{1}{a_1 + \cfrac{1}{a_2 + \cfrac{1}{a_3 + \cfrac{1}{a_4 + \cfrac{1}{a_5 + \cfrac{1}{a_6 + \cfrac{1}{a_7 + \cfrac{1}{a_8 + \cfrac{1}{a_9 + \cfrac{1}{a_{10} + \cdots}}}}}}}}}
+$$
+
+## 19. 超长乘积公式
+
+### 无穷乘积
+
+$$
+\prod_{n=1}^{\infty} \left(1 + a_n\right) = \lim_{N \to \infty} \prod_{n=1}^{N} (1 + a_n) = (1 + a_1)(1 + a_2)(1 + a_3) \cdots (1 + a_n) \cdots
+$$
+
+### 欧拉乘积
+
+$$
+\prod_{p \text{ prime}} \frac{1}{1 - p^{-s}} = \prod_{p \text{ prime}} \left(1 + \frac{1}{p^s} + \frac{1}{p^{2s}} + \frac{1}{p^{3s}} + \cdots\right) = \sum_{n=1}^{\infty} \frac{1}{n^s}
+$$
+
+## 20. 超长嵌套公式
+
+### 多重嵌套积分
+
+$$
+I = \int_{a_1}^{b_1} \int_{a_2(x_1)}^{b_2(x_1)} \int_{a_3(x_1,x_2)}^{b_3(x_1,x_2)} \cdots \int_{a_n(x_1,\ldots,x_{n-1})}^{b_n(x_1,\ldots,x_{n-1})} f(x_1, x_2, \ldots, x_n) \, dx_n \cdots dx_2 \, dx_1
+$$
+
+### 多重嵌套求和
+
+$$
+S = \sum_{i_1=1}^{m_1} \sum_{i_2=1}^{m_2} \sum_{i_3=1}^{m_3} \cdots \sum_{i_n=1}^{m_n} a_{i_1, i_2, \ldots, i_n} \prod_{j=1}^{n} w_{i_j}^{(j)}
+$$
+
+## 21. 超长分式公式
+
+$$
+\frac{a_0 + a_1 x + a_2 x^2 + a_3 x^3 + \cdots + a_n x^n}{b_0 + b_1 x + b_2 x^2 + b_3 x^3 + \cdots + b_m x^m} = \frac{\sum_{i=0}^{n} a_i x^i}{\sum_{j=0}^{m} b_j x^j}
+$$
+
+## 22. 超长根式公式
+
+$$
+\sqrt{a_0 + \sqrt{a_1 + \sqrt{a_2 + \sqrt{a_3 + \sqrt{a_4 + \sqrt{a_5 + \sqrt{a_6 + \sqrt{a_7 + \sqrt{a_8 + \sqrt{a_9 + \sqrt{a_{10} + \cdots}}}}}}}}}}}
+$$
+
+## 23. 超长指数公式
+
+$$
+e^{x + y + z + w + u + v} = e^x \cdot e^y \cdot e^z \cdot e^w \cdot e^u \cdot e^v = \prod_{i=1}^{6} e^{x_i}
+$$
+
+$$
+\exp\left(\sum_{i=1}^{n} x_i\right) = \prod_{i=1}^{n} \exp(x_i) = \exp(x_1) \cdot \exp(x_2) \cdot \exp(x_3) \cdots \exp(x_n)
+$$
+
+## 24. 超长对数公式
+
+$$
+\ln\left(\prod_{i=1}^{n} x_i\right) = \sum_{i=1}^{n} \ln(x_i) = \ln(x_1) + \ln(x_2) + \ln(x_3) + \cdots + \ln(x_n)
+$$
+
+$$
+\log_a \left(\frac{x_1 \cdot x_2 \cdot x_3 \cdots x_n}{y_1 \cdot y_2 \cdot y_3 \cdots y_m}\right) = \sum_{i=1}^{n} \log_a(x_i) - \sum_{j=1}^{m} \log_a(y_j)
+$$
+
+## 25. 超长三角函数公式
+
+### 多角公式
+
+$$
+\sin(n\theta) = \sum_{k=0}^{\lfloor n/2 \rfloor} (-1)^k \binom{n}{2k+1} \cos^{n-2k-1}(\theta) \sin^{2k+1}(\theta)
+$$
+
+$$
+\cos(n\theta) = \sum_{k=0}^{\lfloor n/2 \rfloor} (-1)^k \binom{n}{2k} \cos^{n-2k}(\theta) \sin^{2k}(\theta)
+$$
+
+### 积化和差
+
+$$
+\sin(\alpha) \sin(\beta) = \frac{1}{2}[\cos(\alpha - \beta) - \cos(\alpha + \beta)]
+$$
+
+$$
+\cos(\alpha) \cos(\beta) = \frac{1}{2}[\cos(\alpha - \beta) + \cos(\alpha + \beta)]
+$$
+
+$$
+\sin(\alpha) \cos(\beta) = \frac{1}{2}[\sin(\alpha + \beta) + \sin(\alpha - \beta)]
+$$
+
+## 26. 超长组合公式
+
+### 多重组合
+
+$$
+\binom{n}{k_1, k_2, \ldots, k_m} = \frac{n!}{k_1! k_2! \cdots k_m!} = \frac{n!}{\prod_{i=1}^{m} k_i!}
+$$
+
+其中 $k_1 + k_2 + \cdots + k_m = n$。
+
+### 二项式系数的性质
+
+$$
+\sum_{k=0}^{n} \binom{n}{k} = 2^n, \quad \sum_{k=0}^{n} (-1)^k \binom{n}{k} = 0, \quad \sum_{k=0}^{n} k \binom{n}{k} = n \cdot 2^{n-1}
+$$
+
+## 27. 超长向量公式
+
+### 向量三重积
+
+$$
+\mathbf{a} \times (\mathbf{b} \times \mathbf{c}) = (\mathbf{a} \cdot \mathbf{c}) \mathbf{b} - (\mathbf{a} \cdot \mathbf{b}) \mathbf{c}
+$$
+
+### 向量场的散度和旋度
+
+$$
+\nabla \cdot \mathbf{F} = \frac{\partial F_x}{\partial x} + \frac{\partial F_y}{\partial y} + \frac{\partial F_z}{\partial z}
+$$
+
+$$
+\nabla \times \mathbf{F} = \begin{vmatrix} \mathbf{i} & \mathbf{j} & \mathbf{k} \\ \frac{\partial}{\partial x} & \frac{\partial}{\partial y} & \frac{\partial}{\partial z} \\ F_x & F_y & F_z \end{vmatrix} = \left(\frac{\partial F_z}{\partial y} - \frac{\partial F_y}{\partial z}\right) \mathbf{i} - \left(\frac{\partial F_z}{\partial x} - \frac{\partial F_x}{\partial z}\right) \mathbf{j} + \left(\frac{\partial F_y}{\partial x} - \frac{\partial F_x}{\partial y}\right) \mathbf{k}
+$$
+
+## 28. 超长张量公式
+
+### 爱因斯坦求和约定
+
+$$
+A_{ij} B_{jk} C_{kl} = \sum_{j=1}^{n} \sum_{k=1}^{n} A_{ij} B_{jk} C_{kl}
+$$
+
+### 张量的缩并
+
+$$
+T^{i_1 i_2 \cdots i_p}_{j_1 j_2 \cdots j_q} \delta^{j_k}_{i_l} = T^{i_1 \cdots \hat{i_l} \cdots i_p}_{j_1 \cdots \hat{j_k} \cdots j_q}
+$$
+
+## 29. 超长微分几何公式
+
+### 第一基本形式
+
+$$
+ds^2 = E \, du^2 + 2F \, du \, dv + G \, dv^2 = \sum_{i,j=1}^{2} g_{ij} \, dx^i \, dx^j
+$$
+
+### 第二基本形式
+
+$$
+L \, du^2 + 2M \, du \, dv + N \, dv^2 = \sum_{i,j=1}^{2} h_{ij} \, dx^i \, dx^j
+$$
+
+### 高斯曲率
+
+$$
+K = \frac{LN - M^2}{EG - F^2} = \frac{\det(h_{ij})}{\det(g_{ij})}
+$$
+
+## 30. 超长统计物理公式
+
+### 配分函数
+
+$$
+Z = \sum_{i} e^{-\beta E_i} = \int e^{-\beta H(\mathbf{q}, \mathbf{p})} \, d\mathbf{q} \, d\mathbf{p}
+$$
+
+### 玻尔兹曼分布
+
+$$
+P_i = \frac{e^{-\beta E_i}}{Z} = \frac{e^{-E_i / k_B T}}{\sum_{j} e^{-E_j / k_B T}}
+$$
+
+### 自由能
+
+$$
+F = -k_B T \ln Z = -k_B T \ln \left(\sum_{i} e^{-\beta E_i}\right) = -k_B T \ln \left(\int e^{-\beta H(\mathbf{q}, \mathbf{p})} \, d\mathbf{q} \, d\mathbf{p}\right)
+$$
+
+---
+
+## 总结
+
+本文档包含了各种超长的数学公式，涵盖了：
+- 多重积分和级数
+- 矩阵运算和线性代数
+- 微分方程和偏微分方程
+- 概率论和统计学
+- 复变函数和泛函分析
+- 量子力学和电磁学
+- 数论和组合数学
+- 以及其他各种复杂的数学表达式
+
+这些公式可以用来测试 Markdown 编辑器和 PDF 导出功能对复杂数学公式的处理能力。
