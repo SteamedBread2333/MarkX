@@ -271,7 +271,7 @@ $$
 - Use standard LaTeX syntax:
   - `$...$` for inline formulas
   - `$$...$$` for block formulas
-- Math formulas inside code blocks (```...```) will NOT be parsed
+- Code blocks protect math syntax - `$` and `$$` inside code blocks are treated as plain text
 - You can mix inline and block formulas freely in your markdown
 
 **More Examples**:

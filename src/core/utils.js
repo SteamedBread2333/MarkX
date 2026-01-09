@@ -67,7 +67,7 @@ export function preprocessMathFormulas(markdown) {
     codeBlockMatches.sort((a, b) => b.start - a.start);
     
     codeBlockMatches.forEach((block) => {
-        const placeholder = `\u200B\u200B\u200BCODE_BLOCK_${codeBlockIndex++}\u200B\u200B\u200B`;
+        const placeholder = `<!--MARKX_CODE_BLOCK_${codeBlockIndex++}-->`;
         codeBlocks.push({
             placeholder: placeholder,
             content: block.content
@@ -119,7 +119,7 @@ export function processMathInHTML(html) {
     let codeIndex = 0;
     
     tempDiv.querySelectorAll('pre, code, .mermaid, .echarts').forEach(el => {
-        const placeholder = `__MARKX_CODE_${codeIndex++}__`;
+        const placeholder = `<!--MARKX_CODE_${codeIndex++}-->`;
         codeBlocks.push({
             placeholder: placeholder,
             content: el.outerHTML
@@ -172,7 +172,7 @@ export function processMathInHTML(html) {
     
     while ((match = inlineMathRegex.exec(processedHTML)) !== null) {
         // 跳过代码块占位符
-        if (match[0].includes('__MARKX_CODE_')) {
+        if (match[0].includes('<!--MARKX_CODE_')) {
             continue;
         }
         
