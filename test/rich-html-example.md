@@ -213,9 +213,7 @@
         <h4 style="margin: 0 0 5px 0;">步骤 1</h4>
         <p style="margin: 0; color: #666;">这是第一个步骤的描述</p>
     </div>
-    
     <div style="position: absolute; left: 0; top: 40px; width: 2px; height: 60px; background: #ddd;"></div>
-    
     <div style="position: absolute; left: 0; top: 100px; width: 20px; height: 20px; background: #28a745; border-radius: 50%; border: 3px solid white; box-shadow: 0 0 0 3px #28a745;"></div>
     <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
         <h4 style="margin: 0 0 5px 0;">步骤 2</h4>

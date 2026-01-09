@@ -12,10 +12,33 @@ import { t } from '../core/i18n.js';
 /**
  * 等待 Mermaid 加载完成
  */
-async function waitForMermaid(maxRetries = 10, delay = 100) {
+async function waitForMermaid(maxRetries = 20, delay = 100) {
     for (let i = 0; i < maxRetries; i++) {
+        // 检查 Mermaid 对象和方法是否存在
         if (mermaid && typeof mermaid.initialize === 'function' && typeof mermaid.render === 'function') {
-            return true;
+            // 首次加载时，需要额外等待确保 Mermaid 内部完全初始化
+            // 尝试检查 Mermaid 的内部状态（如果可用）
+            try {
+                // 检查 mermaid 是否有配置对象（表示已初始化）
+                if (mermaid.mermaidAPI && typeof mermaid.mermaidAPI.getConfig === 'function') {
+                    // Mermaid 已初始化，但首次加载时可能需要额外时间
+                    if (i === 0) {
+                        // 首次检测到，等待额外时间确保完全就绪
+                        await new Promise(resolve => setTimeout(resolve, 200));
+                    }
+                    return true;
+                }
+            } catch (e) {
+                // 如果检查失败，继续等待
+            }
+            
+            // 如果方法存在但无法检查内部状态，至少等待几次确保就绪
+            // 首次加载时需要更多等待时间
+            if (i >= 3) {
+                // 额外等待确保 Mermaid 完全就绪
+                await new Promise(resolve => setTimeout(resolve, 100));
+                return true;
+            }
         }
         await new Promise(resolve => setTimeout(resolve, delay));
     }
@@ -77,6 +100,29 @@ export async function renderMermaidCharts() {
     // 重新初始化 Mermaid（以应用主题）
     try {
         initMermaid();
+        // 首次刷新时，初始化后需要额外等待确保 Mermaid 完全就绪
+        // 使用 requestAnimationFrame 和 setTimeout 确保 DOM 和 Mermaid 都准备好
+        // 首次加载时需要更长的等待时间
+        const isFirstLoad = !window.__mermaidInitialized;
+        window.__mermaidInitialized = true;
+        
+        if (isFirstLoad) {
+            // 首次加载：等待更长时间确保 Mermaid 完全初始化
+            await new Promise(resolve => {
+                requestAnimationFrame(() => {
+                    requestAnimationFrame(() => {
+                        setTimeout(resolve, 300);
+                    });
+                });
+            });
+        } else {
+            // 后续调用：短暂等待即可
+            await new Promise(resolve => {
+                requestAnimationFrame(() => {
+                    setTimeout(resolve, 50);
+                });
+            });
+        }
     } catch (error) {
         console.error('Mermaid 初始化失败:', error);
         mermaidElements.forEach(element => {
