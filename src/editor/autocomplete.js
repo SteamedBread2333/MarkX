@@ -57,6 +57,7 @@ function checkIfInsideBlock(session, pos) {
     let inBlockquote = false;
     let codeBlockMarker = null;
     let codeBlockLanguage = null;
+    let codeBlockOriginalLanguage = null;
     let codeBlockStartRow = -1;
     
     // 检查当前行及之前的行
@@ -72,10 +73,16 @@ function checkIfInsideBlock(session, pos) {
                     inCodeBlock = false;
                     codeBlockMarker = null;
                     codeBlockLanguage = null;
+                    codeBlockOriginalLanguage = null;
                     codeBlockStartRow = -1;
                 } else {
                     // 当前行是结束标记，但光标可能在标记上
-                    return { inCodeBlock: true, language: codeBlockLanguage, inBlockquote: false };
+                    return { 
+                        inCodeBlock: true, 
+                        language: codeBlockLanguage, 
+                        originalLanguage: codeBlockOriginalLanguage,
+                        inBlockquote: false 
+                    };
                 }
             } else {
                 // 代码块开始，提取语言类型
@@ -84,7 +91,8 @@ function checkIfInsideBlock(session, pos) {
                 codeBlockStartRow = i;
                 // 提取语言：```language 或 ```language:title
                 const match = trimmedLine.match(/^```(\w+)/);
-                codeBlockLanguage = match ? match[1].toLowerCase() : null;
+                codeBlockOriginalLanguage = match ? match[1].toLowerCase() : null;
+                codeBlockLanguage = codeBlockOriginalLanguage;
                 // echarts 块使用 JavaScript 语法高亮
                 if (codeBlockLanguage === 'echarts') {
                     codeBlockLanguage = 'javascript';
@@ -97,9 +105,15 @@ function checkIfInsideBlock(session, pos) {
                     inCodeBlock = false;
                     codeBlockMarker = null;
                     codeBlockLanguage = null;
+                    codeBlockOriginalLanguage = null;
                     codeBlockStartRow = -1;
                 } else {
-                    return { inCodeBlock: true, language: codeBlockLanguage, inBlockquote: false };
+                    return { 
+                        inCodeBlock: true, 
+                        language: codeBlockLanguage, 
+                        originalLanguage: codeBlockOriginalLanguage,
+                        inBlockquote: false 
+                    };
                 }
             } else {
                 inCodeBlock = true;
@@ -107,7 +121,8 @@ function checkIfInsideBlock(session, pos) {
                 codeBlockStartRow = i;
                 // 提取语言：~~~language
                 const match = trimmedLine.match(/^~~~(\w+)/);
-                codeBlockLanguage = match ? match[1].toLowerCase() : null;
+                codeBlockOriginalLanguage = match ? match[1].toLowerCase() : null;
+                codeBlockLanguage = codeBlockOriginalLanguage;
                 // echarts 块使用 JavaScript 语法高亮
                 if (codeBlockLanguage === 'echarts') {
                     codeBlockLanguage = 'javascript';
@@ -128,18 +143,23 @@ function checkIfInsideBlock(session, pos) {
     
     // 如果当前行在代码块内
     if (inCodeBlock && pos.row >= 0 && pos.row > codeBlockStartRow) {
-        return { inCodeBlock: true, language: codeBlockLanguage, inBlockquote: false };
+        return { 
+            inCodeBlock: true, 
+            language: codeBlockLanguage, 
+            originalLanguage: codeBlockOriginalLanguage === 'echarts' ? 'echarts' : null,
+            inBlockquote: false 
+        };
     }
     
     // 如果当前行在引用块内
     if (inBlockquote && pos.row >= 0) {
         const currentLine = lines[pos.row];
         if (currentLine.trim().startsWith('>')) {
-            return { inCodeBlock: false, language: null, inBlockquote: true };
+            return { inCodeBlock: false, language: null, originalLanguage: null, inBlockquote: true };
         }
     }
     
-    return { inCodeBlock: false, language: null, inBlockquote: false };
+    return { inCodeBlock: false, language: null, originalLanguage: null, inBlockquote: false };
 }
 
 /**
@@ -211,6 +231,7 @@ function getMarkdownCompletions() {
     { name: 'code-css', value: '```css\n${1:' + ph('cssStyle') + '}\n```', meta: 'CSS', score: 900 },
     { name: 'code-html', value: '```html\n${1:' + ph('htmlComment') + '}\n```', meta: 'HTML', score: 900 },
     { name: 'code-json', value: '```json\n${1:{\n  "key": "value"\n}}\n```', meta: 'JSON', score: 900 },
+    { name: 'code-echarts', value: '```echarts\n' + '{\n  "title": {\n    "text": "Monthly Sales",\n    "left": "center"\n  },\n  "xAxis": {\n    "type": "category",\n    "data": ["Jan", "Feb", "Mar", "Apr", "May", "Jun"]\n  },\n  "yAxis": {\n    "type": "value"\n  },\n  "series": [{\n    "type": "bar",\n    "data": [120, 200, 150, 80, 70, 110]\n  }]\n}\n' + '```', meta: 'ECharts', score: 900 },
     { name: 'code-xml', value: '```xml\n${1:' + ph('xmlComment') + '}\n```', meta: 'XML', score: 900 },
     { name: 'code-bash', value: '```bash\n${1:' + ph('bashCmd') + '}\n```', meta: 'Bash/Shell', score: 900 },
     { name: 'code-sql', value: '```sql\n${1:' + ph('sqlQuery') + '}\n```', meta: 'SQL', score: 900 },

@@ -157,10 +157,13 @@ async function renderSingleEChartsChart(element, code, index) {
         
         // 解析配置代码（支持 JSON 格式和 JavaScript 对象字面量）
         let option;
+        let parseError = null;
+        
         try {
             // 尝试作为 JSON 解析
             option = JSON.parse(code);
         } catch (e) {
+            parseError = e;
             // 如果不是 JSON，尝试作为 JavaScript 代码执行
             try {
                 // 使用 Function 构造函数安全地执行代码
@@ -174,7 +177,11 @@ async function renderSingleEChartsChart(element, code, index) {
                     throw new Error('ECharts 配置必须是一个对象');
                 }
             } catch (e2) {
-                throw new Error('ECharts 配置代码格式错误：' + e2.message);
+                // 提供更详细的错误信息
+                const jsonErrorMsg = parseError ? `JSON 解析失败: ${parseError.message}` : '';
+                const jsErrorMsg = `JavaScript 执行失败: ${e2.message}`;
+                const combinedError = jsonErrorMsg && jsErrorMsg ? `${jsonErrorMsg}; ${jsErrorMsg}` : (jsonErrorMsg || jsErrorMsg);
+                throw new Error(`ECharts 配置代码格式错误：${combinedError}`);
             }
         }
         

@@ -296,6 +296,7 @@ function checkIfInsideBlock(session, pos) {
     let inBlockquote = false;
     let codeBlockMarker = null;
     let codeBlockLanguage = null;
+    let codeBlockOriginalLanguage = null;
     let codeBlockStartRow = -1;
     
     // 检查当前行及之前的行
@@ -311,10 +312,16 @@ function checkIfInsideBlock(session, pos) {
                     inCodeBlock = false;
                     codeBlockMarker = null;
                     codeBlockLanguage = null;
+                    codeBlockOriginalLanguage = null;
                     codeBlockStartRow = -1;
                 } else {
                     // 当前行是结束标记，但光标可能在标记上
-                    return { inCodeBlock: true, language: codeBlockLanguage, inBlockquote: false };
+                    return { 
+                        inCodeBlock: true, 
+                        language: codeBlockLanguage, 
+                        originalLanguage: codeBlockOriginalLanguage,
+                        inBlockquote: false 
+                    };
                 }
             } else {
                 // 代码块开始，提取语言类型
@@ -323,7 +330,8 @@ function checkIfInsideBlock(session, pos) {
                 codeBlockStartRow = i;
                 // 提取语言：```language 或 ```language:title
                 const match = trimmedLine.match(/^```(\w+)/);
-                codeBlockLanguage = match ? match[1].toLowerCase() : null;
+                codeBlockOriginalLanguage = match ? match[1].toLowerCase() : null;
+                codeBlockLanguage = codeBlockOriginalLanguage;
                 // echarts 块使用 JavaScript 语法高亮
                 if (codeBlockLanguage === 'echarts') {
                     codeBlockLanguage = 'javascript';
@@ -336,9 +344,15 @@ function checkIfInsideBlock(session, pos) {
                     inCodeBlock = false;
                     codeBlockMarker = null;
                     codeBlockLanguage = null;
+                    codeBlockOriginalLanguage = null;
                     codeBlockStartRow = -1;
                 } else {
-                    return { inCodeBlock: true, language: codeBlockLanguage, inBlockquote: false };
+                    return { 
+                        inCodeBlock: true, 
+                        language: codeBlockLanguage, 
+                        originalLanguage: codeBlockOriginalLanguage,
+                        inBlockquote: false 
+                    };
                 }
             } else {
                 inCodeBlock = true;
@@ -346,7 +360,8 @@ function checkIfInsideBlock(session, pos) {
                 codeBlockStartRow = i;
                 // 提取语言：~~~language
                 const match = trimmedLine.match(/^~~~(\w+)/);
-                codeBlockLanguage = match ? match[1].toLowerCase() : null;
+                codeBlockOriginalLanguage = match ? match[1].toLowerCase() : null;
+                codeBlockLanguage = codeBlockOriginalLanguage;
                 // echarts 块使用 JavaScript 语法高亮
                 if (codeBlockLanguage === 'echarts') {
                     codeBlockLanguage = 'javascript';
@@ -367,18 +382,23 @@ function checkIfInsideBlock(session, pos) {
     
     // 如果当前行在代码块内
     if (inCodeBlock && pos.row >= 0 && pos.row > codeBlockStartRow) {
-        return { inCodeBlock: true, language: codeBlockLanguage, inBlockquote: false };
+        return { 
+            inCodeBlock: true, 
+            language: codeBlockLanguage, 
+            originalLanguage: codeBlockOriginalLanguage === 'echarts' ? 'echarts' : null,
+            inBlockquote: false 
+        };
     }
     
     // 如果当前行在引用块内
     if (inBlockquote && pos.row >= 0) {
         const currentLine = lines[pos.row];
         if (currentLine.trim().startsWith('>')) {
-            return { inCodeBlock: false, language: null, inBlockquote: true };
+            return { inCodeBlock: false, language: null, originalLanguage: null, inBlockquote: true };
         }
     }
     
-    return { inCodeBlock: false, language: null, inBlockquote: false };
+    return { inCodeBlock: false, language: null, originalLanguage: null, inBlockquote: false };
 }
 
 /**
@@ -534,7 +554,9 @@ function setupAutocompletion(editor) {
                     // 根据是否在块内动态调整自动完成
                     if (blockInfo.inCodeBlock && blockInfo.language) {
                         // 在代码块内（有语言）：切换到对应语言的自动完成
-                        switchToLanguageMode(editor, blockInfo.language);
+                        // 如果是 echarts 块，传递原始语言信息
+                        const languageToUse = blockInfo.originalLanguage === 'echarts' ? 'echarts' : blockInfo.language;
+                        switchToLanguageMode(editor, languageToUse, blockInfo.originalLanguage);
                         editor.setOptions({
                             enableBasicAutocompletion: true,
                             enableLiveAutocompletion: true,  // 在代码块内启用实时自动完成
@@ -697,7 +719,7 @@ function isInsideString(session, pos) {
 /**
  * 创建语言特定的自动完成器
  */
-function createLanguageCompleter(language) {
+function createLanguageCompleter(language, originalLanguage = null) {
     return {
         getCompletions: function(editor, session, pos, prefix, callback) {
             // 检测是否在字符串内
@@ -707,7 +729,13 @@ function createLanguageCompleter(language) {
             }
             
             // 语言关键字映射
-            const languageKeywords = getLanguageKeywords(language);
+            let languageKeywords = getLanguageKeywords(language);
+            
+            // 如果是 ECharts 块，添加 ECharts 特定的关键字
+            if (originalLanguage === 'echarts' || language === 'echarts') {
+                const echartsKeywords = getEChartsKeywords();
+                languageKeywords = [...languageKeywords, ...echartsKeywords];
+            }
             
             if (!languageKeywords || languageKeywords.length === 0) {
                 callback(null, []);
@@ -716,13 +744,28 @@ function createLanguageCompleter(language) {
             
             // 过滤匹配的关键字
             const matches = languageKeywords
-                .filter(keyword => keyword.toLowerCase().startsWith(prefix.toLowerCase()))
-                .map(keyword => ({
-                    name: keyword,
-                    value: keyword,
-                    score: 1000,
-                    meta: language
-                }));
+                .filter(keyword => {
+                    const keywordStr = typeof keyword === 'string' ? keyword : keyword.name;
+                    return keywordStr.toLowerCase().startsWith(prefix.toLowerCase());
+                })
+                .map(keyword => {
+                    if (typeof keyword === 'string') {
+                        return {
+                            name: keyword,
+                            value: keyword,
+                            score: 1000,
+                            meta: language
+                        };
+                    } else {
+                        // 已经是对象格式（ECharts 关键字）
+                        return {
+                            name: keyword.name,
+                            value: keyword.value,
+                            score: keyword.score || 1000,
+                            meta: keyword.meta || language
+                        };
+                    }
+                });
             
             callback(null, matches);
         },
@@ -762,6 +805,85 @@ function getLanguageKeywords(language) {
     return keywordsMap[normalizedLang] || [];
 }
 
+/**
+ * 获取 ECharts 特定的关键字和配置选项
+ */
+function getEChartsKeywords() {
+    return [
+        // ECharts 配置选项
+        { name: 'title', value: 'title: {\n  text: "${1:Chart Title}",\n  left: "center"\n}', score: 1000, meta: 'ECharts Option' },
+        { name: 'tooltip', value: 'tooltip: {\n  trigger: "${1:axis|item}"\n}', score: 1000, meta: 'ECharts Option' },
+        { name: 'legend', value: 'legend: {\n  data: ["${1:Series1}", "${2:Series2}"]\n}', score: 1000, meta: 'ECharts Option' },
+        { name: 'grid', value: 'grid: {\n  left: "3%",\n  right: "4%",\n  bottom: "3%",\n  containLabel: true\n}', score: 1000, meta: 'ECharts Option' },
+        { name: 'xAxis', value: 'xAxis: {\n  type: "${1:category|value|time}",\n  data: ["${2:Mon}", "${3:Tue}", "${4:Wed}"]\n}', score: 1000, meta: 'ECharts Option' },
+        { name: 'yAxis', value: 'yAxis: {\n  type: "${1:value|category|time}"\n}', score: 1000, meta: 'ECharts Option' },
+        { name: 'series', value: 'series: [{\n  name: "${1:Series Name}",\n  type: "${2:bar|line|pie|scatter}",\n  data: [${3:120, 200, 150}]\n}]', score: 1000, meta: 'ECharts Option' },
+        { name: 'dataZoom', value: 'dataZoom: [{\n  type: "slider",\n  start: 0,\n  end: 100\n}]', score: 900, meta: 'ECharts Option' },
+        { name: 'visualMap', value: 'visualMap: {\n  min: 0,\n  max: 100,\n  inRange: {\n    color: ["${1:#50a3ba}", "${2:#eac736}", "${3:#d94e5d}"]\n  }\n}', score: 900, meta: 'ECharts Option' },
+        { name: 'toolbox', value: 'toolbox: {\n  feature: {\n    saveAsImage: {},\n    dataView: {},\n    restore: {}\n  }\n}', score: 900, meta: 'ECharts Option' },
+        { name: 'brush', value: 'brush: {\n  toolbox: ["rect", "polygon", "lineX", "lineY", "keep", "clear"]\n}', score: 800, meta: 'ECharts Option' },
+        { name: 'geo', value: 'geo: {\n  map: "${1:china|world}",\n  roam: true\n}', score: 800, meta: 'ECharts Option' },
+        { name: 'parallel', value: 'parallel: {\n  left: "5%",\n  right: "13%",\n  bottom: "10%",\n  top: "20%"\n}', score: 800, meta: 'ECharts Option' },
+        { name: 'parallelAxis', value: 'parallelAxis: [{\n  dim: 0,\n  name: "${1:Price}"\n}]', score: 800, meta: 'ECharts Option' },
+        { name: 'singleAxis', value: 'singleAxis: {\n  left: 150,\n  type: "time"\n}', score: 800, meta: 'ECharts Option' },
+        { name: 'timeline', value: 'timeline: {\n  data: ["${1:2020}", "${2:2021}", "${3:2022}"]\n}', score: 800, meta: 'ECharts Option' },
+        { name: 'graphic', value: 'graphic: [{\n  type: "text",\n  left: "center",\n  top: "middle",\n  style: {\n    text: "${1:Text}"\n  }\n}]', score: 800, meta: 'ECharts Option' },
+        { name: 'calendar', value: 'calendar: {\n  left: "center",\n  top: "middle",\n  cellSize: [20, 20],\n  range: ["${1:2024-01-01}", "${2:2024-12-31}"]\n}', score: 800, meta: 'ECharts Option' },
+        { name: 'dataset', value: 'dataset: {\n  source: [\n    ["product", "2015", "2016", "2017"],\n    ["${1:Matcha Latte}", ${2:43.3}, ${3:85.8}, ${4:93.7}]\n  ]\n}', score: 800, meta: 'ECharts Option' },
+        { name: 'aria', value: 'aria: {\n  enabled: true,\n  label: {\n    enabled: true\n  }\n}', score: 700, meta: 'ECharts Option' },
+        { name: 'backgroundColor', value: 'backgroundColor: "${1:transparent|#fff}"', score: 900, meta: 'ECharts Option' },
+        { name: 'animation', value: 'animation: ${1:true}', score: 800, meta: 'ECharts Option' },
+        { name: 'animationDuration', value: 'animationDuration: ${1:1000}', score: 800, meta: 'ECharts Option' },
+        { name: 'animationEasing', value: 'animationEasing: "${1:cubicOut|linear|quadraticIn}"', score: 800, meta: 'ECharts Option' },
+        
+        // Series 类型
+        { name: 'type: bar', value: 'type: "bar"', score: 950, meta: 'ECharts Series Type' },
+        { name: 'type: line', value: 'type: "line"', score: 950, meta: 'ECharts Series Type' },
+        { name: 'type: pie', value: 'type: "pie"', score: 950, meta: 'ECharts Series Type' },
+        { name: 'type: scatter', value: 'type: "scatter"', score: 950, meta: 'ECharts Series Type' },
+        { name: 'type: radar', value: 'type: "radar"', score: 900, meta: 'ECharts Series Type' },
+        { name: 'type: map', value: 'type: "map"', score: 900, meta: 'ECharts Series Type' },
+        { name: 'type: tree', value: 'type: "tree"', score: 900, meta: 'ECharts Series Type' },
+        { name: 'type: treemap', value: 'type: "treemap"', score: 900, meta: 'ECharts Series Type' },
+        { name: 'type: graph', value: 'type: "graph"', score: 900, meta: 'ECharts Series Type' },
+        { name: 'type: gauge', value: 'type: "gauge"', score: 900, meta: 'ECharts Series Type' },
+        { name: 'type: funnel', value: 'type: "funnel"', score: 900, meta: 'ECharts Series Type' },
+        { name: 'type: parallel', value: 'type: "parallel"', score: 900, meta: 'ECharts Series Type' },
+        { name: 'type: sankey', value: 'type: "sankey"', score: 900, meta: 'ECharts Series Type' },
+        { name: 'type: boxplot', value: 'type: "boxplot"', score: 900, meta: 'ECharts Series Type' },
+        { name: 'type: candlestick', value: 'type: "candlestick"', score: 900, meta: 'ECharts Series Type' },
+        { name: 'type: effectScatter', value: 'type: "effectScatter"', score: 900, meta: 'ECharts Series Type' },
+        { name: 'type: lines', value: 'type: "lines"', score: 900, meta: 'ECharts Series Type' },
+        { name: 'type: heatmap', value: 'type: "heatmap"', score: 900, meta: 'ECharts Series Type' },
+        { name: 'type: pictorialBar', value: 'type: "pictorialBar"', score: 900, meta: 'ECharts Series Type' },
+        { name: 'type: themeRiver', value: 'type: "themeRiver"', score: 900, meta: 'ECharts Series Type' },
+        { name: 'type: sunburst', value: 'type: "sunburst"', score: 900, meta: 'ECharts Series Type' },
+        { name: 'type: custom', value: 'type: "custom"', score: 900, meta: 'ECharts Series Type' },
+        
+        // 常用属性
+        { name: 'name', value: 'name: "${1:Series Name}"', score: 950, meta: 'ECharts Property' },
+        { name: 'data', value: 'data: [${1:120, 200, 150, 80, 70, 110}]', score: 950, meta: 'ECharts Property' },
+        { name: 'itemStyle', value: 'itemStyle: {\n  color: "${1:#188df0}"\n}', score: 950, meta: 'ECharts Property' },
+        { name: 'label', value: 'label: {\n  show: ${1:true},\n  position: "${2:top|inside|bottom}"\n}', score: 950, meta: 'ECharts Property' },
+        { name: 'emphasis', value: 'emphasis: {\n  itemStyle: {\n    color: "${1:#2378f7}"\n  }\n}', score: 900, meta: 'ECharts Property' },
+        { name: 'markPoint', value: 'markPoint: {\n  data: [\n    { type: "max", name: "Max" },\n    { type: "min", name: "Min" }\n  ]\n}', score: 900, meta: 'ECharts Property' },
+        { name: 'markLine', value: 'markLine: {\n  data: [\n    { type: "average", name: "Average" }\n  ]\n}', score: 900, meta: 'ECharts Property' },
+        { name: 'markArea', value: 'markArea: {\n  data: [[\n    { name: "Area", xAxis: "min", yAxis: "min" },\n    { xAxis: "max", yAxis: "max" }\n  ]]\n}', score: 800, meta: 'ECharts Property' },
+        { name: 'smooth', value: 'smooth: ${1:true}', score: 900, meta: 'ECharts Property' },
+        { name: 'stack', value: 'stack: "${1:Total}"', score: 900, meta: 'ECharts Property' },
+        { name: 'barWidth', value: 'barWidth: "${1:50%|60}"', score: 900, meta: 'ECharts Property' },
+        { name: 'barGap', value: 'barGap: "${1:30%}"', score: 800, meta: 'ECharts Property' },
+        { name: 'radius', value: 'radius: ["${1:40%}", "${2:70%}"]', score: 900, meta: 'ECharts Property' },
+        { name: 'center', value: 'center: ["${1:50%}", "${2:50%}"]', score: 900, meta: 'ECharts Property' },
+        { name: 'roseType', value: 'roseType: "${1:radius|area}"', score: 800, meta: 'ECharts Property' },
+        { name: 'selectedMode', value: 'selectedMode: "${1:single|multiple|false}"', score: 800, meta: 'ECharts Property' },
+        { name: 'symbol', value: 'symbol: "${1:circle|rect|roundRect|triangle|diamond|pin|arrow|none}"', score: 800, meta: 'ECharts Property' },
+        { name: 'symbolSize', value: 'symbolSize: ${1:10}', score: 800, meta: 'ECharts Property' },
+        { name: 'lineStyle', value: 'lineStyle: {\n  color: "${1:#188df0}",\n  width: ${2:2},\n  type: "${3:solid|dashed|dotted}"\n}', score: 900, meta: 'ECharts Property' },
+        { name: 'areaStyle', value: 'areaStyle: {\n  color: "${1:#188df0}",\n  opacity: ${2:0.3}\n}', score: 900, meta: 'ECharts Property' },
+    ];
+}
+
 // 注意：已移除 getAceModeForLanguage 函数
 // Ace Editor 不支持部分文档使用不同语法高亮模式
 // 切换整个文档的模式会导致 Markdown 文本被错误高亮
@@ -772,11 +894,11 @@ function getLanguageKeywords(language) {
  * 注意：不切换语法高亮模式，保持整个文档为 Markdown 模式
  * Ace Editor 不支持部分文档使用不同语法高亮，切换模式会导致整个文档都被切换
  */
-function switchToLanguageMode(editor, language) {
+function switchToLanguageMode(editor, language, originalLanguage = null) {
     if (!editor || !language) return;
     
     // 如果已经是该语言，不需要切换
-    if (editor._currentLanguageMode === language) {
+    if (editor._currentLanguageMode === language && editor._originalLanguage === originalLanguage) {
         return;
     }
     
@@ -787,7 +909,7 @@ function switchToLanguageMode(editor, language) {
         // 保持整个文档为 Markdown 模式，避免整个文档被错误高亮
         if (langTools) {
             // 创建语言特定的自动完成器
-            const languageCompleter = createLanguageCompleter(language);
+            const languageCompleter = createLanguageCompleter(language, originalLanguage);
             
             // 在代码块内（有语言）时，只使用语言特定的自动完成器，不包含 Markdown 补全
             const completers = [
@@ -798,6 +920,7 @@ function switchToLanguageMode(editor, language) {
         }
         
         editor._currentLanguageMode = language;
+        editor._originalLanguage = originalLanguage;
         
     } catch (error) {
         console.warn('切换语言模式失败:', error);
