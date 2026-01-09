@@ -329,15 +329,6 @@
         gap: var(--spacing-xs);
     }
     
-    /* 确保版本号在移动端正确显示 */
-    .toolbar-version {
-        display: inline-flex !important;
-        font-size: 10px;
-        margin: 0;
-        opacity: 0.7;
-        white-space: nowrap;
-    }
-    
     /* 隐藏移动端布局切换按钮 */
     #mobileLayoutBtn {
         display: none !important;

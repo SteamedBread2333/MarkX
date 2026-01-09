@@ -26,13 +26,3 @@
     color: var(--border-color);
 }
 
-.version-display {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--text-secondary);
-    font-size: 12px;
-    font-family: var(--font-mono);
-    white-space: nowrap;
-    user-select: none;
-}

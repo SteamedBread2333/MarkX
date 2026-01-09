@@ -16,7 +16,6 @@ export const elements = {
     saveBtn: document.getElementById('saveBtn'),
     fileInput: document.getElementById('fileInput'),
     statusMessage: document.getElementById('statusMessage'),
-    versionDisplay: document.getElementById('versionDisplay'),
     charCount: document.getElementById('charCount'),
     wordCount: document.getElementById('wordCount'),
     lineCount: document.getElementById('lineCount'),

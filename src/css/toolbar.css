@@ -42,26 +42,6 @@
     display: none;
 }
 
-/* 工具栏中的版本号显示 */
-.toolbar-version {
-    display: none;
-}
-
-@media (max-width: 480px) {
-    .toolbar-version {
-        display: inline-flex;
-        font-size: 10px;
-        margin: 0 var(--spacing-xs);
-        opacity: 0.7;
-        order: -1; /* 确保在设置按钮之前显示 */
-    }
-    
-    .toolbar-right {
-        display: flex;
-        align-items: center;
-        gap: var(--spacing-xs);
-    }
-}
 
 /* 桌面端右侧按钮组保持水平排列 */
 .toolbar-right-desktop {
