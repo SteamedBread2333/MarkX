@@ -13,24 +13,89 @@ const debouncedRender = debounce(renderMarkdown, 300);
 
 /**
  * 在编辑器中插入文本
+ * @param {string} before - 插入文本的前缀，或完整的模板字符串
+ * @param {string} after - 插入文本的后缀
+ * @param {string} placeholder - 占位符文本
+ * @param {Object} options - 选项
+ * @param {boolean} options.selectPlaceholder - 是否选中占位符（默认 true）
+ * @param {number} options.selectStart - 选中范围的起始位置（相对于插入位置，字符索引）
+ * @param {number} options.selectEnd - 选中范围的结束位置（相对于插入位置，字符索引）
  */
-export function insertText(before, after = '', placeholder = '') {
+export function insertText(before, after = '', placeholder = '', options = {}) {
     const aceEditor = getEditorInstance();
     if (!aceEditor) return;
     
+    const { selectPlaceholder = true, selectStart, selectEnd } = options;
     const selectedText = aceEditor.getSelectedText();
-    const textToInsert = before + (selectedText || placeholder) + after;
+    
+    // 如果 before 是完整模板（包含换行符），直接使用
+    let textToInsert;
+    if (before.includes('\n') && !after && !placeholder) {
+        // 完整模板，如果有选中文本，替换第一个占位符
+        textToInsert = selectedText ? before.replace(/\$x\$|x|y|a|b|c|d|1|2|3|4/, selectedText) : before;
+    } else {
+        // 传统格式：before + placeholder + after
+        textToInsert = before + (selectedText || placeholder) + after;
+    }
+    
+    // 记录插入位置
+    const cursor = aceEditor.getCursorPosition();
+    const insertRow = cursor.row;
+    const insertCol = cursor.column;
     
     // 插入文本
     aceEditor.insert(textToInsert);
     
-    // 如果没有选中文本且有占位符，选中占位符
-    if (!selectedText && placeholder) {
-        const cursor = aceEditor.getCursorPosition();
+    // 如果没有选中文本，尝试选中指定范围或占位符
+    if (!selectedText) {
         const Range = window.ace.require('ace/range').Range;
-        const startCol = cursor.column - after.length - placeholder.length;
-        const endCol = cursor.column - after.length;
-        aceEditor.selection.setRange(new Range(cursor.row, startCol, cursor.row, endCol));
+        let startRow, startCol, endRow, endCol;
+        
+        if (selectStart !== undefined && selectEnd !== undefined) {
+            // 使用指定的选中范围（字符索引）
+            const lines = textToInsert.split('\n');
+            let charCount = 0;
+            let foundStart = false;
+            let foundEnd = false;
+            
+            for (let i = 0; i < lines.length; i++) {
+                const lineLength = lines[i].length + 1; // +1 for newline
+                
+                if (!foundStart && charCount + lineLength > selectStart) {
+                    startRow = insertRow + i;
+                    startCol = insertCol + (selectStart - charCount);
+                    foundStart = true;
+                }
+                
+                if (!foundEnd && charCount + lineLength > selectEnd) {
+                    endRow = insertRow + i;
+                    endCol = insertCol + (selectEnd - charCount);
+                    foundEnd = true;
+                    break;
+                }
+                
+                charCount += lineLength;
+            }
+            
+            if (foundStart && foundEnd) {
+                aceEditor.selection.setRange(new Range(startRow, startCol, endRow, endCol));
+            }
+        } else if (selectPlaceholder && placeholder) {
+            // 选中占位符（传统方式）
+            const beforeLines = before.split('\n');
+            const beforeLastLineLength = beforeLines[beforeLines.length - 1].length;
+            
+            startRow = insertRow + beforeLines.length - 1;
+            startCol = insertCol + beforeLastLineLength;
+            
+            const placeholderLines = placeholder.split('\n');
+            endRow = insertRow + beforeLines.length + placeholderLines.length - 2;
+            endCol = placeholderLines.length > 1 
+                ? placeholderLines[placeholderLines.length - 1].length
+                : startCol + placeholder.length;
+            
+            aceEditor.selection.setRange(new Range(startRow, startCol, endRow, endCol));
+        }
     }
     
     aceEditor.focus();
@@ -107,14 +172,68 @@ stateDiagram-v2
 /**
  * 数学公式模板
  * 使用 ```katex 代码块格式，内部使用 $...$ (行内) 和 $$...$$ (块级) 格式
+ * 优化：使用更实用的默认值和更好的占位符
  */
 export const mathTemplates = {
-    inline: '```katex\n$x$\n```\n',
-    block: '```katex\n$$\nx\n$$\n```\n\n',
-    fraction: '```katex\n$\\frac{a}{b}$\n```\n',
-    sqrt: '```katex\n$\\sqrt{x}$\n```\n',
-    sum: '```katex\n$\\sum_{i=1}^{n} a_i$\n```\n',
-    integral: '```katex\n$\\int_{a}^{b} f(x)dx$\n```\n',
-    limit: '```katex\n$\\lim_{x \\to \\infty} f(x)$\n```\n',
-    matrix: '```katex\n$$\n\\begin{bmatrix}\na & b \\\\\nc & d\n\\end{bmatrix}\n$$\n```\n\n'
+    inline: {
+        template: '```katex\n$x$\n```\n',
+        selectStart: 9, // 选中 $x$ 中的 x
+        selectEnd: 10
+    },
+    block: {
+        template: '```katex\n$$\nx = y\n$$\n```\n\n',
+        selectStart: 15, // 选中 x = y 中的 x
+        selectEnd: 19
+    },
+    fraction: {
+        template: '```katex\n$\\frac{1}{2}$\n```\n',
+        selectStart: 13, // 选中 \frac{1}{2} 中的 1
+        selectEnd: 14
+    },
+    sqrt: {
+        template: '```katex\n$\\sqrt{x}$\n```\n',
+        selectStart: 12, // 选中 \sqrt{x} 中的 x
+        selectEnd: 13
+    },
+    sum: {
+        template: '```katex\n$\\sum_{i=1}^{n} x_i$\n```\n',
+        selectStart: 7, // 选中整个公式（从 $ 开始）
+        selectEnd: 25
+    },
+    integral: {
+        template: '```katex\n$\\int_{0}^{\\infty} f(x) dx$\n```\n',
+        selectStart: 7, // 选中整个公式（从 $ 开始）
+        selectEnd: 35
+    },
+    limit: {
+        template: '```katex\n$\\lim_{x \\to 0} \\frac{\\sin(x)}{x} = 1$\n```\n',
+        selectStart: 7, // 选中整个公式（从 $ 开始）
+        selectEnd: 45
+    },
+    matrix: {
+        template: '```katex\n$$\n\\begin{bmatrix}\n1 & 2 \\\\\n3 & 4\n\\end{bmatrix}\n$$\n```\n\n',
+        selectStart: 15, // 选中矩阵第一个元素 1
+        selectEnd: 16
+    },
+    // 新增常用公式
+    equation: {
+        template: '```katex\n$$\n\\begin{align}\nx &= a + b \\\\\ny &= c \\cdot d\n\\end{align}\n$$\n```\n\n',
+        selectStart: 15, // 选中第一个等式的 x
+        selectEnd: 16
+    },
+    vector: {
+        template: '```katex\n$\\vec{v} = (x, y, z)$\n```\n',
+        selectStart: 7, // 选中整个公式（从 $ 开始）
+        selectEnd: 25
+    },
+    derivative: {
+        template: '```katex\n$\\frac{d}{dx}f(x)$\n```\n',
+        selectStart: 17, // 选中 f(x) 中的 f
+        selectEnd: 18
+    },
+    partial: {
+        template: '```katex\n$\\frac{\\partial f}{\\partial x}$\n```\n',
+        selectStart: 21, // 选中 f
+        selectEnd: 22
+    }
 };

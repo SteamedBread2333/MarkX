@@ -573,14 +573,18 @@ $$
             state: '状态图'
         },
         mathTypes: {
-            inline: '行内公式 (```katex)',
-            block: '块级公式 (```katex)',
-            fraction: '分数 (```katex)',
-            sqrt: '根号 (```katex)',
-            sum: '求和 (```katex)',
-            integral: '积分 (```katex)',
-            limit: '极限 (```katex)',
-            matrix: '矩阵 (```katex)'
+            inline: '行内公式',
+            block: '块级公式',
+            fraction: '分数',
+            sqrt: '根号',
+            sum: '求和',
+            integral: '积分',
+            limit: '极限',
+            derivative: '导数',
+            partial: '偏导数',
+            vector: '向量',
+            matrix: '矩阵',
+            equation: '对齐公式组'
         }
     },
     messages: {

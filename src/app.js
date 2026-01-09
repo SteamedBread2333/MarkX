@@ -160,8 +160,73 @@ function initEventListeners() {
             e.preventDefault();
             e.stopPropagation();
             const type = btn.getAttribute('data-math');
-            insertText(mathTemplates[type]);
-            const mathName = btn.textContent.split(' ')[0].trim();
+            const templateConfig = mathTemplates[type];
+            if (!templateConfig) return;
+            
+            const aceEditor = getEditorInstance();
+            if (!aceEditor) return;
+            
+            // 支持新的模板格式（对象）和旧格式（字符串）
+            let template, selectStart, selectEnd;
+            if (typeof templateConfig === 'object' && templateConfig.template) {
+                template = templateConfig.template;
+                selectStart = templateConfig.selectStart;
+                selectEnd = templateConfig.selectEnd;
+            } else {
+                template = templateConfig;
+            }
+            
+            // 如果有选中文本，替换模板中的第一个变量
+            const selectedText = aceEditor.getSelectedText();
+            if (selectedText) {
+                template = template.replace(/\$x\$|x|y|a|b|c|d|1|2|3|4/, selectedText);
+            }
+            
+            // 记录插入位置
+            const cursor = aceEditor.getCursorPosition();
+            const insertRow = cursor.row;
+            const insertCol = cursor.column;
+            
+            // 插入文本
+            aceEditor.insert(template);
+            
+            // 如果有指定选中范围，选中该范围
+            if (!selectedText && selectStart !== undefined && selectEnd !== undefined) {
+                const Range = window.ace.require('ace/range').Range;
+                const lines = template.split('\n');
+                let charCount = 0;
+                let startRow, startCol, endRow, endCol;
+                
+                for (let i = 0; i < lines.length; i++) {
+                    const lineLength = lines[i].length;
+                    const lineLengthWithNewline = lineLength + (i < lines.length - 1 ? 1 : 0);
+                    
+                    if (charCount <= selectStart && charCount + lineLength >= selectStart) {
+                        startRow = insertRow + i;
+                        startCol = insertCol + (selectStart - charCount);
+                    }
+                    
+                    if (charCount <= selectEnd && charCount + lineLength >= selectEnd) {
+                        endRow = insertRow + i;
+                        endCol = insertCol + (selectEnd - charCount);
+                        break;
+                    }
+                    
+                    charCount += lineLengthWithNewline;
+                }
+                
+                if (startRow !== undefined && endRow !== undefined) {
+                    aceEditor.selection.setRange(new Range(startRow, startCol, endRow, endCol));
+                }
+            }
+            
+            aceEditor.focus();
+            AppState.isDirty = true;
+            debouncedRender();
+            
+            // 获取翻译后的名称用于状态提示
+            const mathNameKey = `toolbar.mathTypes.${type}`;
+            const mathName = t(mathNameKey) || btn.textContent.split(' ')[0].trim();
             setStatus(t('messages.insertedMath', { name: mathName }));
         });
     });

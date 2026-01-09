@@ -573,14 +573,18 @@ Try editing the content, and the right side will update in real-time! 🚀`
             state: 'State Diagram'
         },
         mathTypes: {
-            inline: 'Inline Formula (```katex)',
-            block: 'Block Formula (```katex)',
-            fraction: 'Fraction (```katex)',
-            sqrt: 'Square Root (```katex)',
-            sum: 'Summation (```katex)',
-            integral: 'Integral (```katex)',
-            limit: 'Limit (```katex)',
-            matrix: 'Matrix (```katex)'
+            inline: 'Inline Formula',
+            block: 'Block Formula',
+            fraction: 'Fraction',
+            sqrt: 'Square Root',
+            sum: 'Summation',
+            integral: 'Integral',
+            limit: 'Limit',
+            derivative: 'Derivative',
+            partial: 'Partial Derivative',
+            vector: 'Vector',
+            matrix: 'Matrix',
+            equation: 'Aligned Equation'
         }
     },
     messages: {

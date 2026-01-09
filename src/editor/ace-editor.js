@@ -336,6 +336,10 @@ function checkIfInsideBlock(session, pos) {
                 if (codeBlockLanguage === 'echarts') {
                     codeBlockLanguage = 'javascript';
                 }
+                // katex 块使用 LaTeX 自动完成
+                if (codeBlockLanguage === 'katex') {
+                    codeBlockLanguage = 'latex';
+                }
             }
         } else if (trimmedLine.startsWith('~~~')) {
             if (inCodeBlock && codeBlockMarker === '~~~') {
@@ -365,6 +369,10 @@ function checkIfInsideBlock(session, pos) {
                 // echarts 块使用 JavaScript 语法高亮
                 if (codeBlockLanguage === 'echarts') {
                     codeBlockLanguage = 'javascript';
+                }
+                // katex 块使用 LaTeX 自动完成
+                if (codeBlockLanguage === 'katex') {
+                    codeBlockLanguage = 'latex';
                 }
             }
         }
@@ -555,7 +563,10 @@ function setupAutocompletion(editor) {
                     if (blockInfo.inCodeBlock && blockInfo.language) {
                         // 在代码块内（有语言）：切换到对应语言的自动完成
                         // 如果是 echarts 块，传递原始语言信息
-                        const languageToUse = blockInfo.originalLanguage === 'echarts' ? 'echarts' : blockInfo.language;
+                        // 如果是 katex 块，传递原始语言信息
+                        const languageToUse = blockInfo.originalLanguage === 'echarts' ? 'echarts' 
+                            : blockInfo.originalLanguage === 'katex' ? 'latex'
+                            : blockInfo.language;
                         switchToLanguageMode(editor, languageToUse, blockInfo.originalLanguage);
                         editor.setOptions({
                             enableBasicAutocompletion: true,
@@ -737,6 +748,12 @@ function createLanguageCompleter(language, originalLanguage = null) {
                 languageKeywords = [...languageKeywords, ...echartsKeywords];
             }
             
+            // 如果是 LaTeX/katex 块，添加 LaTeX 特定的关键字和模板
+            if (originalLanguage === 'katex' || language === 'latex' || language === 'katex') {
+                const latexKeywords = getLaTeXKeywords();
+                languageKeywords = [...languageKeywords, ...latexKeywords];
+            }
+            
             if (!languageKeywords || languageKeywords.length === 0) {
                 callback(null, []);
                 return;
@@ -800,9 +817,191 @@ function getLanguageKeywords(language) {
         'php': ['<?php', '?>', 'function', 'class', 'if', 'else', 'for', 'while', 'return', 'echo', 'print', 'array', 'isset', 'empty', 'include', 'require', 'public', 'private', 'protected', 'static'],
         'bash': ['if', 'then', 'else', 'fi', 'for', 'while', 'do', 'done', 'case', 'esac', 'function', 'return', 'echo', 'export', 'read', 'cd', 'ls', 'pwd', 'mkdir', 'rm', 'cp', 'mv'],
         'sh': ['if', 'then', 'else', 'fi', 'for', 'while', 'do', 'done', 'case', 'esac', 'function', 'return', 'echo', 'export', 'read', 'cd', 'ls', 'pwd', 'mkdir', 'rm', 'cp', 'mv'],
+        'latex': ['frac', 'sqrt', 'sum', 'int', 'prod', 'lim', 'sin', 'cos', 'tan', 'log', 'ln', 'exp', 'vec', 'hat', 'bar', 'dot', 'ddot', 'partial', 'nabla', 'infty', 'alpha', 'beta', 'gamma', 'delta', 'epsilon', 'theta', 'lambda', 'mu', 'pi', 'sigma', 'phi', 'omega'],
+        'katex': ['frac', 'sqrt', 'sum', 'int', 'prod', 'lim', 'sin', 'cos', 'tan', 'log', 'ln', 'exp', 'vec', 'hat', 'bar', 'dot', 'ddot', 'partial', 'nabla', 'infty', 'alpha', 'beta', 'gamma', 'delta', 'epsilon', 'theta', 'lambda', 'mu', 'pi', 'sigma', 'phi', 'omega'],
     };
     
     return keywordsMap[normalizedLang] || [];
+}
+
+/**
+ * 获取 LaTeX/KaTeX 特定的关键字和数学公式模板
+ */
+function getLaTeXKeywords() {
+    return [
+        // 基础数学符号
+        { name: '\\frac', value: '\\frac{${1:a}}{${2:b}}', score: 1000, meta: 'LaTeX Command' },
+        { name: '\\sqrt', value: '\\sqrt{${1:x}}', score: 1000, meta: 'LaTeX Command' },
+        { name: '\\sqrt[n]', value: '\\sqrt[${1:n}]{${2:x}}', score: 950, meta: 'LaTeX Command' },
+        { name: '\\sum', value: '\\sum_{${1:i=1}}^{${2:n}} ${3:a_i}', score: 1000, meta: 'LaTeX Command' },
+        { name: '\\prod', value: '\\prod_{${1:i=1}}^{${2:n}} ${3:a_i}', score: 1000, meta: 'LaTeX Command' },
+        { name: '\\int', value: '\\int_{${1:a}}^{${2:b}} ${3:f(x)} dx', score: 1000, meta: 'LaTeX Command' },
+        { name: '\\iint', value: '\\iint_{${1:D}} ${2:f(x,y)} dxdy', score: 950, meta: 'LaTeX Command' },
+        { name: '\\iiint', value: '\\iiint_{${1:V}} ${2:f(x,y,z)} dV', score: 950, meta: 'LaTeX Command' },
+        { name: '\\oint', value: '\\oint_{${1:C}} ${2:f(z)} dz', score: 950, meta: 'LaTeX Command' },
+        { name: '\\lim', value: '\\lim_{${1:x} \\to ${2:\\infty}} ${3:f(x)}', score: 1000, meta: 'LaTeX Command' },
+        
+        // 微积分
+        { name: '\\frac{d}{dx}', value: '\\frac{d}{d${1:x}}${2:f}', score: 1000, meta: 'LaTeX Command' },
+        { name: '\\frac{d^2}{dx^2}', value: '\\frac{d^2}{d${1:x}^2}${2:f}', score: 950, meta: 'LaTeX Command' },
+        { name: '\\partial', value: '\\frac{\\partial ${1:f}}{\\partial ${2:x}}', score: 1000, meta: 'LaTeX Command' },
+        { name: '\\nabla', value: '\\nabla ${1:f}', score: 950, meta: 'LaTeX Command' },
+        
+        // 三角函数
+        { name: '\\sin', value: '\\sin(${1:x})', score: 1000, meta: 'LaTeX Function' },
+        { name: '\\cos', value: '\\cos(${1:x})', score: 1000, meta: 'LaTeX Function' },
+        { name: '\\tan', value: '\\tan(${1:x})', score: 1000, meta: 'LaTeX Function' },
+        { name: '\\cot', value: '\\cot(${1:x})', score: 950, meta: 'LaTeX Function' },
+        { name: '\\sec', value: '\\sec(${1:x})', score: 950, meta: 'LaTeX Function' },
+        { name: '\\csc', value: '\\csc(${1:x})', score: 950, meta: 'LaTeX Function' },
+        { name: '\\arcsin', value: '\\arcsin(${1:x})', score: 950, meta: 'LaTeX Function' },
+        { name: '\\arccos', value: '\\arccos(${1:x})', score: 950, meta: 'LaTeX Function' },
+        { name: '\\arctan', value: '\\arctan(${1:x})', score: 950, meta: 'LaTeX Function' },
+        
+        // 对数函数
+        { name: '\\log', value: '\\log(${1:x})', score: 1000, meta: 'LaTeX Function' },
+        { name: '\\ln', value: '\\ln(${1:x})', score: 1000, meta: 'LaTeX Function' },
+        { name: '\\exp', value: '\\exp(${1:x})', score: 1000, meta: 'LaTeX Function' },
+        
+        // 矩阵和环境
+        { name: '\\begin{bmatrix}', value: '\\begin{bmatrix}\n${1:a} & ${2:b} \\\\\n${3:c} & ${4:d}\n\\end{bmatrix}', score: 1000, meta: 'LaTeX Environment' },
+        { name: '\\begin{pmatrix}', value: '\\begin{pmatrix}\n${1:a} & ${2:b} \\\\\n${3:c} & ${4:d}\n\\end{pmatrix}', score: 1000, meta: 'LaTeX Environment' },
+        { name: '\\begin{vmatrix}', value: '\\begin{vmatrix}\n${1:a} & ${2:b} \\\\\n${3:c} & ${4:d}\n\\end{vmatrix}', score: 1000, meta: 'LaTeX Environment' },
+        { name: '\\begin{align}', value: '\\begin{align}\n${1:x} &= ${2:y} \\\\\n&= ${3:z}\n\\end{align}', score: 1000, meta: 'LaTeX Environment' },
+        { name: '\\begin{cases}', value: '\\begin{cases}\n${1:x} & \\text{if } ${2:condition} \\\\\n${3:y} & \\text{otherwise}\n\\end{cases}', score: 1000, meta: 'LaTeX Environment' },
+        { name: '\\begin{aligned}', value: '\\begin{aligned}\n${1:x} &= ${2:y} \\\\\n&= ${3:z}\n\\end{aligned}', score: 1000, meta: 'LaTeX Environment' },
+        
+        // 向量和符号
+        { name: '\\vec', value: '\\vec{${1:v}}', score: 1000, meta: 'LaTeX Command' },
+        { name: '\\hat', value: '\\hat{${1{x}}}', score: 950, meta: 'LaTeX Command' },
+        { name: '\\bar', value: '\\bar{${1{x}}}', score: 950, meta: 'LaTeX Command' },
+        { name: '\\dot', value: '\\dot{${1{x}}}', score: 950, meta: 'LaTeX Command' },
+        { name: '\\ddot', value: '\\ddot{${1{x}}}', score: 950, meta: 'LaTeX Command' },
+        { name: '\\tilde', value: '\\tilde{${1{x}}}', score: 900, meta: 'LaTeX Command' },
+        { name: '\\overline', value: '\\overline{${1{x}}}', score: 950, meta: 'LaTeX Command' },
+        { name: '\\underline', value: '\\underline{${1{x}}}', score: 950, meta: 'LaTeX Command' },
+        
+        // 希腊字母
+        { name: '\\alpha', value: '\\alpha', score: 1000, meta: 'Greek Letter' },
+        { name: '\\beta', value: '\\beta', score: 1000, meta: 'Greek Letter' },
+        { name: '\\gamma', value: '\\gamma', score: 1000, meta: 'Greek Letter' },
+        { name: '\\delta', value: '\\delta', score: 1000, meta: 'Greek Letter' },
+        { name: '\\epsilon', value: '\\epsilon', score: 1000, meta: 'Greek Letter' },
+        { name: '\\varepsilon', value: '\\varepsilon', score: 950, meta: 'Greek Letter' },
+        { name: '\\zeta', value: '\\zeta', score: 950, meta: 'Greek Letter' },
+        { name: '\\eta', value: '\\eta', score: 950, meta: 'Greek Letter' },
+        { name: '\\theta', value: '\\theta', score: 1000, meta: 'Greek Letter' },
+        { name: '\\vartheta', value: '\\vartheta', score: 900, meta: 'Greek Letter' },
+        { name: '\\iota', value: '\\iota', score: 900, meta: 'Greek Letter' },
+        { name: '\\kappa', value: '\\kappa', score: 950, meta: 'Greek Letter' },
+        { name: '\\lambda', value: '\\lambda', score: 1000, meta: 'Greek Letter' },
+        { name: '\\mu', value: '\\mu', score: 1000, meta: 'Greek Letter' },
+        { name: '\\nu', value: '\\nu', score: 950, meta: 'Greek Letter' },
+        { name: '\\xi', value: '\\xi', score: 950, meta: 'Greek Letter' },
+        { name: '\\pi', value: '\\pi', score: 1000, meta: 'Greek Letter' },
+        { name: '\\varpi', value: '\\varpi', score: 900, meta: 'Greek Letter' },
+        { name: '\\rho', value: '\\rho', score: 950, meta: 'Greek Letter' },
+        { name: '\\varrho', value: '\\varrho', score: 900, meta: 'Greek Letter' },
+        { name: '\\sigma', value: '\\sigma', score: 1000, meta: 'Greek Letter' },
+        { name: '\\varsigma', value: '\\varsigma', score: 900, meta: 'Greek Letter' },
+        { name: '\\tau', value: '\\tau', score: 950, meta: 'Greek Letter' },
+        { name: '\\upsilon', value: '\\upsilon', score: 900, meta: 'Greek Letter' },
+        { name: '\\phi', value: '\\phi', score: 1000, meta: 'Greek Letter' },
+        { name: '\\varphi', value: '\\varphi', score: 950, meta: 'Greek Letter' },
+        { name: '\\chi', value: '\\chi', score: 950, meta: 'Greek Letter' },
+        { name: '\\psi', value: '\\psi', score: 950, meta: 'Greek Letter' },
+        { name: '\\omega', value: '\\omega', score: 1000, meta: 'Greek Letter' },
+        
+        // 大写希腊字母
+        { name: '\\Gamma', value: '\\Gamma', score: 950, meta: 'Greek Letter' },
+        { name: '\\Delta', value: '\\Delta', score: 950, meta: 'Greek Letter' },
+        { name: '\\Theta', value: '\\Theta', score: 950, meta: 'Greek Letter' },
+        { name: '\\Lambda', value: '\\Lambda', score: 950, meta: 'Greek Letter' },
+        { name: '\\Xi', value: '\\Xi', score: 900, meta: 'Greek Letter' },
+        { name: '\\Pi', value: '\\Pi', score: 950, meta: 'Greek Letter' },
+        { name: '\\Sigma', value: '\\Sigma', score: 950, meta: 'Greek Letter' },
+        { name: '\\Phi', value: '\\Phi', score: 950, meta: 'Greek Letter' },
+        { name: '\\Psi', value: '\\Psi', score: 900, meta: 'Greek Letter' },
+        { name: '\\Omega', value: '\\Omega', score: 950, meta: 'Greek Letter' },
+        
+        // 关系和运算符
+        { name: '\\leq', value: '\\leq', score: 1000, meta: 'Relation' },
+        { name: '\\geq', value: '\\geq', score: 1000, meta: 'Relation' },
+        { name: '\\neq', value: '\\neq', score: 1000, meta: 'Relation' },
+        { name: '\\approx', value: '\\approx', score: 1000, meta: 'Relation' },
+        { name: '\\equiv', value: '\\equiv', score: 1000, meta: 'Relation' },
+        { name: '\\sim', value: '\\sim', score: 1000, meta: 'Relation' },
+        { name: '\\simeq', value: '\\simeq', score: 950, meta: 'Relation' },
+        { name: '\\cong', value: '\\cong', score: 950, meta: 'Relation' },
+        { name: '\\propto', value: '\\propto', score: 950, meta: 'Relation' },
+        { name: '\\in', value: '\\in', score: 1000, meta: 'Relation' },
+        { name: '\\notin', value: '\\notin', score: 950, meta: 'Relation' },
+        { name: '\\subset', value: '\\subset', score: 1000, meta: 'Relation' },
+        { name: '\\supset', value: '\\supset', score: 1000, meta: 'Relation' },
+        { name: '\\subseteq', value: '\\subseteq', score: 1000, meta: 'Relation' },
+        { name: '\\supseteq', value: '\\supseteq', score: 1000, meta: 'Relation' },
+        
+        // 集合运算符
+        { name: '\\cup', value: '\\cup', score: 1000, meta: 'Set Operation' },
+        { name: '\\cap', value: '\\cap', score: 1000, meta: 'Set Operation' },
+        { name: '\\setminus', value: '\\setminus', score: 950, meta: 'Set Operation' },
+        { name: '\\emptyset', value: '\\emptyset', score: 1000, meta: 'Set Symbol' },
+        { name: '\\varnothing', value: '\\varnothing', score: 900, meta: 'Set Symbol' },
+        
+        // 其他常用符号
+        { name: '\\infty', value: '\\infty', score: 1000, meta: 'Symbol' },
+        { name: '\\pm', value: '\\pm', score: 1000, meta: 'Symbol' },
+        { name: '\\mp', value: '\\mp', score: 950, meta: 'Symbol' },
+        { name: '\\times', value: '\\times', score: 1000, meta: 'Symbol' },
+        { name: '\\cdot', value: '\\cdot', score: 1000, meta: 'Symbol' },
+        { name: '\\div', value: '\\div', score: 1000, meta: 'Symbol' },
+        { name: '\\ast', value: '\\ast', score: 950, meta: 'Symbol' },
+        { name: '\\star', value: '\\star', score: 950, meta: 'Symbol' },
+        { name: '\\circ', value: '\\circ', score: 950, meta: 'Symbol' },
+        { name: '\\bullet', value: '\\bullet', score: 950, meta: 'Symbol' },
+        { name: '\\parallel', value: '\\parallel', score: 950, meta: 'Symbol' },
+        { name: '\\perp', value: '\\perp', score: 950, meta: 'Symbol' },
+        { name: '\\angle', value: '\\angle', score: 950, meta: 'Symbol' },
+        { name: '\\triangle', value: '\\triangle', score: 950, meta: 'Symbol' },
+        { name: '\\square', value: '\\square', score: 900, meta: 'Symbol' },
+        { name: '\\diamond', value: '\\diamond', score: 900, meta: 'Symbol' },
+        
+        // 箭头
+        { name: '\\rightarrow', value: '\\rightarrow', score: 1000, meta: 'Arrow' },
+        { name: '\\leftarrow', value: '\\leftarrow', score: 1000, meta: 'Arrow' },
+        { name: '\\leftrightarrow', value: '\\leftrightarrow', score: 950, meta: 'Arrow' },
+        { name: '\\Rightarrow', value: '\\Rightarrow', score: 1000, meta: 'Arrow' },
+        { name: '\\Leftarrow', value: '\\Leftarrow', score: 1000, meta: 'Arrow' },
+        { name: '\\Leftrightarrow', value: '\\Leftrightarrow', score: 950, meta: 'Arrow' },
+        { name: '\\mapsto', value: '\\mapsto', score: 950, meta: 'Arrow' },
+        { name: '\\to', value: '\\to', score: 1000, meta: 'Arrow' },
+        { name: '\\gets', value: '\\gets', score: 950, meta: 'Arrow' },
+        
+        // 文本修饰
+        { name: '\\text', value: '\\text{${1:text}}', score: 1000, meta: 'LaTeX Command' },
+        { name: '\\mathrm', value: '\\mathrm{${1:text}}', score: 950, meta: 'LaTeX Command' },
+        { name: '\\mathbf', value: '\\mathbf{${1:text}}', score: 1000, meta: 'LaTeX Command' },
+        { name: '\\mathit', value: '\\mathit{${1:text}}', score: 950, meta: 'LaTeX Command' },
+        { name: '\\mathsf', value: '\\mathsf{${1:text}}', score: 900, meta: 'LaTeX Command' },
+        { name: '\\mathtt', value: '\\mathtt{${1:text}}', score: 900, meta: 'LaTeX Command' },
+        { name: '\\mathcal', value: '\\mathcal{${1:A}}', score: 950, meta: 'LaTeX Command' },
+        { name: '\\mathbb', value: '\\mathbb{${1:R}}', score: 1000, meta: 'LaTeX Command' },
+        
+        // 括号和分隔符
+        { name: '\\left(', value: '\\left(${1:content}\\right)', score: 1000, meta: 'LaTeX Delimiter' },
+        { name: '\\left[', value: '\\left[${1:content}\\right]', score: 1000, meta: 'LaTeX Delimiter' },
+        { name: '\\left\\{', value: '\\left\\{${1:content}\\right\\}', score: 1000, meta: 'LaTeX Delimiter' },
+        { name: '\\left|', value: '\\left|${1:content}\\right|', score: 1000, meta: 'LaTeX Delimiter' },
+        { name: '\\left\\|', value: '\\left\\|${1:content}\\right\\|', score: 950, meta: 'LaTeX Delimiter' },
+        { name: '\\left\\langle', value: '\\left\\langle${1:content}\\right\\rangle', score: 950, meta: 'LaTeX Delimiter' },
+        
+        // 其他常用命令
+        { name: '\\binom', value: '\\binom{${1:n}}{${2:k}}', score: 1000, meta: 'LaTeX Command' },
+        { name: '\\choose', value: '{${1:n} \\choose ${2:k}}', score: 950, meta: 'LaTeX Command' },
+        { name: '\\prescript', value: '\\prescript{${1:a}}{${2:b}}{${3:C}}', score: 900, meta: 'LaTeX Command' },
+        { name: '\\overset', value: '\\overset{${1:above}}{${2:below}}', score: 950, meta: 'LaTeX Command' },
+        { name: '\\underset', value: '\\underset{${1:below}}{${2:above}}', score: 950, meta: 'LaTeX Command' },
+    ];
 }
 
 /**

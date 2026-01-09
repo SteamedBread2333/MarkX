@@ -97,6 +97,10 @@ function checkIfInsideBlock(session, pos) {
                 if (codeBlockLanguage === 'echarts') {
                     codeBlockLanguage = 'javascript';
                 }
+                // katex 块使用 LaTeX 自动完成
+                if (codeBlockLanguage === 'katex') {
+                    codeBlockLanguage = 'latex';
+                }
             }
         } else if (trimmedLine.startsWith('~~~')) {
             if (inCodeBlock && codeBlockMarker === '~~~') {
@@ -126,6 +130,10 @@ function checkIfInsideBlock(session, pos) {
                 // echarts 块使用 JavaScript 语法高亮
                 if (codeBlockLanguage === 'echarts') {
                     codeBlockLanguage = 'javascript';
+                }
+                // katex 块使用 LaTeX 自动完成
+                if (codeBlockLanguage === 'katex') {
+                    codeBlockLanguage = 'latex';
                 }
             }
         }

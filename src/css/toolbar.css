@@ -241,3 +241,12 @@
 .dropdown-item:hover {
     background: var(--bg-hover);
 }
+
+.dropdown-divider {
+    height: 1px;
+    background: var(--border-color);
+    margin: var(--spacing-xs) 0;
+    border: none;
+    padding: 0;
+    pointer-events: none;
+}

@@ -1,54 +1,5 @@
 /* ==================== KaTeX 数学公式样式 ==================== */
 
-/* 行内公式 */
-.katex {
-    font-size: 1.05em;
-    color: var(--text-primary);
-}
-
-/* 行内公式容器 */
-.katex-inline {
-    display: inline-block;
-    margin: 0 0.2em;
-    vertical-align: baseline;
-}
-
-/* 块级公式容器 */
-.katex-block {
-    margin: 1.5em 0;
-    padding: 0;
-    text-align: center;
-}
-
-/* 块级公式 */
-.katex-display {
-    margin: 0 !important;
-    padding: 1.2em;
-    background: var(--bg-secondary);
-    border-radius: 8px;
-    border-left: 4px solid var(--accent-color);
-    overflow: visible !important;
-    overflow-wrap: break-word;
-    word-wrap: break-word;
-    text-align: center;
-    max-width: 100%;
-}
-
-.katex-display .katex {
-    max-width: 100%;
-    overflow: visible;
-}
-
-/* 暗色主题优化 */
-[data-theme="dark"] .katex {
-    color: var(--text-primary);
-}
-
-[data-theme="dark"] .katex-display {
-    background: var(--bg-tertiary);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-}
-
 /* 错误显示 */
 .katex-error {
     color: #ef5350 !important;

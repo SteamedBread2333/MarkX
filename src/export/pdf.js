@@ -366,7 +366,7 @@ export async function exportPDF() {
         #pdf-export-wrapper .echarts-content { padding: 16px; overflow: visible; }
         #pdf-export-wrapper .echarts-content img { display: block !important; max-width: 100% !important; width: auto !important; height: auto !important; visibility: visible !important; opacity: 1 !important; margin: 0 auto; }
         #pdf-export-wrapper .katex { font-size: 1.05em; color: #24292f; }
-            #pdf-export-wrapper .katex-display { margin: 1.5em 0 !important; padding: 1.2em; background: #f6f8fa; border-radius: 8px; border-left: 4px solid #0969da; overflow: visible; text-align: center; }
+            #pdf-export-wrapper .katex-display { margin: 1em 0 !important; overflow: visible; }
             #pdf-export-wrapper .hljs { background: #f6f8fa; color: #24292f; }
         `;
         
@@ -914,7 +914,7 @@ async function preparePDFContainer() {
         #pdf-export-wrapper .echarts-content { padding: 16px; overflow: visible; }
         #pdf-export-wrapper .echarts-content img { display: block !important; max-width: 100% !important; width: auto !important; height: auto !important; visibility: visible !important; opacity: 1 !important; margin: 0 auto; }
         #pdf-export-wrapper .katex { font-size: 1.05em; color: #24292f; }
-        #pdf-export-wrapper .katex-display { margin: 1.5em 0 !important; padding: 1.2em; background: #f6f8fa; border-radius: 8px; border-left: 4px solid #0969da; overflow: visible; text-align: center; }
+        #pdf-export-wrapper .katex-display { margin: 1em 0 !important; overflow: visible; }
         #pdf-export-wrapper .hljs { background: #f6f8fa; color: #24292f; }
     `;
     
