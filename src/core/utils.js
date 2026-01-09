@@ -43,88 +43,143 @@ export function generateHeadingId(text) {
 
 /**
  * 预处理 Markdown，保护代码块并处理数学公式
- * 简化版本：使用更可靠的匹配方式
+ * 新方案：只提取代码块，数学公式在 HTML 解析后处理
  */
 export function preprocessMathFormulas(markdown) {
     const codeBlocks = [];
-    const codeBlockPlaceholders = [];
     let codeBlockIndex = 0;
     
-    // 第一步：提取所有代码块（使用简单的正则，支持 3+ 个反引号）
-    // 匹配格式：```language 或 ``````language（4个反引号）等
+    // 提取所有代码块（使用简单的正则，支持 3+ 个反引号）
     const codeBlockRegex = /(```+|~~~+)([\s\S]*?)\1/g;
     let match;
+    const codeBlockMatches = [];
     
     while ((match = codeBlockRegex.exec(markdown)) !== null) {
-        const fullMatch = match[0];
-        const placeholder = `\x01CODE_BLOCK_${codeBlockIndex++}\x01`;
-        codeBlocks.push({
-            placeholder: placeholder,
-            content: fullMatch
-        });
-        codeBlockPlaceholders.push({
-            placeholder: placeholder,
-            original: fullMatch
+        codeBlockMatches.push({
+            start: match.index,
+            end: match.index + match[0].length,
+            content: match[0]
         });
     }
     
-    // 替换代码块为占位符（从后往前，避免索引变化）
+    // 从后往前替换代码块为占位符
     let processedMarkdown = markdown;
-    codeBlockPlaceholders.sort((a, b) => {
-        const aIndex = processedMarkdown.indexOf(a.original);
-        const bIndex = processedMarkdown.indexOf(b.original);
+    codeBlockMatches.sort((a, b) => b.start - a.start);
+    
+    codeBlockMatches.forEach((block) => {
+        const placeholder = `\u200B\u200B\u200BCODE_BLOCK_${codeBlockIndex++}\u200B\u200B\u200B`;
+        codeBlocks.push({
+            placeholder: placeholder,
+            content: block.content
+        });
+        processedMarkdown = processedMarkdown.substring(0, block.start) + 
+                           placeholder + 
+                           processedMarkdown.substring(block.end);
+    });
+    
+    // 返回处理后的 markdown 和恢复函数
+    return {
+        markdown: processedMarkdown,
+        restore: (html, markedParser) => {
+            // 恢复代码块
+            if (markedParser) {
+                codeBlocks.forEach((item) => {
+                    if (html.includes(item.placeholder)) {
+                        const codeBlockHtml = markedParser.parse(item.content);
+                        html = html.split(item.placeholder).join(codeBlockHtml);
+                    }
+                });
+            } else {
+                codeBlocks.forEach((item) => {
+                    if (html.includes(item.placeholder)) {
+                        html = html.split(item.placeholder).join(item.content);
+                    }
+                });
+            }
+            
+            return html;
+        },
+        // 导出代码块信息，供后续处理数学公式使用
+        codeBlocks: codeBlocks
+    };
+}
+
+/**
+ * 在 HTML 中处理数学公式（排除代码块中的内容）
+ * 使用字符串替换方法，更可靠
+ */
+export function processMathInHTML(html) {
+    // 创建临时 DOM 来提取代码块内容
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = html;
+    
+    // 提取所有代码块，并用占位符替换
+    const codeBlocks = [];
+    const codePlaceholders = [];
+    let codeIndex = 0;
+    
+    tempDiv.querySelectorAll('pre, code, .mermaid, .echarts').forEach(el => {
+        const placeholder = `__MARKX_CODE_${codeIndex++}__`;
+        codeBlocks.push({
+            placeholder: placeholder,
+            content: el.outerHTML
+        });
+        codePlaceholders.push({
+            placeholder: placeholder,
+            original: el.outerHTML
+        });
+    });
+    
+    // 从后往前替换代码块为占位符
+    codePlaceholders.sort((a, b) => {
+        const aIndex = html.lastIndexOf(a.original);
+        const bIndex = html.lastIndexOf(b.original);
         return bIndex - aIndex;
     });
     
-    codeBlockPlaceholders.forEach(item => {
-        processedMarkdown = processedMarkdown.replace(item.original, item.placeholder);
+    let processedHTML = html;
+    codePlaceholders.forEach(item => {
+        processedHTML = processedHTML.replace(item.original, item.placeholder);
     });
     
-    // 第二步：在非代码块区域处理数学公式
-    const blockMathPlaceholders = [];
-    const inlineMathPlaceholders = [];
-    let blockMathIndex = 0;
-    let inlineMathIndex = 0;
-    
+    // 现在在非代码块区域处理数学公式
     // 先处理块级公式 $$...$$
     const blockMathRegex = /\$\$([\s\S]*?)\$\$/g;
     const blockMatches = [];
+    let match;
     
-    while ((match = blockMathRegex.exec(processedMarkdown)) !== null) {
+    while ((match = blockMathRegex.exec(processedHTML)) !== null) {
         blockMatches.push({
             start: match.index,
             end: match.index + match[0].length,
-            formula: match[1].trim()
+            formula: match[1].trim(),
+            original: match[0]
         });
     }
     
-    // 从后往前替换
+    // 从后往前替换块级公式
     blockMatches.sort((a, b) => b.start - a.start);
     blockMatches.forEach(item => {
-        const placeholder = `\x01BLOCK_MATH_${blockMathIndex++}\x01`;
-        blockMathPlaceholders.push({
-            placeholder: placeholder,
-            formula: item.formula
-        });
-        processedMarkdown = processedMarkdown.substring(0, item.start) + 
-                           placeholder + 
-                           processedMarkdown.substring(item.end);
+        const replacement = `<div class="katex-block">${escapeHtml(item.formula)}</div>`;
+        processedHTML = processedHTML.substring(0, item.start) + 
+                        replacement + 
+                        processedHTML.substring(item.end);
     });
     
     // 再处理行内公式 $...$
     const inlineMathRegex = /\$([\s\S]*?)\$/g;
     const inlineMatches = [];
     
-    while ((match = inlineMathRegex.exec(processedMarkdown)) !== null) {
-        // 跳过块级公式占位符
-        if (match[0].includes('\x01BLOCK_MATH_')) {
+    while ((match = inlineMathRegex.exec(processedHTML)) !== null) {
+        // 跳过代码块占位符
+        if (match[0].includes('__MARKX_CODE_')) {
             continue;
         }
         
         // 检查前后是否有另一个$（避免匹配到$$）
-        const beforeChar = match.index > 0 ? processedMarkdown[match.index - 1] : '';
-        const afterChar = match.index + match[0].length < processedMarkdown.length ? 
-                          processedMarkdown[match.index + match[0].length] : '';
+        const beforeChar = match.index > 0 ? processedHTML[match.index - 1] : '';
+        const afterChar = match.index + match[0].length < processedHTML.length ? 
+                          processedHTML[match.index + match[0].length] : '';
         
         if (beforeChar === '$' || afterChar === '$') {
             continue;
@@ -133,50 +188,24 @@ export function preprocessMathFormulas(markdown) {
         inlineMatches.push({
             start: match.index,
             end: match.index + match[0].length,
-            formula: match[1].trim()
+            formula: match[1].trim(),
+            original: match[0]
         });
     }
     
-    // 从后往前替换
+    // 从后往前替换行内公式
     inlineMatches.sort((a, b) => b.start - a.start);
     inlineMatches.forEach(item => {
-        const placeholder = `\x01INLINE_MATH_${inlineMathIndex++}\x01`;
-        inlineMathPlaceholders.push({
-            placeholder: placeholder,
-            formula: item.formula
-        });
-        processedMarkdown = processedMarkdown.substring(0, item.start) + 
-                           placeholder + 
-                           processedMarkdown.substring(item.end);
+        const replacement = `<span class="katex-inline">${escapeHtml(item.formula)}</span>`;
+        processedHTML = processedHTML.substring(0, item.start) + 
+                       replacement + 
+                       processedHTML.substring(item.end);
     });
     
-    // 返回处理后的 markdown 和恢复函数
-    return {
-        markdown: processedMarkdown,
-        restore: (html, markedParser) => {
-            // 恢复行内数学公式
-            inlineMathPlaceholders.forEach(item => {
-                html = html.split(item.placeholder).join(`<span class="katex-inline">${escapeHtml(item.formula)}</span>`);
-            });
-            
-            // 恢复块级数学公式
-            blockMathPlaceholders.forEach(item => {
-                html = html.split(item.placeholder).join(`<div class="katex-block">${escapeHtml(item.formula)}</div>`);
-            });
-            
-            // 恢复代码块
-            if (markedParser) {
-                codeBlocks.forEach(item => {
-                    const codeBlockHtml = markedParser.parse(item.content);
-                    html = html.split(item.placeholder).join(codeBlockHtml);
-                });
-            } else {
-                codeBlocks.forEach(item => {
-                    html = html.split(item.placeholder).join(item.content);
-                });
-            }
-            
-            return html;
-        }
-    };
+    // 恢复代码块
+    codeBlocks.forEach(item => {
+        processedHTML = processedHTML.split(item.placeholder).join(item.content);
+    });
+    
+    return processedHTML;
 }
