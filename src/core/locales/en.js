@@ -589,6 +589,7 @@ Try editing the content, and the right side will update in real-time! 🚀`
         pngExportFailedConfirm: 'PNG export failed\n\nSuggest switching to SVG format export (vector graphics, better quality)\n\nExport as SVG now?',
         pngExportFailedDetails: 'PNG export failed\n\nError: {{message}}\n\nPossible solutions:\n1. Refresh the page and try again\n2. Use SVG format export\n3. Try reducing chart size\n4. Use another browser\n\nIf the problem persists, open browser console (F12) to view detailed logs.',
         mermaidViewerTitle: 'Mermaid Chart Viewer',
+        echartsViewerTitle: 'ECharts Viewer',
         fullscreenOpened: 'Fullscreen viewer opened',
         fullscreenClosed: 'Fullscreen viewer closed',
         fullscreenEntered: 'Entered fullscreen mode',

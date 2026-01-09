@@ -589,6 +589,7 @@ $$
         pngExportFailedConfirm: 'PNG 导出失败\n\n建议改用 SVG 格式导出（矢量图，质量更好）\n\n是否立即导出为 SVG？',
         pngExportFailedDetails: 'PNG 导出失败\n\n错误信息：{{message}}\n\n可能的解决方案：\n1. 刷新页面后重试\n2. 使用 SVG 格式导出\n3. 尝试缩小图表大小\n4. 使用其他浏览器\n\n如果问题持续，请打开浏览器控制台（F12）查看详细日志。',
         mermaidViewerTitle: 'Mermaid 图表查看器',
+        echartsViewerTitle: 'ECharts 图表查看器',
         fullscreenOpened: '已打开全屏查看器',
         fullscreenClosed: '已关闭全屏查看器',
         fullscreenEntered: '已进入全屏模式',
