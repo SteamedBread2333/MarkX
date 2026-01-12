@@ -295,11 +295,29 @@ export function processMathInHTML(html) {
     let priceMatch;
     
     while ((priceMatch = priceRegex.exec(processedHTML)) !== null) {
-        const placeholder = `<!--MARKX_PRICE_${priceIndex++}-->`;
-        const fullMatch = priceMatch[0];
         const beforeChar = priceMatch[1];
         const priceValue = priceMatch[2];
         const afterChar = priceMatch[3];
+        
+        // 增强规则：如果 $ 前是数学运算符，则不是价格
+        if (/[+\-*/=<>≤≥≠≈≡±×÷]/.test(beforeChar)) {
+            continue;
+        }
+        
+        // 增强规则：如果 $ 后是数学符号，则不是价格
+        if (/[\^_{}]/.test(afterChar)) {
+            continue;
+        }
+        
+        // 增强规则：如果 $ 前后都是字母，则不是价格
+        const beforeIsLetter = /[a-zA-Z]/.test(beforeChar);
+        const afterIsLetter = /[a-zA-Z]/.test(afterChar);
+        if (beforeIsLetter && afterIsLetter) {
+            continue;
+        }
+        
+        const placeholder = `<!--MARKX_PRICE_${priceIndex++}-->`;
+        const fullMatch = priceMatch[0];
         
         pricePlaceholders.push({
             placeholder: placeholder,
@@ -321,162 +339,198 @@ export function processMathInHTML(html) {
         processedHTML = processedHTML.replace(item.original, `${item.beforeChar}${item.placeholder}${item.afterChar}`);
     });
     
-    const inlineMathRegex = /\$([\s\S]*?)\$/g;
+    // 改进的数学公式识别策略：先找到所有 $ 符号的位置，然后尝试匹配成对的 $
+    // 这样可以避免正则表达式非贪婪匹配导致的问题，特别是当 HTML 标签被替换成占位符后
+    const dollarPositions = [];
+    let pos = 0;
+    while ((pos = processedHTML.indexOf('$', pos)) !== -1) {
+        dollarPositions.push(pos);
+        pos++;
+    }
+    
     const inlineMatches = [];
+    const usedPositions = new Set();
     
     // LaTeX 命令模式，用于验证是否是真正的数学公式
     const latexCommandPattern = /\\[a-zA-Z]+|\\[^a-zA-Z]|[\^_\{]|frac|sum|int|sqrt|lim|sin|cos|tan|log|ln|exp|pi|alpha|beta|gamma|delta|theta|lambda|mu|sigma|phi|omega|infty|pm|mp|times|div|leq|geq|neq|approx|equiv|in|notin|subset|supset|cup|cap|emptyset|forall|exists|nabla|partial|cdot|cdots|ldots|vdots|ddots/;
     
-    while ((match = inlineMathRegex.exec(processedHTML)) !== null) {
-        // 跳过代码块占位符
-        if (match[0].includes('<!--MARKX_CODE_')) {
+    // 尝试匹配成对的 $
+    for (let i = 0; i < dollarPositions.length; i++) {
+        if (usedPositions.has(dollarPositions[i])) {
             continue;
         }
         
-        // 跳过HTML标签占位符（HTML标签内的$不应该被解析）
-        if (match[0].includes('<!--MARKX_HTML_TAG_')) {
-            continue;
-        }
+        const startPos = dollarPositions[i];
         
-        // 跳过价格占位符
-        if (match[0].includes('<!--MARKX_PRICE_')) {
-            continue;
-        }
-        
-        // 跳过 &nbsp; 占位符（不应该出现在公式中，但如果出现则跳过）
-        if (match[0].includes('<!--MARKX_NBSP_')) {
-            continue;
-        }
-        
-        // 检查前后是否有另一个$（避免匹配到$$）
-        const beforeChar = match.index > 0 ? processedHTML[match.index - 1] : '';
-        const afterChar = match.index + match[0].length < processedHTML.length ? 
-                          processedHTML[match.index + match[0].length] : '';
+        // 检查前后是否有另一个 $（避免匹配到 $$）
+        const beforeChar = startPos > 0 ? processedHTML[startPos - 1] : '';
+        const afterChar = startPos + 1 < processedHTML.length ? processedHTML[startPos + 1] : '';
         
         if (beforeChar === '$' || afterChar === '$') {
             continue;
         }
         
-        // 获取原始公式内容（在清理之前）
-        const rawFormula = match[1];
-        
-        // 清理公式中的 <br> 和 <br/> 标签，将它们转换为空格
-        // 行内公式不应该包含换行，所以转换为空格
-        let formula = rawFormula.trim();
-        
-        // 先解码 HTML 实体，然后再清理
-        // 注意：&amp; 必须最后解码，否则会干扰其他实体的解码
-        formula = formula
-            .replace(/&lt;/g, '<')
-            .replace(/&gt;/g, '>')
-            .replace(/&quot;/g, '"')
-            .replace(/&#039;/g, "'")
-            .replace(/&#x27;/g, "'")
-            .replace(/&nbsp;/g, ' ')
-            .replace(/&amp;/g, '&');
-        
-        // 清理 <br> 标签和多余空白
-        formula = formula.replace(/<br\s*\/?>/gi, ' ').replace(/\s+/g, ' ').trim();
-        
-        // 先验证是否是真正的数学公式
-        // 如果公式内容看起来不像数学公式（比如只是数字或简单文本），则跳过
-        // 检查条件：
-        // 1. 包含 LaTeX 命令或数学符号
-        // 2. 或者包含数学运算符（+, -, *, /, =, <, >）
-        // 3. 或者前后有适当的边界（空格、标点、HTML 标签边界）
-        const isLikelyMath = latexCommandPattern.test(formula) || 
-                            /[+\-*/=<>≤≥≠≈≡±×÷]/.test(formula) ||
-                            /[a-zA-Z]\s*[+\-*/=<>≤≥≠≈≡±×÷]\s*[a-zA-Z0-9]/.test(formula);
-        
-        // 如果确认是数学公式，跳过后续的严格检查（因为数学公式中可能包含某些字符）
-        if (isLikelyMath) {
-            // 对于确认的数学公式，只做最基本的检查：
-            // 1. 如果公式很短（少于 100 个字符），直接添加，不做 HTML 标签检查
-            // 2. 如果公式较长，检查是否包含明显的 HTML 格式化标签
-            if (formula.length < 100) {
-                // 短公式直接添加，不做 HTML 标签检查
+        // 从当前位置开始，查找匹配的结束 $
+        for (let j = i + 1; j < dollarPositions.length; j++) {
+            const endPos = dollarPositions[j];
+            
+            if (usedPositions.has(endPos)) {
+                continue;
+            }
+            
+            // 检查结束位置前后是否有另一个 $（避免匹配到 $$）
+            const endBeforeChar = endPos > 0 ? processedHTML[endPos - 1] : '';
+            const endAfterChar = endPos + 1 < processedHTML.length ? processedHTML[endPos + 1] : '';
+            
+            if (endBeforeChar === '$' || endAfterChar === '$') {
+                continue;
+            }
+            
+            // 提取公式内容
+            const formulaContent = processedHTML.substring(startPos + 1, endPos);
+            
+            // 检查内容是否跨越了占位符（关键修复）
+            if (formulaContent.includes('<!--MARKX_')) {
+                continue;
+            }
+            
+            // 获取原始公式内容（在清理之前）
+            const rawFormula = formulaContent;
+            
+            // 清理公式中的 <br> 和 <br/> 标签，将它们转换为空格
+            // 行内公式不应该包含换行，所以转换为空格
+            let formula = rawFormula.trim();
+            
+            // 先解码 HTML 实体，然后再清理
+            // 注意：&amp; 必须最后解码，否则会干扰其他实体的解码
+            formula = formula
+                .replace(/&lt;/g, '<')
+                .replace(/&gt;/g, '>')
+                .replace(/&quot;/g, '"')
+                .replace(/&#039;/g, "'")
+                .replace(/&#x27;/g, "'")
+                .replace(/&nbsp;/g, ' ')
+                .replace(/&amp;/g, '&');
+            
+            // 清理 <br> 标签和多余空白
+            formula = formula.replace(/<br\s*\/?>/gi, ' ').replace(/\s+/g, ' ').trim();
+            
+            // 先验证是否是真正的数学公式
+            // 如果公式内容看起来不像数学公式（比如只是数字或简单文本），则跳过
+            // 检查条件：
+            // 1. 包含 LaTeX 命令或数学符号
+            // 2. 或者包含数学运算符（+, -, *, /, =, <, >）
+            // 3. 或者前后有适当的边界（空格、标点、HTML 标签边界）
+            const isLikelyMath = latexCommandPattern.test(formula) || 
+                                /[+\-*/=<>≤≥≠≈≡±×÷]/.test(formula) ||
+                                /[a-zA-Z]\s*[+\-*/=<>≤≥≠≈≡±×÷]\s*[a-zA-Z0-9]/.test(formula);
+            
+            // 如果确认是数学公式，跳过后续的严格检查（因为数学公式中可能包含某些字符）
+            if (isLikelyMath) {
+                // 对于确认的数学公式，只做最基本的检查：
+                // 1. 如果公式很短（少于 100 个字符），直接添加，不做 HTML 标签检查
+                // 2. 如果公式较长，检查是否包含明显的 HTML 格式化标签
+                if (formula.length < 100) {
+                    // 短公式直接添加，不做 HTML 标签检查
+                    inlineMatches.push({
+                        start: startPos,
+                        end: endPos + 1,
+                        formula: formula,
+                        original: processedHTML.substring(startPos, endPos + 1)
+                    });
+                    
+                    // 标记这两个位置已使用
+                    usedPositions.add(startPos);
+                    usedPositions.add(endPos);
+                    break; // 找到匹配的结束 $，跳出内层循环
+                }
+                
+                // 对于长公式，检查是否包含明显的 HTML 格式化标签
+                let tempFormula = rawFormula.replace(/<br\s*\/?>/gi, '');
+                const formattingTags = /<(strong|em|b|i|u|h[1-6]|p|div|span|a|img|code|pre|ul|ol|li|table|tr|td|th|blockquote)[\s>\/]/i;
+                if (formattingTags.test(tempFormula)) {
+                    continue;
+                }
+                
+                // 数学公式通过验证，添加到匹配列表
                 inlineMatches.push({
-                    start: match.index,
-                    end: match.index + match[0].length,
+                    start: startPos,
+                    end: endPos + 1,
                     formula: formula,
-                    original: match[0]
+                    original: processedHTML.substring(startPos, endPos + 1)
                 });
+                
+                // 标记这两个位置已使用
+                usedPositions.add(startPos);
+                usedPositions.add(endPos);
+                break; // 找到匹配的结束 $，跳出内层循环
+            }
+            
+            // 如果不是数学公式，进行更严格的检查以避免误匹配
+            
+            // 检查原始内容中是否包含多个换行符或段落分隔符
+            // 行内公式不应该跨越多行，如果包含多个换行，可能是误匹配
+            const lineBreakCount = (rawFormula.match(/<br\s*\/?>/gi) || []).length;
+            if (lineBreakCount > 1) {
                 continue;
             }
             
-            // 对于长公式，检查是否包含明显的 HTML 格式化标签
-            let tempFormula = rawFormula.replace(/<br\s*\/?>/gi, '');
-            const formattingTags = /<(strong|em|b|i|u|h[1-6]|p|div|span|a|img|code|pre|ul|ol|li|table|tr|td|th|blockquote)[\s>\/]/i;
-            if (formattingTags.test(tempFormula)) {
+            // 检查是否包含 Markdown 语法标记（如 **, *, _, #, [], () 等）
+            // 如果包含这些标记，说明可能匹配到了非数学内容
+            // 注意：只检查明显的 Markdown 语法，不检查单个字符（因为数学公式中也可能包含）
+            const markdownPattern = /\*\*|\*\s+\*|_\s+_|#+\s|```|`/;
+            if (markdownPattern.test(rawFormula)) {
                 continue;
             }
             
-            // 数学公式通过验证，添加到匹配列表
+            // 检查是否包含 HTML 标签（除了 <br>）
+            // 如果包含其他 HTML 标签（如 <strong>, <em>, <h1> 等），说明可能匹配到了非数学内容
+            const tempFormula = rawFormula.replace(/<br\s*\/?>/gi, '');
+            // 检查是否是常见的 HTML 标签（不是数学公式中可能出现的）
+            const commonHtmlTags = /<(strong|em|b|i|u|h[1-6]|p|div|span|a|img|code|pre|ul|ol|li|table|tr|td|th|blockquote)[\s>]/i;
+            if (commonHtmlTags.test(tempFormula)) {
+                continue;
+            }
+            
+            // 检查是否是简单的价格格式（如 $100, $99.99）
+            // 价格格式特征：纯数字（可能包含小数点），且前后有适当的边界
+            // 注意：支持中文标点符号
+            // 注意：endAfterChar 是在内层循环中定义的，需要在这里重新获取
+            const endAfterCharForPrice = endPos + 1 < processedHTML.length ? processedHTML[endPos + 1] : '';
+            const isPriceFormat = /^\d+\.?\d*$/.test(formula) && 
+                                 (beforeChar === '' || /[\s<(]/.test(beforeChar)) &&
+                                 (endAfterCharForPrice === '' || /[\s>.,;:!?)，。；：！？]/.test(endAfterCharForPrice)) &&
+                                 !isLikelyMath;
+            
+            // 如果看起来像价格格式，跳过
+            if (isPriceFormat) {
+                continue;
+            }
+            
+            // 如果公式太短且不包含数学特征，可能是误匹配，跳过
+            if (formula.length < 2 && !isLikelyMath) {
+                continue;
+            }
+            
+            // 如果公式内容看起来不像数学公式，跳过
+            // 例如：包含太多普通文本、包含 Markdown 语法等
+            if (!isLikelyMath && formula.length > 50) {
+                // 如果公式很长但不包含数学特征，可能是误匹配
+                continue;
+            }
+            
             inlineMatches.push({
-                start: match.index,
-                end: match.index + match[0].length,
+                start: startPos,
+                end: endPos + 1,
                 formula: formula,
-                original: match[0]
+                original: processedHTML.substring(startPos, endPos + 1)
             });
-            continue;
+            
+            // 标记这两个位置已使用
+            usedPositions.add(startPos);
+            usedPositions.add(endPos);
+            break; // 找到匹配的结束 $，跳出内层循环
         }
-        
-        // 如果不是数学公式，进行更严格的检查以避免误匹配
-        
-        // 检查原始内容中是否包含多个换行符或段落分隔符
-        // 行内公式不应该跨越多行，如果包含多个换行，可能是误匹配
-        const lineBreakCount = (rawFormula.match(/<br\s*\/?>/gi) || []).length;
-        if (lineBreakCount > 1) {
-            continue;
-        }
-        
-        // 检查是否包含 Markdown 语法标记（如 **, *, _, #, [], () 等）
-        // 如果包含这些标记，说明可能匹配到了非数学内容
-        // 注意：只检查明显的 Markdown 语法，不检查单个字符（因为数学公式中也可能包含）
-        const markdownPattern = /\*\*|\*\s+\*|_\s+_|#+\s|```|`/;
-        if (markdownPattern.test(rawFormula)) {
-            continue;
-        }
-        
-        // 检查是否包含 HTML 标签（除了 <br>）
-        // 如果包含其他 HTML 标签（如 <strong>, <em>, <h1> 等），说明可能匹配到了非数学内容
-        const tempFormula = rawFormula.replace(/<br\s*\/?>/gi, '');
-        // 检查是否是常见的 HTML 标签（不是数学公式中可能出现的）
-        const commonHtmlTags = /<(strong|em|b|i|u|h[1-6]|p|div|span|a|img|code|pre|ul|ol|li|table|tr|td|th|blockquote)[\s>]/i;
-        if (commonHtmlTags.test(tempFormula)) {
-            continue;
-        }
-        
-        // 检查是否是简单的价格格式（如 $100, $99.99）
-        // 价格格式特征：纯数字（可能包含小数点），且前后有适当的边界
-        const isPriceFormat = /^\d+\.?\d*$/.test(formula) && 
-                             (beforeChar === '' || /[\s<(]/.test(beforeChar)) &&
-                             (afterChar === '' || /[\s>.,;:!?)]/.test(afterChar)) &&
-                             !isLikelyMath;
-        
-        // 如果看起来像价格格式，跳过
-        if (isPriceFormat) {
-            continue;
-        }
-        
-        // 如果公式太短且不包含数学特征，可能是误匹配，跳过
-        if (formula.length < 2 && !isLikelyMath) {
-            continue;
-        }
-        
-        // 如果公式内容看起来不像数学公式，跳过
-        // 例如：包含太多普通文本、包含 Markdown 语法等
-        if (!isLikelyMath && formula.length > 50) {
-            // 如果公式很长但不包含数学特征，可能是误匹配
-            continue;
-        }
-        
-        inlineMatches.push({
-            start: match.index,
-            end: match.index + match[0].length,
-            formula: formula,
-            original: match[0]
-        });
     }
     
     // 从后往前替换行内公式
