@@ -208,8 +208,8 @@ export function processMathInHTML(html) {
             continue;
         }
         
-        // 跳过HTML标签占位符（HTML标签内的$不应该被解析）
-        if (match[0].includes('<!--MARKX_HTML_TAG_')) {
+        // 跳过占位符（包括HTML标签占位符，因为占位符不包含$，所以不会匹配到，但为了安全保留检查）
+        if (match[0].includes('<!--MARKX_')) {
             continue;
         }
         
