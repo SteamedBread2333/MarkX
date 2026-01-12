@@ -151,6 +151,14 @@ export function processMathInHTML(html) {
     // 查找形如 <p>$$...$$</p> 的模式，并临时移除 <p> 标签以便后续匹配
     // 注意：这必须在提取HTML标签之前进行，否则<p>标签已经被占位符替换了
     processedHTML = processedHTML.replace(/<p>\s*\$\$([\s\S]*?)\$\$\s*<\/p>/gi, (match, formula) => {
+        // 先修复被 Marked.js 误解析为 <em> 标签的下划线
+        // 在数学公式块中，所有的 <em> 标签都应该是被误解析的下划线
+        // 例如：{}<em>2</em>F<em>1</em> -> {}_2F_1
+        // 例如：\sum<em>{n=0}</em> -> \sum_{n=0}
+        // 例如：(a)<em>n</em> -> (a)_n
+        // 注意：在数学公式中，<em> 标签应该全部被替换为下划线
+        formula = formula.replace(/<em>([^<]*)<\/em>/g, '_$1');
+        
         // 清理公式中的 <br> 标签
         const cleanedFormula = formula.replace(/<br\s*\/?>/gi, '\n');
         return `$$${cleanedFormula}$$`;
@@ -216,10 +224,18 @@ export function processMathInHTML(html) {
         // 清理公式中的 HTML 标签和实体
         let formula = match[1];
         
+        // 先修复被 Marked.js 误解析为 <em> 标签的下划线
+        // 在数学公式块中，所有的 <em> 标签都应该是被误解析的下划线
+        // 例如：{}<em>2</em>F<em>1</em> -> {}_2F_1
+        // 例如：\sum<em>{n=0}</em> -> \sum_{n=0}
+        // 例如：(a)<em>n</em> -> (a)_n
+        // 注意：在数学公式中，<em> 标签应该全部被替换为下划线
+        formula = formula.replace(/<em>([^<]*)<\/em>/g, '_$1');
+        
         // 将 <br> 和 <br/> 标签转换为换行符
         formula = formula.replace(/<br\s*\/?>/gi, '\n');
         
-        // 移除其他 HTML 标签
+        // 移除其他 HTML 标签（包括剩余的 <em> 标签）
         formula = formula.replace(/<[^>]+>/g, '');
         
         // 解码常见的 HTML 实体
