@@ -316,7 +316,7 @@ $$
 ## 18. 超长连分数
 
 $$
-x = a_0 + \cfrac{1}{a_1 + \cfrac{1}{a_2 + \cfrac{1}{a_3 + \cfrac{1}{a_4 + \cfrac{1}{a_5 + \cfrac{1}{a_6 + \cfrac{1}{a_7 + \cfrac{1}{a_8 + \cfrac{1}{a_9 + \cfrac{1}{a_{10} + \cdots}}}}}}}}}
+x = a_0 + \cfrac{1}{a_1 + \cfrac{1}{a_2 + \cfrac{1}{a_3 + \cfrac{1}{a_4 + \cfrac{1}{a_5 + \cfrac{1}{a_6 + \cfrac{1}{a_7 + \cfrac{1}{a_8 + \cfrac{1}{a_9 + \cfrac{1}{a_{10} + \cdots}}}}}}}}}}
 $$
 
 ## 19. 超长乘积公式
