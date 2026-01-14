@@ -1068,6 +1068,68 @@ export async function exportPDFDefault() {
                     });
                 });
                 
+                // 确保克隆文档中的标题空格被保留
+                const clonedHeadings = clonedDoc.querySelectorAll('h1, h2, h3, h4, h5, h6');
+                clonedHeadings.forEach(heading => {
+                    heading.style.whiteSpace = 'pre-wrap';
+                    
+                    const originalHTML = heading.innerHTML;
+                    if (originalHTML.includes(' ')) {
+                        let newHTML = '';
+                        let inTag = false;
+                        for (let i = 0; i < originalHTML.length; i++) {
+                            const char = originalHTML[i];
+                            if (char === '<') {
+                                inTag = true;
+                                newHTML += char;
+                            } else if (char === '>') {
+                                inTag = false;
+                                newHTML += char;
+                            } else if (char === ' ' && !inTag) {
+                                newHTML += '&nbsp;';
+                            } else {
+                                newHTML += char;
+                            }
+                        }
+                        heading.innerHTML = newHTML;
+                    }
+                    
+                    const computedStyle = clonedDoc.defaultView.getComputedStyle(heading);
+                    const fontSize = parseFloat(computedStyle.fontSize) || 16;
+                    heading.style.letterSpacing = (fontSize * 0.1) + 'px';
+                    
+                    // 遍历所有文本节点，确保空格都被转换为 &nbsp;
+                    const walker = clonedDoc.createTreeWalker(
+                        heading,
+                        NodeFilter.SHOW_TEXT,
+                        null,
+                        false
+                    );
+                    
+                    const textNodes = [];
+                    let node;
+                    while (node = walker.nextNode()) {
+                        textNodes.push(node);
+                    }
+                    
+                    textNodes.forEach(textNode => {
+                        const originalText = textNode.textContent;
+                        if (originalText.includes(' ') && originalText.trim().length > 0) {
+                            const tempSpan = clonedDoc.createElement('span');
+                            tempSpan.textContent = originalText;
+                            const escapedHTML = tempSpan.innerHTML;
+                            const fixedHTML = escapedHTML.replace(/ /g, '&nbsp;');
+                            
+                            const wrapper = clonedDoc.createElement('span');
+                            wrapper.innerHTML = fixedHTML;
+                            
+                            if (textNode.parentNode) {
+                                textNode.parentNode.replaceChild(wrapper, textNode);
+                            }
+                        }
+                    });
+                });
+                
                 // 确保克隆文档的容器高度正确
                 const clonedContainer = clonedDoc.getElementById('pdf-export-wrapper');
                 if (clonedContainer) {
@@ -1243,6 +1305,68 @@ export async function exportPDFFullPage() {
                         if (el.style) {
                             el.style.visibility = 'visible';
                             el.style.opacity = '1';
+                        }
+                    });
+                });
+                
+                // 确保克隆文档中的标题空格被保留
+                const clonedHeadings = clonedDoc.querySelectorAll('h1, h2, h3, h4, h5, h6');
+                clonedHeadings.forEach(heading => {
+                    heading.style.whiteSpace = 'pre-wrap';
+                    
+                    const originalHTML = heading.innerHTML;
+                    if (originalHTML.includes(' ')) {
+                        let newHTML = '';
+                        let inTag = false;
+                        for (let i = 0; i < originalHTML.length; i++) {
+                            const char = originalHTML[i];
+                            if (char === '<') {
+                                inTag = true;
+                                newHTML += char;
+                            } else if (char === '>') {
+                                inTag = false;
+                                newHTML += char;
+                            } else if (char === ' ' && !inTag) {
+                                newHTML += '&nbsp;';
+                            } else {
+                                newHTML += char;
+                            }
+                        }
+                        heading.innerHTML = newHTML;
+                    }
+                    
+                    const computedStyle = clonedDoc.defaultView.getComputedStyle(heading);
+                    const fontSize = parseFloat(computedStyle.fontSize) || 16;
+                    heading.style.letterSpacing = (fontSize * 0.1) + 'px';
+                    
+                    // 遍历所有文本节点，确保空格都被转换为 &nbsp;
+                    const walker = clonedDoc.createTreeWalker(
+                        heading,
+                        NodeFilter.SHOW_TEXT,
+                        null,
+                        false
+                    );
+                    
+                    const textNodes = [];
+                    let node;
+                    while (node = walker.nextNode()) {
+                        textNodes.push(node);
+                    }
+                    
+                    textNodes.forEach(textNode => {
+                        const originalText = textNode.textContent;
+                        if (originalText.includes(' ') && originalText.trim().length > 0) {
+                            const tempSpan = clonedDoc.createElement('span');
+                            tempSpan.textContent = originalText;
+                            const escapedHTML = tempSpan.innerHTML;
+                            const fixedHTML = escapedHTML.replace(/ /g, '&nbsp;');
+                            
+                            const wrapper = clonedDoc.createElement('span');
+                            wrapper.innerHTML = fixedHTML;
+                            
+                            if (textNode.parentNode) {
+                                textNode.parentNode.replaceChild(wrapper, textNode);
+                            }
                         }
                     });
                 });
